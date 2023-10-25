@@ -1,4 +1,5 @@
 import 'package:basic_board/views/screens/room_screen.dart';
+import 'package:basic_board/views/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,7 @@ import '../../models/room.dart';
 import '../../providers/auth_provider.dart';
 import 'package:basic_board/providers/firestore_provider.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/loading_indicator_build.dart';
 import '../widgets/room_tile.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -30,7 +32,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       drawer: AppDrawer(room: room, user: user, auth: auth),
-      appBar: AppBar(title: const Text('Home')),
+      appBar: AppBar(
+        title: const Text('Home'),
+        actions: [
+          IconButton(
+            onPressed: () => showLoadingIndicator(context),
+            icon: const Icon(Icons.add_rounded),
+          ),
+        ],
+      ),
       body: room.when(
         data: (data) => Column(
           children: [
@@ -172,9 +182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         error: (error, stackTrace) => const Center(
           child: Text('An error occurred'),
         ),
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        loading: () => const LoadingIndicator(),
       ),
     );
   }

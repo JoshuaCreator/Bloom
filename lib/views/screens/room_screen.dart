@@ -102,7 +102,6 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
             itemBuilder: (context, index) {
               final pending =
                   snapshot.data?.docs[index].metadata.hasPendingWrites;
-              print(pending);
               return MessageTile(
                 message: Message(
                   sender: data?[index]['sender'],
@@ -116,6 +115,7 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
           );
         },
       ),
+      
       persistentFooterButtons: user.value?['admin']
           ? buildTexter(
               context,
