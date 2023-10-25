@@ -36,7 +36,7 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
         .doc(widget.room.id)
         .collection('messages')
         .orderBy('time', descending: true)
-        .snapshots();
+        .snapshots(includeMetadataChanges: true);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       collectionRef = FirebaseFirestore.instance
@@ -100,12 +100,16 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
             reverse: true,
             itemCount: data?.length,
             itemBuilder: (context, index) {
-              return NoticeTile(
-                notice: Message(
+              final pending =
+                  snapshot.data?.docs[index].metadata.hasPendingWrites;
+              print(pending);
+              return MessageTile(
+                message: Message(
                   sender: data?[index]['sender'],
                   message: data?[index]['message'],
                   // image: data?[index]['image'],
                   time: (data?[index]['time']).toDate(),
+                  pending: pending!,
                 ),
               );
             },

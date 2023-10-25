@@ -1,4 +1,6 @@
 // import 'package:flutter/gestures.dart';
+import 'dart:async';
+
 import 'package:basic_board/views/widgets/app_dialogues.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -7,20 +9,20 @@ import 'package:basic_board/models/message.dart';
 import 'package:intl/intl.dart';
 import 'package:basic_board/views/widgets/notice_info.dart';
 
-class NoticeTile extends StatelessWidget {
-  const NoticeTile({super.key, required this.notice});
-  final Message notice;
+class MessageTile extends StatelessWidget {
+  const MessageTile({super.key, required this.message});
+  final Message message;
 
   @override
   Widget build(BuildContext context) {
-    String time = DateFormat('hh:mm a').format(notice.time);
+    String time = DateFormat('hh:mm a').format(message.time);
     return Padding(
       padding: EdgeInsets.only(top: ten),
       child: InkWell(
         onTap: () {
           showModalBottomSheet(
             context: context,
-            builder: (context) => NoticeInfo(notice: notice),
+            builder: (context) => NoticeInfo(notice: message),
           );
         },
         child: Container(
@@ -52,7 +54,7 @@ class NoticeTile extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    notice.sender,
+                    message.sender,
                     style: const TextStyle(
                       fontSize: 18.0,
                       fontWeight: FontWeight.bold,
@@ -60,13 +62,26 @@ class NoticeTile extends StatelessWidget {
                   ),
                   SizedBox(width: ten),
                   Text(time),
+                  SizedBox(width: ten),
+                  if (message.pending!)
+                    Icon(
+                      Icons.access_time_rounded,
+                      color: Colors.grey,
+                      size: size / 2.3,
+                    )
+                  else
+                    Icon(
+                      Icons.done_rounded,
+                      color: Colors.green,
+                      size: size / 2.3,
+                    ),
                 ],
               ),
               height5,
               Text.rich(
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
-                TextSpan(children: extractText(context, notice.message)),
+                TextSpan(children: extractText(context, message.message)),
               ),
             ],
           ),
