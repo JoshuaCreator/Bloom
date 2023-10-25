@@ -1,0 +1,96 @@
+import 'package:basic_board/models/room.dart';
+import 'package:basic_board/providers/auth_provider.dart';
+import 'package:basic_board/providers/firestore_provider.dart';
+import 'package:basic_board/services/room_db.dart';
+import 'package:flutter/material.dart';
+import 'package:basic_board/configs/consts.dart';
+import 'package:basic_board/views/widgets/app_button.dart';
+import 'package:basic_board/views/widgets/app_text_field.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class CreateRoomScreen extends ConsumerStatefulWidget {
+  static String id = 'create-room';
+  const CreateRoomScreen({super.key});
+
+  @override
+  ConsumerState<CreateRoomScreen> createState() =>
+      _ConsumerCreateRoomScreenState();
+}
+
+class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
+  bool value = false;
+  final _nameController = TextEditingController();
+  final _descController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    final user = ref.watch(userProvider).value;
+    final auth = ref.watch(authStateProvider).value;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Create Room')),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(ten),
+        child: Column(
+          children: [
+            AppTextField(
+              label: 'Room name',
+              hintText: 'Give your new room a name',
+              textInputAction: TextInputAction.next,
+              controller: _nameController,
+            ),
+            height20,
+            AppTextField(
+              label: 'Description',
+              hintText: "What's your new room about",
+              maxLines: 5,
+              controller: _descController,
+            ),
+            height20,
+            PrivateTile(
+              value: value,
+              onChanged: (newValue) {
+                setState(() {
+                  value = newValue;
+                });
+              },
+            ),
+            height30,
+            AppButton(
+              title: 'Create',
+              onTap: () {
+                if (_nameController.text.trim().isEmpty) return;
+                final Room room = Room(
+                  name: _nameController.text.trim(),
+                  desc: _descController.text.trim(),
+                  creator:
+                      user?['fName'] + ' ' + user?['lName'].toString().trim(),
+                  creatorId: auth!.uid,
+                  private: value,
+                  createdAt: DateTime.now(),
+                );
+                RoomDB().create(room, context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PrivateTile extends StatelessWidget {
+  const PrivateTile({super.key, required this.value, this.onChanged});
+  final bool value;
+  final void Function(bool)? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text('Make this Room private?', style: TextStyle(fontSize: 16.0)),
+        Switch(value: value, onChanged: onChanged),
+      ],
+    );
+  }
+}

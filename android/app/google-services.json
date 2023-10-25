@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "636595821339",
+    "project_id": "notice-board-project",
+    "storage_bucket": "notice-board-project.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:636595821339:android:345a8f3d2afc4e3e9a91be",
+        "android_client_info": {
+          "package_name": "com.example.basic_board"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIydfJS2dFTrywbgHTexNSntJ0kV3fGzE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:636595821339:android:22f8b5fd8c1101b39a91be",
+        "android_client_info": {
+          "package_name": "com.example.notice_board"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIydfJS2dFTrywbgHTexNSntJ0kV3fGzE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
