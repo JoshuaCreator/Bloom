@@ -3,13 +3,13 @@ import 'package:basic_board/views/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../configs/consts.dart';
 import '../../models/room.dart';
 import '../../providers/auth_provider.dart';
 import 'package:basic_board/providers/firestore_provider.dart';
-import '../widgets/app_drawer.dart';
-import '../widgets/loading_indicator_build.dart';
 import '../widgets/room_tile.dart';
+import 'account_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   static String id = '/home';
@@ -29,15 +29,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final user = ref.watch(userProvider);
     final room = ref.watch(roomProvider);
     final auth = ref.watch(authStateProvider).value;
+    final firestore = ref.watch(firestoreProvider);
 
     return Scaffold(
-      drawer: AppDrawer(room: room, user: user, auth: auth),
+      // drawer: AppDrawer(room: room, user: user, auth: auth),
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
           IconButton(
-            onPressed: () => showLoadingIndicator(context),
-            icon: const Icon(Icons.add_rounded),
+            onPressed: () => context.push(
+              '${HomeScreen.id}/${AccountScreen.id}',
+            ),
+            icon: const Icon(Icons.more_vert_rounded),
           ),
         ],
       ),
@@ -66,7 +69,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Visibility(
                   visible: roomsVisible,
                   child: ListView.builder(
-                    padding: EdgeInsets.only(top: ten, left: ten, right: ten),
+                    // padding: EdgeInsets.only(top: ten, left: ten, right: ten),
                     itemCount: room.value?.length,
                     itemBuilder: (context, index) {
                       final Room roomData = Room(
@@ -75,6 +78,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         creatorId: auth!.uid,
                         name: room.value?[index]['name'],
                         private: room.value?[index]['private'],
+                        image: room.value?[index]['image'] ??
+                            'https://images.pexels.com/photos/18281880/pexels-photo-18281880/free-photo-of-glass-of-coffee.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
                       );
 
                       // bool visible = roomData.private || user.value?['admin'];
@@ -91,21 +96,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         }
                       }
 
+                      // String lastSent = lastMessage.value?[0]['message'];
+
                       bool visible = showRoom();
-                      return Visibility(
-                        visible: visible,
-                        child: RoomTile(
-                          leading: Icons.people_rounded,
-                          selected: false,
-                          name: roomData.name,
-                          onTap: () {
-                            context.push(
-                              '${HomeScreen.id}/${RoomScreen.id}',
-                              extra: roomData,
+                      return StreamBuilder(
+                          stream: firestore
+                              .collection('rooms')
+                              .doc(roomData.id)
+                              .collection('messages')
+                              .orderBy('time', descending: true)
+                              .limit(1)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            String sender = user.value?['id'] == auth.uid
+                                ? 'You: '
+                                : '${user.value?['title'] + ' ' + user.value?['fName']}: ';
+                            String lastSent =
+                                snapshot.data?.docs[0].data()['message'] ?? '';
+                            DateTime timeStamp =
+                                (snapshot.data?.docs[0].data()['time']) == null
+                                    ? DateTime.now()
+                                    : (snapshot.data?.docs[0].data()['time'])
+                                        .toDate();
+                            String time =
+                                DateFormat('EE, hh:mm a').format(timeStamp);
+                            return Visibility(
+                              visible: visible,
+                              child: RoomTile(
+                                image: roomData.image!,
+                                leading: Icons.people_rounded,
+                                name: roomData.name,
+                                subtitle: '$sender $lastSent',
+                                dateTime: time,
+                                onTap: () {
+                                  context.push(
+                                    '${HomeScreen.id}/${RoomScreen.id}',
+                                    extra: roomData,
+                                  );
+                                },
+                              ),
                             );
-                          },
-                        ),
-                      );
+                          });
                     },
                   ),
                 ),

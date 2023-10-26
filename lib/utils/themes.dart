@@ -5,7 +5,7 @@ class AppTheme {
     colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
     useMaterial3: true,
     appBarTheme: const AppBarTheme(
-      centerTitle: true,
+      // centerTitle: true,
       surfaceTintColor: Colors.transparent,
     ),
     bottomSheetTheme: const BottomSheetThemeData(
@@ -34,7 +34,7 @@ class AppTheme {
     colorScheme: const ColorScheme.dark(),
     useMaterial3: true,
     appBarTheme: const AppBarTheme(
-      centerTitle: true,
+      // centerTitle: true,
       surfaceTintColor: Colors.transparent,
     ),
     bottomSheetTheme: const BottomSheetThemeData(

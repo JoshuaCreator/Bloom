@@ -20,9 +20,10 @@ class SettingTile extends StatelessWidget {
       leading: Icon(
         leading,
         size: 28,
+        color: Colors.grey,
       ),
       title: Text(title),
-      subtitle: Text(subtitle),
+      subtitle: Text(subtitle, style: TextStyle(color: Colors.grey.shade600)),
       trailing: trailing,
       onTap: onTap,
     );

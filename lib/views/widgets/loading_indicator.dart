@@ -5,14 +5,41 @@ import '../../configs/consts.dart';
 class LoadingIndicator extends StatelessWidget {
   const LoadingIndicator({
     super.key,
-    this.backgroundColour = Colors.black87,
-    this.foregroundColour = Colors.white,
+    // this.backgroundColour = Colors.black87,
+    // this.foregroundColour = Colors.white,
+    this.isBuild = false,
   });
-  final Color backgroundColour;
-  final Color foregroundColour;
+  // final Color backgroundColour;
+  // final Color foregroundColour;
+  final bool isBuild;
+
+  Color foregroundColour(Brightness brightness) {
+    if (isBuild && brightness == Brightness.dark) {
+      return Colors.black87;
+    } else if (isBuild && brightness == Brightness.light) {
+      return Colors.white;
+    } else if (!isBuild && brightness == Brightness.light) {
+      return Colors.white;
+    } else {
+      return Colors.black87;
+    }
+  }
+
+  Color backgroundColour(Brightness brightness) {
+    if (isBuild && brightness == Brightness.dark) {
+      return Colors.white;
+    } else if (isBuild && brightness == Brightness.light) {
+      return Colors.black87;
+    } else if (!isBuild && brightness == Brightness.light) {
+      return Colors.black87;
+    } else {
+      return Colors.white;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final brightness = MediaQuery.of(context).platformBrightness;
     return Center(
       child: Material(
         borderRadius: BorderRadius.circular(twenty),
@@ -22,16 +49,21 @@ class LoadingIndicator extends StatelessWidget {
           padding: EdgeInsets.all(thirty),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(twenty),
-            color: backgroundColour,
+            color: backgroundColour(brightness),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(color: foregroundColour),
+              CircularProgressIndicator(
+                color: foregroundColour(brightness),
+              ),
               height10,
               Text(
                 'Getting things ready',
-                style: TextStyle(fontSize: 16.0, color: foregroundColour),
+                style: TextStyle(
+                  fontSize: 16.0,
+                  color: foregroundColour(brightness),
+                ),
               ),
             ],
           ),

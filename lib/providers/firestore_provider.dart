@@ -40,6 +40,17 @@ final roomProvider = StreamProvider(
   },
 );
 
+//? *************** Get Last Message ******************//
+final lastMessageProvider = StreamProvider((ref) {
+  final firestore = ref.watch(firestoreProvider);
+
+  var docRef = firestore
+      .collection('rooms')
+      .doc()
+      .collection('messages').orderBy('time', descending: true).limit(1);
+  return docRef.snapshots().map((data) => data.docs);
+});
+
 final firestoreProvider = Provider<FirebaseFirestore>((ref) {
   return FirebaseFirestore.instance;
 });

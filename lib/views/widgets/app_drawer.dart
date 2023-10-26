@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../configs/consts.dart';
 import '../screens/account_screen.dart';
+import 'profile_tile.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({
@@ -35,46 +36,7 @@ class AppDrawer extends StatelessWidget {
             color: Colors.cyan,
             child: DrawerHeader(
               margin: EdgeInsets.zero,
-              child: InkWell(
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onTap: () {
-                  context.pop();
-                  context.push(
-                    '${HomeScreen.id}/${AccountScreen.id}',
-                  );
-                },
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    CircleAvatar(radius: thirty + five),
-                    SizedBox(width: ten),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: size * 5,
-                          child: Text(
-                            user.value?['fName'] + ' ' + user.value?['lName'],
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        SizedBox(
-                          width: size * 5,
-                          child: Text(
-                            email!,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 12.0,
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
+              child: ProfileTile(user: user, email: email),
             ),
           ),
           Expanded(
@@ -148,3 +110,4 @@ class AppDrawer extends StatelessWidget {
     );
   }
 }
+

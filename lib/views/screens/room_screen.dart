@@ -37,13 +37,11 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
         .collection('messages')
         .orderBy('time', descending: true)
         .snapshots(includeMetadataChanges: true);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      collectionRef = FirebaseFirestore.instance
-          .collection('rooms')
-          .doc(widget.room.id)
-          .collection('messages');
-    });
+        
+    collectionRef = FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(widget.room.id)
+        .collection('messages');
   }
 
   // Future<bool> checkConnectivity() async {
@@ -78,7 +76,9 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
                 context: context,
                 builder: (context) => const RoomInfoScreen(),
               ),
-              child: const CircleAvatar(),
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(widget.room.image!),
+              ),
             ),
           ),
         ],
@@ -86,11 +86,14 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
       body: StreamBuilder(
         stream: messageSnapshots,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            const Center(child: CircularProgressIndicator());
-          }
           if (snapshot.data!.docs.isEmpty || !snapshot.hasData) {
             return const Center(child: Text("No messages"));
+          }
+          if (!snapshot.hasData) {
+            const Center(child: Text('Nothing to see here'));
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
             const Center(child: Text("Oops! An error occurred"));
@@ -115,7 +118,6 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
           );
         },
       ),
-      
       persistentFooterButtons: user.value?['admin']
           ? buildTexter(
               context,

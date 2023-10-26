@@ -6,10 +6,7 @@ showLoadingIndicator(BuildContext context) {
     context: context,
     barrierDismissible: false,
     builder: (context) {
-      return const LoadingIndicator(
-        foregroundColour: Colors.black87,
-        backgroundColour: Colors.white,
-      );
+      return const LoadingIndicator(isBuild: true);
     },
   );
 }

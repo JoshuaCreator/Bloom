@@ -92,6 +92,7 @@ class Auth {
           .createUserWithEmailAndPassword(email: email, password: password)
           .then((value) {
         _userRef.doc(email).set({
+          'id': _auth.currentUser?.uid,
           'title': user.title,
           'fName': user.fName,
           'lName': user.lName,
