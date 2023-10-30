@@ -1,17 +1,17 @@
-import 'package:basic_board/views/screens/create_room_screen.dart';
-import 'package:basic_board/views/screens/home_screen.dart';
-import 'package:basic_board/views/screens/settings_screen.dart';
-import 'package:basic_board/views/widgets/app_text_buttons.dart';
+// import 'package:basic_board/views/screens/create_room_screen.dart';
+// import 'package:basic_board/views/screens/home_screen.dart';
+// import 'package:basic_board/views/screens/settings_screen.dart';
+// import 'package:basic_board/views/widgets/app_text_buttons.dart';
 // import 'package:basic_board/views/widgets/room_tile.dart';
 // import '../../models/room.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+// import 'package:go_router/go_router.dart';
 
-import '../../configs/consts.dart';
-import '../screens/account_screen.dart';
+// import '../../configs/consts.dart';
+// import '../screens/account_screen.dart';
 import 'profile_tile.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -28,7 +28,7 @@ class AppDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final email = auth?.email;
     // final uid = auth?.uid;
-    bool visible = user.value?['admin'];
+    // bool visible = user.value?['admin'];
     return Drawer(
       child: Column(
         children: [
@@ -71,37 +71,38 @@ class AppDrawer extends StatelessWidget {
                 //   ),
                 // ),
 
-                Padding(
-                  padding: EdgeInsets.all(ten),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      AppTextButtonIcon(
-                        label: 'Settings',
-                        icon: Icons.settings_rounded,
-                        onPressed: () {
-                          context.pop();
-                          context.push(
-                            '${HomeScreen.id}/${SettingsScreen.id}',
-                          );
-                        },
-                      ),
-                      Visibility(
-                        visible: visible,
-                        child: AppTextButtonIcon(
-                          label: 'Create Room',
-                          icon: Icons.add_rounded,
-                          onPressed: () {
-                            context.pop();
-                            context.push(
-                              '${HomeScreen.id}/${CreateRoomScreen.id}',
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                )
+                // Padding(
+                //   padding: EdgeInsets.all(ten),
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //     children: [
+                //       AppTextButtonIcon(
+                //         label: 'Settings',
+                //         icon: Icons.settings_rounded,
+                //         onPressed: () {
+                //           context.pop();
+                //           context.push(
+                //             '${HomeScreen.id}/${SettingsScreen.id}',
+                //           );
+                //         },
+                //       ),
+                //       Visibility(
+                //         visible: visible,
+                //         child: AppTextButtonIcon(
+                //           label: 'Create Room',
+                //           icon: Icons.add_rounded,
+                //           onPressed: () {
+                //             context.pop();
+                //             context.push(
+                //               '${HomeScreen.id}/${CreateRoomScreen.id}',
+                //             );
+                //           },
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // )
+              
               ],
             ),
           )

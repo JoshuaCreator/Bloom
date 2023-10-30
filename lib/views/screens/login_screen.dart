@@ -1,9 +1,11 @@
+import 'package:basic_board/views/widgets/app_divider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/services/auth.dart';
 
 import '../widgets/app_button.dart';
+import '../widgets/app_text_buttons.dart';
 import '../widgets/app_text_field.dart';
 import 'password_reset_screen.dart';
 import 'register_screen.dart';
@@ -63,17 +65,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
+                    AppTextButton(
                       onPressed: () => context.go(
                         PasswordResetScreen.id,
                       ),
-                      child: const Text(
-                        'Reset password',
-                      ),
+                      label: 'Reset password',
                     ),
                   ],
                 ),
-                height5,
+                height20,
                 AppButton(
                   title: 'Log In',
                   onTap: () => Auth().logIn(
@@ -82,9 +82,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     password: passwordController.text.trim(),
                   ),
                 ),
+                height40,
+                const AppDivider(),
                 height20,
-                TextButton(
-                  child: const Text('Register'),
+                AppTextButton(
+                  label: 'Get registered',
                   onPressed: () => context.go(RegisterScreeen.id),
                 )
               ],
@@ -93,5 +95,11 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+   @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }

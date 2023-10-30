@@ -1,4 +1,6 @@
+import 'package:basic_board/views/dialogues/snack_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -37,17 +39,22 @@ linkAlertDialogue(
         ),
         actions: [
           TextButton(
-            onPressed: () => context.pop(),
-            child: const Text('Cancel'),
+            onPressed: () => Clipboard.setData(ClipboardData(text: linkString))
+                .then((value) {
+              context.pop();
+              showSnackBar(context, msg: 'Copied to clipboard');
+            }),
+            child: const Text('Copy'),
           ),
           TextButton(
             onPressed: () async {
               context.pop();
-              if (!await launchUrl(link, mode: LaunchMode.inAppWebView)) {
-                throw Exception('Could not launch $linkString');
-              }
+              await launchUrl(link, mode: LaunchMode.inAppWebView).catchError(
+                (value) =>
+                    showSnackBar(context, msg: 'Unable to open this link'),
+              );
             },
-            child: const Text('Open link'),
+            child: const Text('Open'),
           ),
         ],
       ),

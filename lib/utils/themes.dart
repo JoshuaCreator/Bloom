@@ -18,16 +18,7 @@ class AppTheme {
         borderRadius: BorderRadius.zero,
       ),
     ),
-    textButtonTheme: const TextButtonThemeData(
-      style: ButtonStyle(
-        textStyle: MaterialStatePropertyAll(
-          TextStyle(
-            fontSize: 16.0,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    ),
+    dividerColor: Colors.black.withOpacity(0.3),
   );
 
   static ThemeData darkTheme = ThemeData(
@@ -47,15 +38,6 @@ class AppTheme {
         borderRadius: BorderRadius.zero,
       ),
     ),
-    textButtonTheme: const TextButtonThemeData(
-      style: ButtonStyle(
-        textStyle: MaterialStatePropertyAll(
-          TextStyle(
-            fontSize: 16.0,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    ),
+    dividerColor: Colors.white.withOpacity(0.3),
   );
 }

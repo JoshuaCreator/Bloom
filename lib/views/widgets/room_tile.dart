@@ -1,5 +1,6 @@
 import 'package:basic_board/configs/consts.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class RoomTile extends StatelessWidget {
   const RoomTile({
@@ -22,10 +23,11 @@ class RoomTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       isThreeLine: true,
+      /// Wrap [CircleAvatar] with [GestureDetector]
       leading: CircleAvatar(
         radius: size / 1.5,
         // child: Icon(leading),
-        backgroundImage: NetworkImage(image),
+        backgroundImage: CachedNetworkImageProvider(image),
         onBackgroundImageError: (exception, stackTrace) => Icon(leading),
       ),
       title: Text(

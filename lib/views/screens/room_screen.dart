@@ -4,13 +4,17 @@ import 'package:basic_board/services/message_db.dart';
 import 'package:basic_board/models/room.dart';
 import 'package:basic_board/providers/firestore_provider.dart';
 import 'package:basic_board/views/screens/room_info_screen.dart';
+import 'package:basic_board/views/dialogues/loading_indicator.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/models/message.dart';
-import 'package:basic_board/views/widgets/notice_tile.dart';
+import 'package:basic_board/views/widgets/message_tile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../providers/auth_provider.dart';
 
 class RoomScreen extends ConsumerStatefulWidget {
   static String id = 'room';
@@ -25,7 +29,7 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
   final _messageController = TextEditingController();
   bool showUploadButtons = false;
-  late Stream<QuerySnapshot<Map<String, dynamic>>> messageSnapshots;
+  late Stream<QuerySnapshot<Map<String, dynamic>>>? messageSnapshots;
   late CollectionReference collectionRef;
 
   @override
@@ -37,7 +41,6 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
         .collection('messages')
         .orderBy('time', descending: true)
         .snapshots(includeMetadataChanges: true);
-        
     collectionRef = FirebaseFirestore.instance
         .collection('rooms')
         .doc(widget.room.id)
@@ -56,6 +59,7 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
   Widget build(BuildContext context) {
     // checkConnectivity();
     final user = ref.watch(userProvider);
+    final auth = ref.watch(authStateProvider).value;
 
     double bottom = MediaQuery.of(context).viewInsets.bottom;
 
@@ -74,10 +78,12 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
                 useSafeArea: true,
                 enableDrag: false,
                 context: context,
-                builder: (context) => const RoomInfoScreen(),
+                builder: (context) => RoomInfoScreen(
+                  image: widget.room.image!,
+                ),
               ),
               child: CircleAvatar(
-                backgroundImage: NetworkImage(widget.room.image!),
+                backgroundImage: CachedNetworkImageProvider(widget.room.image!),
               ),
             ),
           ),
@@ -85,32 +91,36 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
       ),
       body: StreamBuilder(
         stream: messageSnapshots,
-        builder: (context, snapshot) {
-          if (snapshot.data!.docs.isEmpty || !snapshot.hasData) {
-            return const Center(child: Text("No messages"));
-          }
-          if (!snapshot.hasData) {
-            const Center(child: Text('Nothing to see here'));
-          }
+        builder: (_, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            const Center(child: CircularProgressIndicator());
+            return const Center(child: LoadingIndicator());
           }
           if (snapshot.hasError) {
-            const Center(child: Text("Oops! An error occurred"));
+            return const Center(child: Text("Oops! An error occurred"));
           }
-          final data = snapshot.data?.docs;
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('Nothing to see here'));
+          }
+          final data = snapshot.data!.docs;
+
           return ListView.builder(
+            padding: EdgeInsets.only(bottom: ten),
             reverse: true,
-            itemCount: data?.length,
+            itemCount: data.length,
             itemBuilder: (context, index) {
+              bool isMe = user.value?['id'] == auth?.uid ? true : false;
+
               final pending =
                   snapshot.data?.docs[index].metadata.hasPendingWrites;
               return MessageTile(
+                messageRef: collectionRef,
                 message: Message(
-                  sender: data?[index]['sender'],
-                  message: data?[index]['message'],
+                  id: data[index].id,
+                  isMe: isMe,
+                  sender: data[index]['sender'],
+                  message: data[index]['message'],
                   // image: data?[index]['image'],
-                  time: (data?[index]['time']).toDate(),
+                  time: (data[index]['time']).toDate(),
                   pending: pending!,
                 ),
               );

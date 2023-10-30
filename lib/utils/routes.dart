@@ -25,8 +25,18 @@ GoRouter goRouter = GoRouter(
       builder: (context, state) => const HomeScreen(),
       routes: [
         GoRoute(
-          path: AccountScreen.id,
-          builder: (context, state) => const AccountScreen(),
+          path: SettingsScreen.id,
+          builder: (context, state) => const SettingsScreen(),
+          routes: [
+            GoRoute(
+              path: AccountScreen.id,
+              builder: (context, state) => const AccountScreen(),
+            ),
+            GoRoute(
+              path: ThemeSelectorScreen.id,
+              builder: (context, state) => const ThemeSelectorScreen(),
+            ),
+          ],
         ),
         GoRoute(
           path: CreateRoomScreen.id,
@@ -37,16 +47,6 @@ GoRouter goRouter = GoRouter(
           builder: (context, state) => RoomScreen(
             room: state.extra as Room,
           ),
-        ),
-        GoRoute(
-          path: SettingsScreen.id,
-          builder: (context, state) => const SettingsScreen(),
-          routes: [
-            GoRoute(
-              path: ThemeSelectorScreen.id,
-              builder: (context, state) => const ThemeSelectorScreen(),
-            ),
-          ],
         ),
       ],
     ),

@@ -1,5 +1,5 @@
 import 'package:basic_board/views/screens/room_screen.dart';
-import 'package:basic_board/views/widgets/loading_indicator.dart';
+import 'package:basic_board/views/dialogues/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +9,8 @@ import '../../models/room.dart';
 import '../../providers/auth_provider.dart';
 import 'package:basic_board/providers/firestore_provider.dart';
 import '../widgets/room_tile.dart';
-import 'account_screen.dart';
+import 'create_room_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   static String id = '/home';
@@ -24,6 +25,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool chatsVisible = true;
   double roomsTurns = 0.0;
   double chatsTurns = 0.0;
+  int index = 0;
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
@@ -34,14 +37,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       // drawer: AppDrawer(room: room, user: user, auth: auth),
       appBar: AppBar(
-        title: const Text('Home'),
+        title: const Text("Joshua's chat app"),
         actions: [
-          IconButton(
-            onPressed: () => context.push(
-              '${HomeScreen.id}/${AccountScreen.id}',
-            ),
-            icon: const Icon(Icons.more_vert_rounded),
-          ),
+          PopupMenuButton(
+            shape: RoundedRectangleBorder(borderRadius: defaultBorderRadius),
+            offset: const Offset(0, kToolbarHeight),
+            itemBuilder: (context) => [
+              buildPopupMenuItem(
+                context,
+                onTap: () => context.push(
+                  '${HomeScreen.id}/${CreateRoomScreen.id}',
+                ),
+                label: 'New Room',
+                icon: Icons.people_alt_rounded,
+              ),
+              buildPopupMenuItem(
+                context,
+                onTap: () => context.push(
+                  '${HomeScreen.id}/${SettingsScreen.id}',
+                ),
+                label: 'Settings',
+                icon: Icons.settings_rounded,
+              ),
+            ],
+          )
         ],
       ),
       body: room.when(
@@ -69,20 +88,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Visibility(
                   visible: roomsVisible,
                   child: ListView.builder(
-                    // padding: EdgeInsets.only(top: ten, left: ten, right: ten),
                     itemCount: room.value?.length,
                     itemBuilder: (context, index) {
                       final Room roomData = Room(
-                        id: room.value?[index]['id'],
+                        id: room.value![index]['id'],
                         creator: room.value?[index]['creator'],
                         creatorId: auth!.uid,
                         name: room.value?[index]['name'],
                         private: room.value?[index]['private'],
-                        image: room.value?[index]['image'] ??
-                            'https://images.pexels.com/photos/18281880/pexels-photo-18281880/free-photo-of-glass-of-coffee.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+                        image: room.value?[index]['image'],
                       );
-
-                      // bool visible = roomData.private || user.value?['admin'];
 
                       bool showRoom() {
                         if (user.value?['admin'] && roomData.private) {
@@ -96,8 +111,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         }
                       }
 
-                      // String lastSent = lastMessage.value?[0]['message'];
-
                       bool visible = showRoom();
                       return StreamBuilder(
                           stream: firestore
@@ -109,7 +122,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               .snapshots(),
                           builder: (context, snapshot) {
                             String sender = user.value?['id'] == auth.uid
-                                ? 'You: '
+                                ? 'Me: '
                                 : '${user.value?['title'] + ' ' + user.value?['fName']}: ';
                             String lastSent =
                                 snapshot.data?.docs[0].data()['message'] ?? '';
@@ -142,78 +155,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             ),
-            height20,
-            // SectionDivider(
-            //   title: 'Chats',
-            //   turns: chatsTurns,
-            //   onTap: () => setState(() {
-            //     chatsVisible ? chatsVisible = false : chatsVisible = true;
-            //     chatsVisible
-            //         ? chatsTurns -= 1.0 / 2.0
-            //         : chatsTurns += 1.0 / 2.0;
-            //   }),
-            // ),
-            // Flexible(
-            //   child: AnimatedSize(
-            //     alignment: Alignment.bottomCenter,
-            //     curve: Curves.ease,
-            //     duration: Duration(milliseconds: animationDuration),
-            //     reverseDuration: Duration(milliseconds: animationDuration),
-            //     child: Visibility(
-            //       visible: chatsVisible,
-            //       child: ListView.builder(
-            //         padding: EdgeInsets.only(top: ten, left: ten, right: ten),
-            //         itemCount: room.value?.length,
-            //         itemBuilder: (context, index) {
-            //           final Room roomData = Room(
-            //             creator: room.value?[index]['creator'],
-            //             creatorId: auth!.uid,
-            //             name: room.value?[index]['name'],
-            //             private: room.value?[index]['private'],
-            //             // participants: room.value?[index]['participants'], // Get Participants
-            //             // messages: messages.value,
-            //           );
-
-            //           // bool visible = roomData.private || user.value?['admin'];
-
-            //           bool showRoom() {
-            //             if (user.value?['admin'] && roomData.private) {
-            //               return true;
-            //             } else if (user.value?['admin'] && !roomData.private) {
-            //               return true;
-            //             } else if (!user.value?['admin'] && !roomData.private) {
-            //               return true;
-            //             } else {
-            //               return false;
-            //             }
-            //           }
-
-            //           bool visible = showRoom();
-            //           return Visibility(
-            //             visible: visible,
-            //             child: RoomTile(
-            //               leading: Icons.people_rounded,
-            //               selected: false,
-            //               name: roomData.name,
-            //               onTap: () {
-            //                 context.push(
-            //                   '${HomeScreen.id}/${RoomScreen.id}',
-            //                   extra: roomData,
-            //                 );
-            //               },
-            //             ),
-            //           );
-            //         },
-            //       ),
-            //     ),
-            //   ),
-            // ),
           ],
         ),
         error: (error, stackTrace) => const Center(
           child: Text('An error occurred'),
         ),
         loading: () => const LoadingIndicator(),
+      ),
+    );
+  }
+
+  PopupMenuItem<int> buildPopupMenuItem(
+    BuildContext context, {
+    required String label,
+    required IconData icon,
+    required void Function()? onTap,
+  }) {
+    return PopupMenuItem(
+      value: 1,
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(icon),
+          SizedBox(width: ten),
+          Text(label, style: const TextStyle(fontSize: 16.0)),
+        ],
       ),
     );
   }

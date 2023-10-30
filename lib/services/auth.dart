@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:basic_board/views/screens/home_screen.dart';
 import 'package:basic_board/views/screens/verify_email_screen.dart';
-import 'package:basic_board/views/widgets/loading_indicator_build.dart';
-import 'package:basic_board/views/widgets/snack_bar.dart';
+import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
+import 'package:basic_board/views/dialogues/snack_bar.dart';
 
 class Auth {
   final FirebaseAuth _auth = FirebaseAuth.instance;

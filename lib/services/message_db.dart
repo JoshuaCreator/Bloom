@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../views/widgets/loading_indicator_build.dart';
-import '../views/widgets/snack_bar.dart';
+import '../views/dialogues/loading_indicator_build.dart';
+import '../views/dialogues/snack_bar.dart';
 
 class MessageDB {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -38,16 +38,7 @@ class MessageDB {
           context,
           msg: e,
         );
-      }).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          showSnackBar(
-            context,
-            msg:
-                'The connection timed out. Check your internet connection and try again',
-          );
-        },
-      );
+      });
       return true;
     } catch (e) {
       return Future.error(e.toString());

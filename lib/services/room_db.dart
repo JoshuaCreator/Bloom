@@ -4,8 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../views/widgets/loading_indicator_build.dart';
-import '../views/widgets/snack_bar.dart';
+import '../views/dialogues/loading_indicator_build.dart';
+import '../views/dialogues/snack_bar.dart';
 
 class RoomDB {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

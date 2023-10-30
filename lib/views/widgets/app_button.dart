@@ -16,8 +16,8 @@ class AppButton extends ConsumerWidget {
       borderRadius: BorderRadius.circular(50.0),
       onTap: onTap,
       child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(ten + five),
+        // width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: thirty, vertical: ten),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50.0),
           color: Colors.purple.withOpacity(0.5),
@@ -28,7 +28,6 @@ class AppButton extends ConsumerWidget {
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w500,
-            fontSize: 18.0,
           ),
         ),
       ),

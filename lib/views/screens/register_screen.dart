@@ -7,6 +7,7 @@ import 'package:basic_board/views/widgets/app_button.dart';
 import 'package:basic_board/views/widgets/app_text_field.dart';
 
 import '../../models/user.dart';
+import '../widgets/app_divider.dart';
 import '../widgets/app_dropdown.dart';
 
 class RegisterScreeen extends StatefulWidget {
@@ -134,6 +135,8 @@ class _RegisterScreeenState extends State<RegisterScreeen> {
                     }
                   },
                 ),
+                height40,
+                const AppDivider(),
                 height20,
                 TextButton(
                   child: const Text('Login'),

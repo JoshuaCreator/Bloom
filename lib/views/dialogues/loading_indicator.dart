@@ -59,7 +59,7 @@ class LoadingIndicator extends StatelessWidget {
               ),
               height10,
               Text(
-                'Getting things ready',
+                'Loading...',
                 style: TextStyle(
                   fontSize: 16.0,
                   color: foregroundColour(brightness),

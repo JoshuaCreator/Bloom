@@ -17,13 +17,9 @@ class SettingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(
-        leading,
-        size: 28,
-        color: Colors.grey,
-      ),
+      leading: Icon(leading, color: Colors.grey),
       title: Text(title),
-      subtitle: Text(subtitle, style: TextStyle(color: Colors.grey.shade600)),
+      subtitle: Text(subtitle, style: const TextStyle(color: Colors.grey)),
       trailing: trailing,
       onTap: onTap,
     );
