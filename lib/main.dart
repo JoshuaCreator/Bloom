@@ -35,7 +35,7 @@ class MyApp extends ConsumerWidget {
     // final n = MediaQuery.of(context).platformBrightness;
     // print(n);
     return MaterialApp.router(
-      title: 'Flutter Demo',
+      title: "Joshua's Chat app",
       themeMode: ref.watch(themeSelectorProvider),
       darkTheme: AppTheme.darkTheme,
       theme: AppTheme.lightTheme,

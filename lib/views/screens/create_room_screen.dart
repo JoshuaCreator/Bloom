@@ -26,24 +26,70 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
   Widget build(BuildContext context) {
     final user = ref.watch(userProvider).value;
     final auth = ref.watch(authStateProvider).value;
+    final theme = MediaQuery.of(context).platformBrightness;
+    print(theme);
     return Scaffold(
       appBar: AppBar(title: const Text('Create Room')),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(ten),
         child: Column(
           children: [
-            AppTextField(
-              label: 'Room name',
-              hintText: 'Give your new room a name',
-              textInputAction: TextInputAction.next,
-              controller: _nameController,
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () => showModalBottomSheet(
+                    enableDrag: false,
+                    context: context,
+                    builder: (context) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.sd_storage_outlined),
+                            title: const Text('Device storage'),
+                            onTap: () {
+                              // Select image from device storage
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.camera_alt_outlined),
+                            title: const Text('Camera'),
+                            onTap: () {
+                              // Select image from camera
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  child: CircleAvatar(
+                    radius: size,
+                    backgroundColor: Colors.grey.withOpacity(0.3),
+                    child: Icon(
+                      Icons.camera_alt_outlined,
+                      color: theme == Brightness.light
+                          ? Colors.black
+                          : Colors.white,
+                    ),
+                  ),
+                ),
+                SizedBox(width: ten),
+                Expanded(
+                  child: AppTextField(
+                    hintText: 'Room name (required)',
+                    textInputAction: TextInputAction.next,
+                    controller: _nameController,
+                    borderless: true,
+                  ),
+                ),
+              ],
             ),
             height20,
             AppTextField(
-              label: 'Description',
-              hintText: "What's your new room about",
+              hintText: "Room description",
               maxLines: 5,
               controller: _descController,
+              borderless: true,
             ),
             height20,
             PrivateTile(

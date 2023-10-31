@@ -1,18 +1,19 @@
 class Message {
-  final String message, sender;
+  final String message, senderName, senderId;
   final String? id, image;
   final DateTime time;
   final bool? pending, isMe;
-  final bool? previousMessageBySameSender;
+  // final bool? previousMessageBySameSender;
 
   const Message({
-     this.id,
+    this.id,
     required this.message,
-    required this.sender,
+    required this.senderName,
+    required this.senderId,
     this.image,
     required this.time,
     this.pending,
     this.isMe = false,
-    this.previousMessageBySameSender,
+    // this.previousMessageBySameSender,
   });
 }

@@ -5,7 +5,7 @@ import '../../configs/consts.dart';
 class AppTextField extends StatelessWidget {
   const AppTextField({
     super.key,
-    required this.label,
+    this.label,
     required this.hintText,
     this.maxLines = 1,
     this.minLines,
@@ -18,8 +18,9 @@ class AppTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.maxLength,
     this.validate = true,
+    this.borderless = false,
   });
-  final String label;
+  final String? label;
   final String hintText;
   final int? maxLines;
   final int? minLines;
@@ -32,6 +33,7 @@ class AppTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final int? maxLength;
   final bool validate;
+  final bool borderless;
 
   @override
   Widget build(BuildContext context) {
@@ -56,21 +58,37 @@ class AppTextField extends StatelessWidget {
         ),
         suffixIcon: suffixIcon,
         border: OutlineInputBorder(borderRadius: defaultBorderRadius),
-        label: Text(label),
+        label: borderless ? null : Text(label!),
         hintText: hintText,
-        focusedBorder: OutlineInputBorder(
-          borderRadius: defaultBorderRadius,
-          borderSide: BorderSide(
-            color: Colors.purple.shade300,
-            width: 2,
-          ),
+        hintStyle: const TextStyle(
+          fontWeight: FontWeight.normal,
+          color: Colors.grey,
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: defaultBorderRadius,
-          borderSide: BorderSide(
-            color: Colors.purple.shade300,
-          ),
-        ),
+        filled: borderless,
+        fillColor: Colors.grey.withOpacity(0.3),
+        focusedBorder: borderless
+            ? OutlineInputBorder(
+                borderRadius: defaultBorderRadius,
+                borderSide: BorderSide.none,
+              )
+            : OutlineInputBorder(
+                borderRadius: defaultBorderRadius,
+                borderSide: BorderSide(
+                  color: Colors.purple.shade300,
+                  width: 2,
+                ),
+              ),
+        enabledBorder: borderless
+            ? OutlineInputBorder(
+                borderRadius: defaultBorderRadius,
+                borderSide: BorderSide.none,
+              )
+            : OutlineInputBorder(
+                borderRadius: defaultBorderRadius,
+                borderSide: BorderSide(
+                  color: Colors.purple.shade300,
+                ),
+              ),
       ),
       maxLines: maxLines,
       minLines: minLines,

@@ -22,13 +22,24 @@ class RoomTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      isThreeLine: true,
       /// Wrap [CircleAvatar] with [GestureDetector]
-      leading: CircleAvatar(
-        radius: size / 1.5,
-        // child: Icon(leading),
-        backgroundImage: CachedNetworkImageProvider(image),
-        onBackgroundImageError: (exception, stackTrace) => Icon(leading),
+      leading: GestureDetector(
+        onTap: () => showDialog(
+          context: context,
+          builder: (context) => Container(
+            constraints: BoxConstraints(maxWidth: size),
+            child: CircleAvatar(
+              // maxRadius: size * 3,
+              backgroundImage: CachedNetworkImageProvider(image),
+            ),
+          ),
+        ),
+        child: CircleAvatar(
+          radius: size / 1.5,
+          // child: Icon(leading),
+          backgroundImage: CachedNetworkImageProvider(image),
+          onBackgroundImageError: (exception, stackTrace) => Icon(leading),
+        ),
       ),
       title: Text(
         name,

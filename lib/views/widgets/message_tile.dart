@@ -5,16 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/models/message.dart';
 import 'package:intl/intl.dart';
-import 'package:basic_board/views/dialogues/message_details_screen.dart';
 
 class MessageTile extends StatefulWidget {
   const MessageTile({
     super.key,
     required this.message,
     required this.messageRef,
+    this.onTap,
   });
   final Message message;
   final CollectionReference<Object?> messageRef;
+  final void Function()? onTap;
 
   @override
   State<MessageTile> createState() => _MessageTileState();
@@ -36,11 +37,6 @@ class _MessageTileState extends State<MessageTile> {
 
   @override
   Widget build(BuildContext context) {
-    final repliesRef = widget.messageRef
-        .doc(widget.message.id)
-        .collection('replies')
-        .snapshots();
-
     String time = DateFormat('hh:mm a').format(widget.message.time);
     const TextStyle textStyle = TextStyle(
       // fontSize: 12.0,
@@ -50,19 +46,7 @@ class _MessageTileState extends State<MessageTile> {
     return Padding(
       padding: EdgeInsets.only(left: ten, top: five, right: ten),
       child: InkWell(
-        onTap: () {
-          showModalBottomSheet(
-            // anchorPoint: Offset(0, kBottomNavigationBarHeight),
-            showDragHandle: true,
-            context: context,
-            isScrollControlled: true,
-            useSafeArea: true,
-            builder: (context) => MessageDetailsScreen(
-              message: widget.message,
-              repliesRef: repliesRef,
-            ),
-          );
-        },
+        onTap: widget.onTap,
         borderRadius: defaultBorderRadius,
         child: Container(
           padding: EdgeInsets.only(
@@ -105,7 +89,9 @@ class _MessageTileState extends State<MessageTile> {
                     Row(
                       children: [
                         Text(
-                          !widget.message.isMe! ? '' : widget.message.sender,
+                          !widget.message.isMe!
+                              ? ''
+                              : widget.message.senderName,
                           style: textStyle,
                         ),
                         !widget.message.isMe!

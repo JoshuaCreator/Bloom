@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../models/reply.dart';
 import '../views/dialogues/loading_indicator_build.dart';
 import '../views/dialogues/snack_bar.dart';
 
@@ -11,7 +12,7 @@ class MessageDB {
   late CollectionReference _messageRef;
 
   Future<bool> send(
-    Message notice,
+    Message message,
     BuildContext context, {
     required CollectionReference ref,
   }) async {
@@ -19,10 +20,11 @@ class MessageDB {
     // _firestore.settings = const Settings(persistenceEnabled: false);
     try {
       await ref.add({
-        'message': notice.message,
-        'sender': notice.sender,
-        'image': notice.image,
-        'time': notice.time
+        'message': message.message,
+        'senderName': message.senderName,
+        'senderId': message.senderId,
+        'image': message.image,
+        'time': message.time
       }).then(
         (value) {
           value.update({'id': value.id});
@@ -31,6 +33,36 @@ class MessageDB {
           //   context,
           //   msg: '',
           // );
+        },
+      ).catchError((e) {
+        context.pop();
+        showSnackBar(
+          context,
+          msg: e,
+        );
+      });
+      return true;
+    } catch (e) {
+      return Future.error(e.toString());
+    }
+  }
+
+  Future<bool> reply(
+    Reply reply,
+    BuildContext context, {
+    required CollectionReference ref,
+  }) async {
+    try {
+      await ref.add({
+        'reply': reply.message,
+        'replySenderId': reply.replySenderId,
+        'replySenderName': reply.replySenderName,
+        'toMessageId': reply.toMessageId,
+        'toSenderId': reply.toSenderId,
+        'time': reply.time
+      }).then(
+        (value) {
+          value.update({'id': value.id});
         },
       ).catchError((e) {
         context.pop();

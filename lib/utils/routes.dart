@@ -1,7 +1,7 @@
 import 'package:basic_board/models/room.dart';
 import 'package:basic_board/views/screens/account_screen.dart';
 import 'package:basic_board/views/screens/create_room_screen.dart';
-import 'package:basic_board/views/screens/room_screen.dart';
+import 'package:basic_board/views/screens/room_chat_screen.dart';
 import 'package:basic_board/views/screens/settings_screen.dart';
 import 'package:basic_board/views/screens/theme_selector_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -43,8 +43,8 @@ GoRouter goRouter = GoRouter(
           builder: (context, state) => const CreateRoomScreen(),
         ),
         GoRoute(
-          path: RoomScreen.id,
-          builder: (context, state) => RoomScreen(
+          path: RoomChatScreen.id,
+          builder: (context, state) => RoomChatScreen(
             room: state.extra as Room,
           ),
         ),

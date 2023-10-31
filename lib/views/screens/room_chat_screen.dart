@@ -5,6 +5,7 @@ import 'package:basic_board/models/room.dart';
 import 'package:basic_board/providers/firestore_provider.dart';
 import 'package:basic_board/views/screens/room_info_screen.dart';
 import 'package:basic_board/views/dialogues/loading_indicator.dart';
+import 'package:basic_board/views/widgets/message_text_field.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:connectivity_plus/connectivity_plus.dart';
@@ -15,17 +16,18 @@ import 'package:basic_board/views/widgets/message_tile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/auth_provider.dart';
+import '../dialogues/message_details_screen.dart';
 
-class RoomScreen extends ConsumerStatefulWidget {
+class RoomChatScreen extends ConsumerStatefulWidget {
   static String id = 'room';
-  const RoomScreen({super.key, required this.room});
+  const RoomChatScreen({super.key, required this.room});
   final Room room;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _RoomScreenState();
 }
 
-class _RoomScreenState extends ConsumerState<RoomScreen> {
+class _RoomScreenState extends ConsumerState<RoomChatScreen> {
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
   final _messageController = TextEditingController();
   bool showUploadButtons = false;
@@ -61,7 +63,7 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
     final user = ref.watch(userProvider);
     final auth = ref.watch(authStateProvider).value;
 
-    double bottom = MediaQuery.of(context).viewInsets.bottom;
+    double bottom = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
       appBar: AppBar(
@@ -112,17 +114,38 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
 
               final pending =
                   snapshot.data?.docs[index].metadata.hasPendingWrites;
+              final Message message = Message(
+                id: data[index].id,
+                senderId: data[index]['senderId'],
+                isMe: isMe,
+                senderName: data[index]['senderName'],
+                message: data[index]['message'],
+                // image: data?[index]['image'],
+                time: (data[index]['time']).toDate(),
+                pending: pending!,
+              );
               return MessageTile(
+                onTap: () {
+                  showModalBottomSheet(
+                    // anchorPoint: Offset(0, kBottomNavigationBarHeight),
+                    showDragHandle: true,
+                    context: context,
+                    isScrollControlled: true,
+                    useSafeArea: true,
+                    builder: (context) => MessageDetailsScreen(
+                      message: message,
+                      repliesSnapshots: collectionRef
+                          .doc(message.id)
+                          .collection('replies')
+                          .orderBy('time', descending: true)
+                          .snapshots(),
+                      repliesRef:
+                          collectionRef.doc(message.id).collection('replies'),
+                    ),
+                  );
+                },
                 messageRef: collectionRef,
-                message: Message(
-                  id: data[index].id,
-                  isMe: isMe,
-                  sender: data[index]['sender'],
-                  message: data[index]['message'],
-                  // image: data?[index]['image'],
-                  time: (data[index]['time']).toDate(),
-                  pending: pending!,
-                ),
+                message: message,
               );
             },
           );
@@ -133,81 +156,61 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
               context,
               user: user.value,
               bottom: bottom,
+              senderId: auth?.uid,
             )
           : null,
     );
   }
 
-  List<Widget> buildTexter(
-    BuildContext context, {
-    required Map<String, dynamic>? user,
-    required double bottom,
-  }) {
+  List<Widget> buildTexter(BuildContext context,
+      {required Map<String, dynamic>? user,
+      required double bottom,
+      required String? senderId}) {
     return [
       Column(
         children: [
           Form(
             key: _key,
             child: Expanded(
-              child: TextField(
-                onTapOutside: (event) =>
-                    FocusManager.instance.primaryFocus!.unfocus(),
-                maxLines: 5,
-                minLines: 1,
-                decoration: InputDecoration(
-                  prefixIcon: IconButton(
-                    onPressed: () => setState(() {
-                      if (showUploadButtons) {
-                        Timer(const Duration(seconds: 10), () {
-                          setState(() {
-                            showUploadButtons = false;
-                          });
-                        });
-                      } else {
-                        showUploadButtons = true;
-                        Timer(const Duration(seconds: 10), () {
-                          setState(() {
-                            showUploadButtons = false;
-                          });
-                        });
-                      }
-                    }),
-                    icon: const Icon(Icons.attach_file_rounded),
-                    tooltip: 'Attach file',
-                  ),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      if (_messageController.text.trim().isEmpty) return;
-                      MessageDB().send(
-                        ref: collectionRef,
-                        Message(
-                          message: _messageController.text.trim(),
-                          time: DateTime.now(),
-                          sender: (user?['title'] +
-                                  ' ' +
-                                  user?['fName'] +
-                                  ' ' +
-                                  user?['lName'])
-                              .toString()
-                              .trim(),
-                        ),
-                        context,
-                      );
-                      _messageController.clear();
-                    },
-                    icon: const Icon(Icons.send_rounded),
-                    tooltip: 'Send',
-                  ),
-                  contentPadding: EdgeInsets.only(
-                    right: ten,
-                    top: five,
-                    bottom: five,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                controller: _messageController,
+              child: MessageTextField(
+                hintText: 'Type a message',
+                textController: _messageController,
+                onPrefixPressed: () => setState(() {
+                  if (showUploadButtons) {
+                    Timer(const Duration(seconds: 10), () {
+                      setState(() {
+                        showUploadButtons = false;
+                      });
+                    });
+                  } else {
+                    showUploadButtons = true;
+                    Timer(const Duration(seconds: 10), () {
+                      setState(() {
+                        showUploadButtons = false;
+                      });
+                    });
+                  }
+                }),
+                onSuffixPressed: () {
+                  if (_messageController.text.trim().isEmpty) return;
+                  MessageDB().send(
+                    ref: collectionRef,
+                    Message(
+                      senderId: senderId!,
+                      message: _messageController.text.trim(),
+                      time: DateTime.now(),
+                      senderName: (user?['title'] +
+                              ' ' +
+                              user?['fName'] +
+                              ' ' +
+                              user?['lName'])
+                          .toString()
+                          .trim(),
+                    ),
+                    context,
+                  );
+                  _messageController.clear();
+                },
               ),
             ),
           ),
