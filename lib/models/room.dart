@@ -3,7 +3,6 @@ class Room {
   final String? id, desc, image;
   final DateTime? createdAt;
   final bool private;
-  final List? participants;
 
   Room({
     required this.name,
@@ -14,6 +13,5 @@ class Room {
     this.image,
     this.createdAt,
     required this.private,
-    this.participants,
   });
 }

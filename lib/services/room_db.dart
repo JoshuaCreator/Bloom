@@ -11,18 +11,11 @@ class RoomDB {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late CollectionReference _roomRef;
 
-  Future<bool> create(Room room, BuildContext context) async {
+  Future<bool> create(Room room, BuildContext context, {required user}) async {
     _roomRef = _firestore.collection('rooms');
 
     try {
       showLoadingIndicator(context);
-      // _roomRef.where('name', isEqualTo: room.name).get().then(
-      //   (value) {
-      //     context.go(HomeScreen.id);
-      //     showSnackBar(context, msg: 'This Room already exists');
-      //     return;
-      //   },
-      // );
       await _roomRef.add({
         'name': room.name,
         'desc': room.desc,
@@ -31,12 +24,19 @@ class RoomDB {
         'private': room.private,
         'image': room.image,
         'createdAt': room.createdAt,
-        'participants': room.participants,
       }).then(
         (value) {
-          value.update({'id': value.id});
-          context.go(HomeScreen.id);
-          showSnackBar(context, msg: 'Your Room has been created');
+          value.update({'id': value.id}).then(
+            (room) => _roomRef.doc(value.id).collection('participants').add({
+              'fName': user['fName'],
+              'lName': user['lName'],
+              'id': user['id'],
+              'joined': DateTime.now(),
+            }).then((value) {
+              context.go(HomeScreen.id);
+              showSnackBar(context, msg: 'Your Room has been created');
+            }),
+          );
         },
       ).catchError((e) {
         context.pop();

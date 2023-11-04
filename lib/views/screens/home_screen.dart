@@ -108,20 +108,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         image: room.value?[index]['image'] ??
                             'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg',
                         createdAt: timeStamp,
-                        participants: room.value?[index]['participants'],
                       );
 
-                      bool showRoom() {
-                        if (roomData.participants!.contains(auth.uid)) {
-                          return true;
-                        } else {
-                          return false;
-                        }
-                      }
+                      // bool showRoom() {
+                      //   if (roomData.participants!.contains(auth.uid)) {
+                      //     return true;
+                      //   } else {
+                      //     return false;
+                      //   }
+                      // }
 
-                      bool visible = showRoom();
+                      // bool visible = showRoom();
+                      //! TODO Adjust visibility
                       return Visibility(
-                        visible: visible,
+                        visible: true,
                         child: RoomTile(
                           image: roomData.image!,
                           leading: Icons.people_rounded,
@@ -136,44 +136,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           },
                         ),
                       );
-                      // return StreamBuilder(
-                      //     stream: firestore
-                      //         .collection('rooms')
-                      //         .doc(roomData.id)
-                      //         .collection('messages')
-                      //         .orderBy('time', descending: true)
-                      //         // .limit(1)
-                      //         .snapshots(),
-                      //     builder: (context, snapshot) {
-                      //       String sender = user.value?['id'] == auth.uid
-                      //           ? 'Me: '
-                      //           : '${user.value?['title'] + ' ' + user.value?['fName']}: ';
-                      //       String lastSent =
-                      //           snapshot.data?.docs[0].data()['message'] ?? '';
-                      //       DateTime timeStamp =
-                      //           (snapshot.data?.docs[0].data()['time']) == null
-                      //               ? DateTime.now()
-                      //               : (snapshot.data?.docs[0].data()['time'])
-                      //                   .toDate();
-                      //       String time =
-                      //           DateFormat('EE, hh:mm a').format(timeStamp);
-                      // return Visibility(
-                      //   visible: visible,
-                      //   child: RoomTile(
-                      //     image: roomData.image!,
-                      //     leading: Icons.people_rounded,
-                      //     name: roomData.name,
-                      //     subtitle: '$sender $lastSent',
-                      //     dateTime: time,
-                      //     onTap: () {
-                      //       context.push(
-                      //         '${HomeScreen.id}/${RoomChatScreen.id}',
-                      //         extra: roomData,
-                      //       );
-                      //     },
-                      //   ),
-                      // );
-                      //     });
                     },
                   ),
                 ),

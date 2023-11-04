@@ -97,9 +97,8 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                   creatorId: auth!.uid,
                   private: value,
                   createdAt: DateTime.now(),
-                  participants: [auth.uid],
                 );
-                RoomDB().create(room, context);
+                RoomDB().create(room, context, user: user);
               },
             ),
           ],

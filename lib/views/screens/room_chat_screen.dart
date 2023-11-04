@@ -129,14 +129,12 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
           );
         },
       ),
-      persistentFooterButtons: user.value?['admin']
-          ? buildTexter(
-              context,
-              user: user.value,
-              bottom: bottom,
-              senderId: auth?.uid,
-            )
-          : null,
+      persistentFooterButtons: buildTexter(
+        context,
+        user: user.value,
+        bottom: bottom,
+        senderId: auth?.uid,
+      ),
     );
   }
 
@@ -156,13 +154,10 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
               enableDrag: false,
               context: context,
               builder: (context) => RoomInfoScreen(
+                roomId: widget.room.id!,
                 name: widget.room.name,
                 desc: widget.room.desc ?? '',
                 image: widget.room.image!,
-                participants: widget.room.participants,
-                participantsSnapshots: FirebaseFirestore.instance
-                    .collection('rooms')
-                    .doc(widget.room.id).get(),
               ),
             ),
             child: Hero(

@@ -108,6 +108,8 @@ class MessageDetailsScreen extends ConsumerWidget {
                 final data = snapshot.data!.docs;
 
                 return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: data.length,
                   itemBuilder: (context, index) {
                     DateTime timeStamp = (data[index]['time']) == null

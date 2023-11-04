@@ -91,13 +91,14 @@ class Auth {
       await _auth
           .createUserWithEmailAndPassword(email: email, password: password)
           .then((value) {
-        _userRef.doc(email).set({
+        _userRef.doc().set({
           'id': _auth.currentUser?.uid,
           'title': user.title,
           'fName': user.fName,
           'lName': user.lName,
           'oName': user.oName,
           'phone': user.phone,
+          'email': email,
           'admin': email.contains('joshua'),
         });
       }).then(
