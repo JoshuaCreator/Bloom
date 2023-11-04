@@ -27,7 +27,13 @@ class RoomTile extends StatelessWidget {
         onTap: () => showDialog(
           context: context,
           builder: (context) => Container(
-            constraints: BoxConstraints(maxWidth: size),
+            // decoration: BoxDecoration(
+            // shape: BoxShape.circle,
+            //   image: DecorationImage(
+            //     fit: BoxFit.cover,
+            //     image: CachedNetworkImageProvider(image),
+            //   ),
+            // ),
             child: CircleAvatar(
               // maxRadius: size * 3,
               backgroundImage: CachedNetworkImageProvider(image),
@@ -35,7 +41,7 @@ class RoomTile extends StatelessWidget {
           ),
         ),
         child: CircleAvatar(
-          radius: size / 1.5,
+          radius: circularAvatarRadius,
           // child: Icon(leading),
           backgroundImage: CachedNetworkImageProvider(image),
           onBackgroundImageError: (exception, stackTrace) => Icon(leading),

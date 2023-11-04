@@ -2,6 +2,7 @@ import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/views/screens/login_screen.dart';
 import 'package:basic_board/views/widgets/app_text_buttons.dart';
 import 'package:basic_board/views/widgets/profile_tile.dart';
+import 'package:basic_board/views/widgets/seperator.dart';
 import 'package:basic_board/views/widgets/settings_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,18 +23,7 @@ class SettingsScreen extends ConsumerWidget {
     final auth = ref.watch(authStateProvider).value;
     final email = auth?.email;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        // actions: [
-        //   IconButton(
-        //     onPressed: () {
-        //       Auth().signOut(context);
-        //       context.pop();
-        //     },
-        //     icon: const Icon(Icons.logout_rounded),
-        //   ),
-        // ],
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: Column(
         children: [
           Expanded(
@@ -41,34 +31,33 @@ class SettingsScreen extends ConsumerWidget {
               // padding: EdgeInsets.all(ten),
               children: [
                 ProfileTile(user: user, email: email),
+                const Seperator(),
                 SettingTile(
                   title: 'Account',
-                  subtitle: 'Manage account',
-                  leading: Icons.key_rounded,
+                  leading: Icons.account_circle_outlined,
                   onTap: () {},
                 ),
+                const Seperator(),
                 SettingTile(
                   title: 'Privacy',
-                  subtitle: 'Make account more private',
-                  leading: Icons.lock_rounded,
+                  leading: Icons.lock_outline,
                   onTap: () {},
                 ),
                 SettingTile(
                   title: 'Notifications',
-                  subtitle: 'Change notification settings',
-                  leading: Icons.notifications_rounded,
+                  leading: Icons.notifications_outlined,
                   onTap: () {},
                 ),
                 SettingTile(
                   title: 'Appearance',
-                  subtitle: 'Change app theme',
-                  leading: Icons.light_mode_rounded,
+                  leading: Icons.light_mode_outlined,
                   onTap: () {
                     context.push(
                       '${HomeScreen.id}/${SettingsScreen.id}/${ThemeSelectorScreen.id}',
                     );
                   },
                 ),
+                const Seperator(),
               ],
             ),
           ),

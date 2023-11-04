@@ -10,6 +10,7 @@ double thirty = size - 6;
 double forty = size + 4;
 
 int animationDuration = 500;
+double circularAvatarRadius = twenty + five;
 
 SizedBox height40 = SizedBox(height: forty);
 SizedBox height30 = SizedBox(height: thirty);

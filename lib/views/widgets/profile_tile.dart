@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../configs/consts.dart';
-import '../screens/account_screen.dart';
+import '../screens/profile_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/settings_screen.dart';
 
@@ -18,14 +18,13 @@ class ProfileTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // final theme = MediaQuery.of(context).platformBrightness;
     return Column(
       children: [
         InkWell(
-          // splashColor: Colors.transparent,
-          // highlightColor: Colors.transparent,
           onTap: () {
             context.push(
-              '${HomeScreen.id}/${SettingsScreen.id}/${AccountScreen.id}',
+              '${HomeScreen.id}/${SettingsScreen.id}/${ProfileScreen.id}',
             );
           },
           child: Ink(
@@ -65,16 +64,14 @@ class ProfileTile extends StatelessWidget {
                     ),
                   ],
                 ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.image),
-                ),
+                // IconButton(
+                //   onPressed: () {},
+                //   icon: const Icon(Icons.image),
+                // ),
               ],
             ),
           ),
         ),
-        Divider(height: 0, thickness: 0.3, color: Colors.grey.shade700),
-        height10,
       ],
     );
   }

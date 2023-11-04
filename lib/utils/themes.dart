@@ -19,6 +19,7 @@ class AppTheme {
       ),
     ),
     dividerColor: Colors.black.withOpacity(0.3),
+        // dividerTheme: const DividerThemeData(color: Colors.transparent)
   );
 
   static ThemeData darkTheme = ThemeData(
@@ -39,5 +40,6 @@ class AppTheme {
       ),
     ),
     dividerColor: Colors.white.withOpacity(0.3),
+        // dividerTheme: const DividerThemeData(color: Colors.transparent)
   );
 }

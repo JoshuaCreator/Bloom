@@ -4,7 +4,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/models/message.dart';
-import 'package:intl/intl.dart';
+
+import '../../services/date_time_formatter.dart';
 
 class MessageTile extends StatefulWidget {
   const MessageTile({
@@ -37,32 +38,26 @@ class _MessageTileState extends State<MessageTile> {
 
   @override
   Widget build(BuildContext context) {
-    String time = DateFormat('hh:mm a').format(widget.message.time);
     const TextStyle textStyle = TextStyle(
       // fontSize: 12.0,
       fontWeight: FontWeight.w500,
       color: Colors.grey,
     );
     return Padding(
-      padding: EdgeInsets.only(left: ten, top: five, right: ten),
+      padding: EdgeInsets.only(left: five, top: five, right: five),
       child: InkWell(
         onTap: widget.onTap,
         borderRadius: defaultBorderRadius,
         child: Container(
-          padding: EdgeInsets.only(
-            left: ten,
-            top: five,
-            right: ten,
-            bottom: five,
-          ),
+          padding: EdgeInsets.all(five),
           decoration: BoxDecoration(borderRadius: defaultBorderRadius),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              widget.message.isMe!
+              !widget.message.isMe!
                   ? const SizedBox()
                   : CircleAvatar(radius: size / 3),
-              widget.message.isMe! ? const SizedBox() : SizedBox(width: ten),
+              !widget.message.isMe! ? const SizedBox() : SizedBox(width: ten),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -97,7 +92,7 @@ class _MessageTileState extends State<MessageTile> {
                         !widget.message.isMe!
                             ? const SizedBox()
                             : SizedBox(width: ten),
-                        Text(time, style: textStyle),
+                        Text(timeAgo(widget.message.time), style: textStyle),
                         SizedBox(width: ten),
                         widget.message.pending!
                             ? Icon(

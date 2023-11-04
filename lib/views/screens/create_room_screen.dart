@@ -2,6 +2,7 @@ import 'package:basic_board/models/room.dart';
 import 'package:basic_board/providers/auth_provider.dart';
 import 'package:basic_board/providers/firestore_provider.dart';
 import 'package:basic_board/services/room_db.dart';
+import 'package:basic_board/views/dialogues/image_picker_dialogue.dart';
 import 'package:flutter/material.dart';
 import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/views/widgets/app_button.dart';
@@ -27,7 +28,6 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     final user = ref.watch(userProvider).value;
     final auth = ref.watch(authStateProvider).value;
     final theme = MediaQuery.of(context).platformBrightness;
-    print(theme);
     return Scaffold(
       appBar: AppBar(title: const Text('Create Room')),
       body: SingleChildScrollView(
@@ -37,29 +37,13 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
             Row(
               children: [
                 GestureDetector(
-                  onTap: () => showModalBottomSheet(
-                    enableDrag: false,
-                    context: context,
-                    builder: (context) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ListTile(
-                            leading: const Icon(Icons.sd_storage_outlined),
-                            title: const Text('Device storage'),
-                            onTap: () {
-                              // Select image from device storage
-                            },
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.camera_alt_outlined),
-                            title: const Text('Camera'),
-                            onTap: () {
-                              // Select image from camera
-                            },
-                          ),
-                        ],
-                      );
+                  onTap: () => imagePickerDialogue(
+                    context,
+                    onStorageTapped: () {
+                      //! Pick Image From Device Storage
+                    },
+                    onCameraTapped: () {
+                      //! Pick Image From Camera
                     },
                   ),
                   child: CircleAvatar(
@@ -92,7 +76,7 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
               borderless: true,
             ),
             height20,
-            PrivateTile(
+            PrivacySwitch(
               value: value,
               onChanged: (newValue) {
                 setState(() {
@@ -113,6 +97,7 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                   creatorId: auth!.uid,
                   private: value,
                   createdAt: DateTime.now(),
+                  participants: [auth.uid],
                 );
                 RoomDB().create(room, context);
               },
@@ -124,8 +109,8 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
   }
 }
 
-class PrivateTile extends StatelessWidget {
-  const PrivateTile({super.key, required this.value, this.onChanged});
+class PrivacySwitch extends StatelessWidget {
+  const PrivacySwitch({super.key, required this.value, this.onChanged});
   final bool value;
   final void Function(bool)? onChanged;
 

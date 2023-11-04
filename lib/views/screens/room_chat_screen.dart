@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:basic_board/services/message_db.dart';
 import 'package:basic_board/models/room.dart';
 import 'package:basic_board/providers/firestore_provider.dart';
-import 'package:basic_board/views/screens/room_info_screen.dart';
+import 'package:basic_board/views/dialogues/room_info_screen.dart';
 import 'package:basic_board/views/dialogues/loading_indicator.dart';
 import 'package:basic_board/views/widgets/message_text_field.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -66,31 +66,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
     double bottom = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.room.name,
-          overflow: TextOverflow.ellipsis,
-        ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: ten),
-            child: GestureDetector(
-              onTap: () => showModalBottomSheet(
-                isScrollControlled: true,
-                useSafeArea: true,
-                enableDrag: false,
-                context: context,
-                builder: (context) => RoomInfoScreen(
-                  image: widget.room.image!,
-                ),
-              ),
-              child: CircleAvatar(
-                backgroundImage: CachedNetworkImageProvider(widget.room.image!),
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: buildAppBar(context),
       body: StreamBuilder(
         stream: messageSnapshots,
         builder: (_, snapshot) {
@@ -101,7 +77,9 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
             return const Center(child: Text("Oops! An error occurred"));
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('Nothing to see here'));
+            return const Center(
+              child: Text('Be the first to send a message'),
+            );
           }
           final data = snapshot.data!.docs;
 
@@ -162,6 +140,43 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
     );
   }
 
+  AppBar buildAppBar(BuildContext context) {
+    return AppBar(
+      title: Text(
+        widget.room.name,
+        overflow: TextOverflow.ellipsis,
+      ),
+      actions: [
+        Padding(
+          padding: EdgeInsets.only(right: ten),
+          child: GestureDetector(
+            onTap: () => showModalBottomSheet(
+              isScrollControlled: true,
+              useSafeArea: true,
+              enableDrag: false,
+              context: context,
+              builder: (context) => RoomInfoScreen(
+                name: widget.room.name,
+                desc: widget.room.desc ?? '',
+                image: widget.room.image!,
+                participants: widget.room.participants,
+                participantsSnapshots: FirebaseFirestore.instance
+                    .collection('rooms')
+                    .doc(widget.room.id).get(),
+              ),
+            ),
+            child: Hero(
+              tag: 'room-img',
+              child: CircleAvatar(
+                backgroundImage: CachedNetworkImageProvider(widget.room.image!),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   List<Widget> buildTexter(BuildContext context,
       {required Map<String, dynamic>? user,
       required double bottom,
@@ -199,11 +214,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                       senderId: senderId!,
                       message: _messageController.text.trim(),
                       time: DateTime.now(),
-                      senderName: (user?['title'] +
-                              ' ' +
-                              user?['fName'] +
-                              ' ' +
-                              user?['lName'])
+                      senderName: (user?['fName'] + ' ' + user?['lName'])
                           .toString()
                           .trim(),
                     ),
@@ -243,33 +254,3 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
     ];
   }
 }
-
-
-
-
-
-
-// body: anouncement.when(
-//         data: (data) {
-//           return data.isEmpty
-//               ? const Center(child: Text("No messages"))
-//               : ListView.builder(
-//                   reverse: true,
-//                   itemCount: data.length,
-//                   itemBuilder: (context, index) {
-//                     return NoticeTile(
-//                       notice: Message(
-//                         sender: data[index]['sender'],
-//                         message: data[index]['message'],
-//                         image: data[index]['image'],
-//                         time: (data[index]['time']).toDate(),
-//                       ),
-//                     );
-//                   },
-//                 );
-//         },
-//         error: (error, stackTrace) => const Center(
-//           child: Text('Oops! An error occurred'),
-//         ),
-//         loading: () => const Center(child: CircularProgressIndicator()),
-//       ),

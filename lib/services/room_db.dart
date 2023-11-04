@@ -31,6 +31,7 @@ class RoomDB {
         'private': room.private,
         'image': room.image,
         'createdAt': room.createdAt,
+        'participants': room.participants,
       }).then(
         (value) {
           value.update({'id': value.id});

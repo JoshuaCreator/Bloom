@@ -1,20 +1,21 @@
+import 'package:basic_board/configs/text_config.dart';
 import 'package:basic_board/models/reply.dart';
-import 'package:basic_board/views/widgets/message_text_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../configs/consts.dart';
 import '../../models/message.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/firestore_provider.dart';
+import '../../services/date_time_formatter.dart';
 import '../../services/message_db.dart';
+import '../widgets/message_text_field.dart';
 import '../widgets/reply_tile.dart';
 import 'loading_indicator.dart';
 import '../widgets/message_tile.dart';
 
-class MessageDetailsScreen extends ConsumerStatefulWidget {
-  const MessageDetailsScreen({
+class MessageDetailsScreen extends ConsumerWidget {
+  MessageDetailsScreen({
     super.key,
     required this.message,
     required this.repliesSnapshots,
@@ -23,27 +24,13 @@ class MessageDetailsScreen extends ConsumerStatefulWidget {
   final Message message;
   final Stream<QuerySnapshot<Map<String, dynamic>>>? repliesSnapshots;
   final CollectionReference repliesRef;
-
-  @override
-  ConsumerState<MessageDetailsScreen> createState() =>
-      _ConsumerMessageDetailsScreenState();
-}
-
-class _ConsumerMessageDetailsScreenState
-    extends ConsumerState<MessageDetailsScreen> {
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
   final _replyTextController = TextEditingController();
 
-  TextStyle textStyle = const TextStyle(
-    fontWeight: FontWeight.w500,
-    color: Colors.grey,
-  );
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
     final auth = ref.watch(authStateProvider).value;
-    String time = DateFormat('hh:mm a').format(widget.message.time);
 
     double bottom = MediaQuery.viewInsetsOf(context).bottom + forty + ten;
     return Scaffold(
@@ -59,11 +46,11 @@ class _ConsumerMessageDetailsScreenState
               children: [
                 Visibility(
                   visible: true,
-                  child: widget.message.image != null
+                  child: message.image != null
                       ? Column(
                           children: [
                             Image.network(
-                              widget.message.image!,
+                              message.image!,
                               fit: BoxFit.cover,
                               loadingBuilder:
                                   (context, child, loadingProgress) =>
@@ -78,15 +65,15 @@ class _ConsumerMessageDetailsScreenState
                 ),
                 Row(
                   children: [
-                    Text(widget.message.senderName, style: textStyle),
+                    Text(message.senderName, style: TextConfig.small),
                     SizedBox(width: ten),
-                    Text(time, style: textStyle),
+                    Text(timeAgo(message.time), style: TextConfig.small),
                   ],
                 ),
                 height5,
                 Text.rich(
                   TextSpan(
-                    children: extractText(context, widget.message.message),
+                    children: extractText(context, message.message),
                   ),
                 ),
               ],
@@ -97,9 +84,9 @@ class _ConsumerMessageDetailsScreenState
             children: [
               Padding(
                 padding: EdgeInsets.only(left: ten),
-                child: const Text(
+                child: Text(
                   'Replies',
-                  style: TextStyle(color: Colors.grey),
+                  style: TextConfig.intro,
                 ),
               )
             ],
@@ -107,7 +94,7 @@ class _ConsumerMessageDetailsScreenState
           height10,
           Flexible(
             child: StreamBuilder(
-              stream: widget.repliesSnapshots,
+              stream: repliesSnapshots,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: LoadingIndicator());
@@ -126,12 +113,11 @@ class _ConsumerMessageDetailsScreenState
                     DateTime timeStamp = (data[index]['time']) == null
                         ? DateTime.now()
                         : (data[index]['time']).toDate();
-                    String time = DateFormat('EE, hh:mm a').format(timeStamp);
                     return ReplyTile(
                       text: data[index]['reply'],
                       sender: data[index]['replySenderName'],
-                      time: time,
-                      textStyle: textStyle,
+                      time: timeAgo(timeStamp),
+                      textStyle: TextConfig.small,
                     );
                   },
                 );
@@ -148,7 +134,7 @@ class _ConsumerMessageDetailsScreenState
               onSuffixPressed: () {
                 if (_replyTextController.text.trim().isEmpty) return;
                 MessageDB().reply(
-                  ref: widget.repliesRef,
+                  ref: repliesRef,
                   Reply(
                     message: _replyTextController.text.trim(),
                     replySenderId: auth!.uid,
@@ -156,8 +142,8 @@ class _ConsumerMessageDetailsScreenState
                         (user.value?['fName'] + ' ' + user.value?['lName'])
                             .toString()
                             .trim(),
-                    toMessageId: widget.message.id!,
-                    toSenderId: widget.message.senderId,
+                    toMessageId: message.id!,
+                    toSenderId: message.senderId,
                     time: DateTime.now(),
                   ),
                   context,

@@ -47,6 +47,7 @@ dependencies:
   jiffy: ^6.2.1
   cached_network_image: ^3.3.0
   readmore: ^2.2.0
+  timeago: ^3.6.0
 
 dev_dependencies:
   flutter_test:

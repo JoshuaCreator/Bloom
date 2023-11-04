@@ -6,6 +6,8 @@ class AppDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // final Brightness brightness = MediaQuery.of(context).platformBrightness;
+    // final Color color = brightness == Brightness.light ? Colors.black : Colors.white;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

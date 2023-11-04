@@ -4,11 +4,11 @@ import 'package:basic_board/views/dialogues/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../configs/consts.dart';
 import '../../models/room.dart';
 import '../../providers/auth_provider.dart';
 import 'package:basic_board/providers/firestore_provider.dart';
+import '../../services/date_time_formatter.dart';
 import '../widgets/room_tile.dart';
 import '../widgets/search_tile.dart';
 import '../widgets/section_divider.dart';
@@ -32,7 +32,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(userProvider);
+    // final user = ref.watch(userProvider);
     final room = ref.watch(roomProvider);
     final auth = ref.watch(authStateProvider).value;
     // final firestore = ref.watch(firestoreProvider);
@@ -95,28 +95,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: ListView.builder(
                     itemCount: room.value?.length,
                     itemBuilder: (context, index) {
-                      //! TODO Create time formatter function
                       DateTime timeStamp =
                           (room.value?[index]['createdAt']) == null
                               ? DateTime.now()
                               : (room.value?[index]['createdAt']).toDate();
-                      String time = DateFormat('EE, hh:mm a').format(timeStamp);
                       final Room roomData = Room(
                         id: room.value![index]['id'],
                         creator: room.value?[index]['creator'],
                         creatorId: auth!.uid,
                         name: room.value?[index]['name'],
                         private: room.value?[index]['private'],
-                        image: room.value?[index]['image'],
+                        image: room.value?[index]['image'] ??
+                            'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg',
                         createdAt: timeStamp,
+                        participants: room.value?[index]['participants'],
                       );
 
                       bool showRoom() {
-                        if (user.value?['admin'] && roomData.private) {
-                          return true;
-                        } else if (user.value?['admin'] && !roomData.private) {
-                          return true;
-                        } else if (!user.value?['admin'] && !roomData.private) {
+                        if (roomData.participants!.contains(auth.uid)) {
                           return true;
                         } else {
                           return false;
@@ -130,7 +126,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           image: roomData.image!,
                           leading: Icons.people_rounded,
                           name: roomData.name,
-                          subtitle: 'Created $time',
+                          subtitle: 'Created ${timeAgo(timeStamp)}',
                           dateTime: '',
                           onTap: () {
                             context.push(
@@ -189,6 +185,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Text('An error occurred'),
         ),
         loading: () => const LoadingIndicator(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Discover public Rooms
+        },
+        child: const Icon(Icons.add_rounded),
       ),
     );
   }

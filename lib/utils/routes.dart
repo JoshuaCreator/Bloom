@@ -1,5 +1,5 @@
 import 'package:basic_board/models/room.dart';
-import 'package:basic_board/views/screens/account_screen.dart';
+import 'package:basic_board/views/screens/profile_screen.dart';
 import 'package:basic_board/views/screens/create_room_screen.dart';
 import 'package:basic_board/views/screens/room_chat_screen.dart';
 import 'package:basic_board/views/screens/settings_screen.dart';
@@ -29,8 +29,8 @@ GoRouter goRouter = GoRouter(
           builder: (context, state) => const SettingsScreen(),
           routes: [
             GoRoute(
-              path: AccountScreen.id,
-              builder: (context, state) => const AccountScreen(),
+              path: ProfileScreen.id,
+              builder: (context, state) => const ProfileScreen(),
             ),
             GoRoute(
               path: ThemeSelectorScreen.id,

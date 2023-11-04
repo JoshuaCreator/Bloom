@@ -5,7 +5,7 @@ import '../../configs/consts.dart';
 class AppTextField extends StatelessWidget {
   const AppTextField({
     super.key,
-    this.label,
+    this.label = '',
     required this.hintText,
     this.maxLines = 1,
     this.minLines,
@@ -19,6 +19,7 @@ class AppTextField extends StatelessWidget {
     this.maxLength,
     this.validate = true,
     this.borderless = false,
+    this.autofocus = false,
   });
   final String? label;
   final String hintText;
@@ -34,6 +35,7 @@ class AppTextField extends StatelessWidget {
   final int? maxLength;
   final bool validate;
   final bool borderless;
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +92,7 @@ class AppTextField extends StatelessWidget {
                 ),
               ),
       ),
+      autofocus: autofocus,
       maxLines: maxLines,
       minLines: minLines,
       onTapOutside: (event) => FocusManager.instance.primaryFocus!.unfocus(),
