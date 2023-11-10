@@ -1,4 +1,3 @@
-import 'package:basic_board/views/widgets/app_divider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:basic_board/configs/consts.dart';
@@ -73,22 +72,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-                height20,
-                AppButton(
-                  title: 'Log In',
-                  onTap: () => Auth().logIn(
-                    context,
-                    email: emailController.text.trim(),
-                    password: passwordController.text.trim(),
-                  ),
+                height30,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    AppOutlinedButton(
+                      label: 'Get registered',
+                      onTap: () => context.go(RegisterScreeen.id),
+                    ),
+                    AppButton(
+                      label: 'Log In',
+                      onTap: () => Auth().logIn(
+                        context,
+                        email: emailController.text.trim(),
+                        password: passwordController.text.trim(),
+                      ),
+                    ),
+                  ],
                 ),
-                height40,
-                const AppDivider(),
-                height20,
-                AppTextButton(
-                  label: 'Get registered',
-                  onPressed: () => context.go(RegisterScreeen.id),
-                )
               ],
             ),
           ),
@@ -96,7 +97,8 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-   @override
+
+  @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();

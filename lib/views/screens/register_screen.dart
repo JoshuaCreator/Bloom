@@ -7,8 +7,6 @@ import 'package:basic_board/views/widgets/app_button.dart';
 import 'package:basic_board/views/widgets/app_text_field.dart';
 
 import '../../models/user.dart';
-import '../widgets/app_divider.dart';
-import '../widgets/app_dropdown.dart';
 
 class RegisterScreeen extends StatefulWidget {
   static String id = '/register';
@@ -20,9 +18,9 @@ class RegisterScreeen extends StatefulWidget {
 
 class _RegisterScreeenState extends State<RegisterScreeen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final fNameController = TextEditingController();
-  final lNameController = TextEditingController();
-  final oNameController = TextEditingController();
+  // final fNameController = TextEditingController();
+  // final lNameController = TextEditingController();
+  final nameController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -41,42 +39,42 @@ class _RegisterScreeenState extends State<RegisterScreeen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                AppDropdownField(
-                  value: title,
-                  hintText: 'How would you like to be addressed',
-                  items: List.generate(
-                    titles.length,
-                    (index) => DropdownMenuItem(
-                      value: '${titles[index]}',
-                      child: Text('${titles[index]}'),
-                    ),
-                  ),
-                  onChanged: (newTitle) {
-                    title = newTitle;
-                  },
-                ),
-                height20,
+                // AppDropdownField(
+                //   value: title,
+                //   hintText: 'How would you like to be addressed',
+                //   items: List.generate(
+                //     titles.length,
+                //     (index) => DropdownMenuItem(
+                //       value: '${titles[index]}',
+                //       child: Text('${titles[index]}'),
+                //     ),
+                //   ),
+                //   onChanged: (newTitle) {
+                //     title = newTitle;
+                //   },
+                // ),
+                // height20,
+                // AppTextField(
+                //   label: 'First name*',
+                //   hintText: 'Enter your first name',
+                //   textInputAction: TextInputAction.next,
+                //   controller: fNameController,
+                //   keyboardType: TextInputType.name,
+                // ),
+                // height20,
+                // AppTextField(
+                //   label: 'Last name*',
+                //   hintText: 'Enter your last name',
+                //   textInputAction: TextInputAction.next,
+                //   controller: lNameController,
+                //   keyboardType: TextInputType.name,
+                // ),
+                // height20,
                 AppTextField(
-                  label: 'First name*',
-                  hintText: 'Enter your first name',
+                  label: 'Display name',
+                  hintText: 'e.g. Joshua Ewaoche',
                   textInputAction: TextInputAction.next,
-                  controller: fNameController,
-                  keyboardType: TextInputType.name,
-                ),
-                height20,
-                AppTextField(
-                  label: 'Last name*',
-                  hintText: 'Enter your last name',
-                  textInputAction: TextInputAction.next,
-                  controller: lNameController,
-                  keyboardType: TextInputType.name,
-                ),
-                height20,
-                AppTextField(
-                  label: 'Other name',
-                  hintText: 'e.g. middle name',
-                  textInputAction: TextInputAction.next,
-                  controller: oNameController,
+                  controller: nameController,
                   keyboardType: TextInputType.name,
                   validate: false,
                 ),
@@ -114,34 +112,39 @@ class _RegisterScreeenState extends State<RegisterScreeen> {
                     color: Colors.purple[300],
                   ),
                 ),
-                height40,
-                AppButton(
-                  title: 'Register',
-                  onTap: () {
-                    AppUser user = AppUser(
-                      title: title,
-                      fName: fNameController.text.trim(),
-                      lName: lNameController.text.trim(),
-                      oName: lNameController.text.trim(),
-                      phone: int.parse(phoneController.text),
-                    );
-                    if (_formKey.currentState!.validate()) {
-                      Auth().register(
-                        context,
-                        email: emailController.text.trim(),
-                        password: passwordController.text.trim(),
-                        user: user,
-                      );
-                    }
-                  },
+                SizedBox(height: size * 2),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    AppOutlinedButton(
+                      label: 'Login',
+                      onTap: () => context.go(LoginScreen.id),
+                    ),
+                    AppButton(
+                      label: 'Register',
+                      onTap: () {
+                        AppUser user = AppUser(
+                          title: title,
+                          // fName: fNameController.text.trim(),
+                          // lName: lNameController.text.trim(),
+                          displayName: nameController.text.trim(),
+                          phone: int.parse(phoneController.text),
+                        );
+                        if (_formKey.currentState!.validate()) {
+                          Auth().register(
+                            context,
+                            email: emailController.text.trim(),
+                            password: passwordController.text.trim(),
+                            user: user,
+                          );
+                        }
+                      },
+                    ),
+                  ],
                 ),
-                height40,
-                const AppDivider(),
-                height20,
-                TextButton(
-                  child: const Text('Login'),
-                  onPressed: () => context.go(LoginScreen.id),
-                ),
+                // height40,
+                // const AppDivider(),
+                // height20,
               ],
             ),
           ),
@@ -152,9 +155,9 @@ class _RegisterScreeenState extends State<RegisterScreeen> {
 
   @override
   void dispose() {
-    fNameController.dispose();
-    lNameController.dispose();
-    oNameController.dispose();
+    // fNameController.dispose();
+    // lNameController.dispose();
+    nameController.dispose();
     phoneController.dispose();
     emailController.dispose();
     passwordController.dispose();

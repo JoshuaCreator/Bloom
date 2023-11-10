@@ -22,7 +22,7 @@ String timeAgo(DateTime time) {
   //   return "${(diff.inHours).floor()} hours ago ${DateFormat('jm').format(time)}";
   // }
   if (diff.inMinutes > 0) {
-    return "${diff.inMinutes} ${diff.inMinutes == 1 ? "minute" : "minutes"} ago";
+    return "${diff.inMinutes} ${diff.inMinutes == 1 ? "min" : "mins"} ago";
   }
   return "Just now";
 }

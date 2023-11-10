@@ -71,7 +71,7 @@ nameEditDialogue(
                 maxLines: 2,
               ),
               height30,
-              AppButton(title: 'Save', onTap: onSaved),
+              AppButton(label: 'Save', onTap: onSaved),
               height10,
             ],
           ),

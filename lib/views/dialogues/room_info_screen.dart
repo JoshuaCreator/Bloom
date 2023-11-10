@@ -5,7 +5,6 @@ import 'package:basic_board/views/widgets/app_text_buttons.dart';
 import 'package:basic_board/views/widgets/seperator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:basic_board/views/dialogues/name_edit_dialogue.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:readmore/readmore.dart';

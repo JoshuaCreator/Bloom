@@ -1,3 +1,4 @@
+import 'package:basic_board/configs/colour_config.dart';
 import 'package:basic_board/configs/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -8,35 +9,47 @@ class RoomTile extends StatelessWidget {
     required this.image,
     required this.name,
     required this.subtitle,
-    required this.dateTime,
-    required this.leading,
+    this.trailing,
     this.onTap,
   });
   final String image;
   final String name;
   final String subtitle;
-  final String dateTime;
-  final IconData leading;
+  final Widget? trailing;
   final void Function()? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final brightness = MediaQuery.of(context).platformBrightness;
     return ListTile(
-      /// Wrap [CircleAvatar] with [GestureDetector]
       leading: GestureDetector(
         onTap: () => showDialog(
           context: context,
-          builder: (context) => Container(
-            // decoration: BoxDecoration(
-            // shape: BoxShape.circle,
-            //   image: DecorationImage(
-            //     fit: BoxFit.cover,
-            //     image: CachedNetworkImageProvider(image),
-            //   ),
-            // ),
-            child: CircleAvatar(
-              // maxRadius: size * 3,
-              backgroundImage: CachedNetworkImageProvider(image),
+          builder: (context) => Center(
+            child: Container(
+              padding: EdgeInsets.all(twenty),
+              decoration: BoxDecoration(
+                color: ColourConfig.backgroundColour(brightness),
+                borderRadius: BorderRadius.circular(forty),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircleAvatar(
+                    radius: size * 4,
+                    backgroundImage: CachedNetworkImageProvider(image),
+                  ),
+                  height20,
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: twenty,
+                      color: ColourConfig.foregroundColour(brightness),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -44,7 +57,8 @@ class RoomTile extends StatelessWidget {
           radius: circularAvatarRadius,
           // child: Icon(leading),
           backgroundImage: CachedNetworkImageProvider(image),
-          onBackgroundImageError: (exception, stackTrace) => Icon(leading),
+          onBackgroundImageError: (exception, stackTrace) =>
+              const Icon(Icons.group_outlined),
         ),
       ),
       title: Text(
@@ -59,7 +73,7 @@ class RoomTile extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontSize: 12.0),
       ),
-      trailing: Text(dateTime),
+      trailing: trailing,
       onLongPress: () {
         //! Show Bottom Sheet With Options
       },

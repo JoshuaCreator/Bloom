@@ -86,7 +86,7 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
             ),
             height30,
             AppButton(
-              title: 'Create',
+              label: 'Create',
               onTap: () {
                 if (_nameController.text.trim().isEmpty) return;
                 final Room room = Room(
@@ -97,6 +97,7 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                   creatorId: auth!.uid,
                   private: value,
                   createdAt: DateTime.now(),
+                  participants: [auth.uid],
                 );
                 RoomDB().create(room, context, user: user);
               },

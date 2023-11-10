@@ -1,3 +1,4 @@
+import 'package:basic_board/configs/colour_config.dart';
 import 'package:flutter/material.dart';
 
 import '../../configs/consts.dart';
@@ -5,38 +6,11 @@ import '../../configs/consts.dart';
 class LoadingIndicator extends StatelessWidget {
   const LoadingIndicator({
     super.key,
-    // this.backgroundColour = Colors.black87,
-    // this.foregroundColour = Colors.white,
     this.isBuild = false,
   });
-  // final Color backgroundColour;
-  // final Color foregroundColour;
   final bool isBuild;
 
-  Color foregroundColour(Brightness brightness) {
-    if (isBuild && brightness == Brightness.dark) {
-      return Colors.black87;
-    } else if (isBuild && brightness == Brightness.light) {
-      return Colors.white;
-    } else if (!isBuild && brightness == Brightness.light) {
-      return Colors.white;
-    } else {
-      return Colors.black87;
-    }
-  }
-
-  Color backgroundColour(Brightness brightness) {
-    if (isBuild && brightness == Brightness.dark) {
-      return Colors.white;
-    } else if (isBuild && brightness == Brightness.light) {
-      return Colors.black87;
-    } else if (!isBuild && brightness == Brightness.light) {
-      return Colors.black87;
-    } else {
-      return Colors.white;
-    }
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     final brightness = MediaQuery.of(context).platformBrightness;
@@ -49,20 +23,21 @@ class LoadingIndicator extends StatelessWidget {
           padding: EdgeInsets.all(thirty),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(twenty),
-            color: backgroundColour(brightness),
+            color: ColourConfig.backgroundColour(brightness),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               CircularProgressIndicator(
-                color: foregroundColour(brightness),
+                color: ColourConfig.foregroundColour(brightness),
               ),
               height10,
               Text(
                 'Loading...',
                 style: TextStyle(
                   fontSize: 16.0,
-                  color: foregroundColour(brightness),
+                  color: ColourConfig.foregroundColour(brightness),
                 ),
               ),
             ],

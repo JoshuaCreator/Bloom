@@ -16,8 +16,6 @@ class MessageDB {
     BuildContext context, {
     required CollectionReference ref,
   }) async {
-    // _messageRef = ref;
-    // _firestore.settings = const Settings(persistenceEnabled: false);
     try {
       await ref.add({
         'message': message.message,

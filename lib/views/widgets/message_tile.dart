@@ -1,3 +1,4 @@
+import 'package:basic_board/configs/text_config.dart';
 import 'package:basic_board/views/dialogues/app_dialogues.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
@@ -38,11 +39,6 @@ class _MessageTileState extends State<MessageTile> {
 
   @override
   Widget build(BuildContext context) {
-    const TextStyle textStyle = TextStyle(
-      // fontSize: 12.0,
-      fontWeight: FontWeight.w500,
-      color: Colors.grey,
-    );
     return Padding(
       padding: EdgeInsets.only(left: five, top: five, right: five),
       child: InkWell(
@@ -56,7 +52,7 @@ class _MessageTileState extends State<MessageTile> {
             children: [
               !widget.message.isMe!
                   ? const SizedBox()
-                  : CircleAvatar(radius: size / 3),
+                  : CircleAvatar(radius: size / 1.5),
               !widget.message.isMe! ? const SizedBox() : SizedBox(width: ten),
               Expanded(
                 child: Column(
@@ -87,12 +83,13 @@ class _MessageTileState extends State<MessageTile> {
                           !widget.message.isMe!
                               ? ''
                               : widget.message.senderName,
-                          style: textStyle,
+                          style: TextConfig.intro,
                         ),
                         !widget.message.isMe!
                             ? const SizedBox()
                             : SizedBox(width: ten),
-                        Text(timeAgo(widget.message.time), style: textStyle),
+                        Text(timeAgo(widget.message.time),
+                            style: TextConfig.intro),
                         SizedBox(width: ten),
                         widget.message.pending!
                             ? Icon(

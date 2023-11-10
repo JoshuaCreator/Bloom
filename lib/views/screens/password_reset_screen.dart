@@ -42,7 +42,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                 ),
                 height40,
                 AppButton(
-                  title: 'Proceed',
+                  label: 'Proceed',
                   onTap: () => Auth().sendPasswordResetLink(
                     context,
                     email: emailController.text.trim(),

@@ -94,9 +94,9 @@ class Auth {
         _userRef.doc().set({
           'id': _auth.currentUser?.uid,
           'title': user.title,
-          'fName': user.fName,
-          'lName': user.lName,
-          'oName': user.oName,
+          // 'fName': user.fName,
+          // 'lName': user.lName,
+          'oName': user.displayName,
           'phone': user.phone,
           'email': email,
           'admin': email.contains('joshua'),

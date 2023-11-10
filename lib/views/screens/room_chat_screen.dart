@@ -88,7 +88,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
             reverse: true,
             itemCount: data.length,
             itemBuilder: (context, index) {
-              bool isMe = user.value?['id'] == auth?.uid ? true : false;
+              bool isMe = user.value?['id'] == auth?.uid;
 
               final pending =
                   snapshot.data?.docs[index].metadata.hasPendingWrites;
@@ -107,16 +107,17 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                   showModalBottomSheet(
                     // anchorPoint: Offset(0, kBottomNavigationBarHeight),
                     showDragHandle: true,
+                    enableDrag: false,
                     context: context,
                     isScrollControlled: true,
                     useSafeArea: true,
                     builder: (context) => MessageDetailsScreen(
                       message: message,
-                      repliesSnapshots: collectionRef
-                          .doc(message.id)
-                          .collection('replies')
-                          .orderBy('time', descending: true)
-                          .snapshots(),
+                      // repliesSnapshots: collectionRef
+                      //     .doc(message.id)
+                      //     .collection('replies')
+                      //     .orderBy('time', descending: true)
+                      //     .get(),
                       repliesRef:
                           collectionRef.doc(message.id).collection('replies'),
                     ),

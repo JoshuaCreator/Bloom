@@ -1,6 +1,8 @@
 import 'package:basic_board/views/dialogues/popup_menu.dart';
+import 'package:basic_board/views/screens/all_rooms_screen.dart';
 import 'package:basic_board/views/screens/room_chat_screen.dart';
 import 'package:basic_board/views/dialogues/loading_indicator.dart';
+import 'package:basic_board/views/screens/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -32,10 +34,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final user = ref.watch(userProvider);
     final room = ref.watch(roomProvider);
     final auth = ref.watch(authStateProvider).value;
-    // final firestore = ref.watch(firestoreProvider);
 
     return Scaffold(
       // drawer: AppDrawer(room: room, user: user, auth: auth),
@@ -69,9 +69,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             SearchTile(
               label: 'search...',
               icon: Icons.search_rounded,
-              onTap: () {
-                // TODO Show Search Delegate
-              },
+              onTap: () => showSearch(
+                context: context,
+                delegate: CustomSearchDelegate(),
+              ),
             ),
             height20,
             SectionDivider(
@@ -108,26 +109,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         image: room.value?[index]['image'] ??
                             'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg',
                         createdAt: timeStamp,
+                        participants: room.value?[index]['participants'],
                       );
 
-                      // bool showRoom() {
-                      //   if (roomData.participants!.contains(auth.uid)) {
-                      //     return true;
-                      //   } else {
-                      //     return false;
-                      //   }
-                      // }
+                      bool showRoom() {
+                        if (roomData.participants.contains(auth.uid)) {
+                          return true;
+                        } else {
+                          return false;
+                        }
+                      }
 
-                      // bool visible = showRoom();
-                      //! TODO Adjust visibility
                       return Visibility(
-                        visible: true,
+                        visible: showRoom(),
                         child: RoomTile(
                           image: roomData.image!,
-                          leading: Icons.people_rounded,
                           name: roomData.name,
                           subtitle: 'Created ${timeAgo(timeStamp)}',
-                          dateTime: '',
                           onTap: () {
                             context.push(
                               '${HomeScreen.id}/${RoomChatScreen.id}',
@@ -149,9 +147,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         loading: () => const LoadingIndicator(),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Discover public Rooms
-        },
+        onPressed: () => context.push('${HomeScreen.id}/${AllRoomsScreen.id}'),
         child: const Icon(Icons.add_rounded),
       ),
     );
