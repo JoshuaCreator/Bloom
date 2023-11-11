@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/firestore_provider.dart';
 import '../../services/auth.dart';
+import 'account_screen.dart';
 import 'home_screen.dart';
 import 'theme_selector_screen.dart';
 
@@ -35,19 +36,23 @@ class SettingsScreen extends ConsumerWidget {
                 SettingTile(
                   title: 'Account',
                   leading: Icons.account_circle_outlined,
-                  onTap: () {},
+                  onTap: () {
+                    context.push(
+                      '${HomeScreen.id}/${SettingsScreen.id}/${AccountScreen.id}',
+                    );
+                  },
                 ),
                 const Seperator(),
-                SettingTile(
-                  title: 'Privacy',
-                  leading: Icons.lock_outline,
-                  onTap: () {},
-                ),
-                SettingTile(
-                  title: 'Notifications',
-                  leading: Icons.notifications_outlined,
-                  onTap: () {},
-                ),
+                // SettingTile(
+                //   title: 'Privacy',
+                //   leading: Icons.lock_outline,
+                //   onTap: () {},
+                // ),
+                // SettingTile(
+                //   title: 'Notifications',
+                //   leading: Icons.notifications_outlined,
+                //   onTap: () {},
+                // ),
                 SettingTile(
                   title: 'Appearance',
                   leading: Icons.light_mode_outlined,

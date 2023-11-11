@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -35,7 +36,13 @@ class ProfileTile extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    CircleAvatar(radius: thirty),
+                    Hero(tag: 'user-profile',
+                      child: CircleAvatar(
+                          radius: thirty,
+                          backgroundImage: CachedNetworkImageProvider(
+                            user.value?['image'],
+                          )),
+                    ),
                     SizedBox(width: ten),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -44,7 +51,7 @@ class ProfileTile extends StatelessWidget {
                         SizedBox(
                           width: size * 5,
                           child: Text(
-                            user.value?['fName'] + ' ' + user.value?['lName'],
+                            user.value?['name'],
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(fontSize: 20.0),
                           ),

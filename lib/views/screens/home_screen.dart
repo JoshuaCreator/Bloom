@@ -105,6 +105,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         creator: room.value?[index]['creator'],
                         creatorId: auth!.uid,
                         name: room.value?[index]['name'],
+                        desc: room.value?[index]['desc'],
                         private: room.value?[index]['private'],
                         image: room.value?[index]['image'] ??
                             'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg',

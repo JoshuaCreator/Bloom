@@ -5,26 +5,30 @@ import 'package:flutter/material.dart';
 import '../../configs/consts.dart';
 import '../widgets/app_text_field.dart';
 
-nameEditDialogue(
+infoEditDialogue(
   BuildContext context, {
   required void Function()? onSaved,
-  bool showNameField = true,
+  bool showName = true,
+  bool showAbout = true,
   bool isRoom = false,
+  TextEditingController? nameController,
+  TextEditingController? aboutController,
+  final String? title,
 }) {
-  String title = '';
+  String defaultTitle = '';
   String name = '';
   String about = '';
   text() {
-    if (showNameField && isRoom) {
-      title = 'Edit Room info';
+    if (showName && isRoom) {
+      defaultTitle = 'Edit Room info';
       name = 'Room name';
       about = 'Room description';
-    } else if (!showNameField && isRoom) {
-      title = 'Room description';
+    } else if (!showName && isRoom) {
+      defaultTitle = 'Room description';
       name = 'Room name';
       about = 'Room description';
     } else {
-      title = 'Edit name and about';
+      defaultTitle = 'Edit name and about';
       name = 'Name';
       about = 'About';
     }
@@ -46,29 +50,39 @@ nameEditDialogue(
             children: [
               Row(children: [
                 Text(
-                  title,
+                  title ?? defaultTitle,
                   style: TextConfig.intro,
                 ),
               ]),
               height10,
               Visibility(
-                visible: showNameField,
+                visible: showName,
                 child: Column(
                   children: [
                     AppTextField(
                       hintText: name,
                       borderless: true,
-                      textInputAction: TextInputAction.next,
+                      textInputAction: showAbout
+                          ? TextInputAction.next
+                          : TextInputAction.done,
                       autofocus: true,
+                      controller: nameController,
+                      onFieldSubmitted: (_) => onSaved!(),
                     ),
                     height10,
                   ],
                 ),
               ),
-              AppTextField(
-                hintText: about,
-                borderless: true,
-                maxLines: 2,
+              Visibility(
+                visible: showAbout,
+                child: AppTextField(
+                  hintText: about,
+                  borderless: true,
+                  maxLines: 2,
+                  autofocus: true,
+                  controller: aboutController,
+                  onFieldSubmitted: (_) => onSaved!(),
+                ),
               ),
               height30,
               AppButton(label: 'Save', onTap: onSaved),

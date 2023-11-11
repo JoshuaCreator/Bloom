@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'auth_provider.dart';
 
-// ⭐⭐ RETRIEVE DATA FROM FIRESTORE USING RIVERPOD ⭐⭐
+// ⭐⭐ RETRIEVE DATA FROM FIRESTORE ⭐⭐
 
 //? *************** Get Anouncements ***************//
 final anouncementProvider = StreamProvider(
@@ -23,7 +23,7 @@ final userProvider = StreamProvider(
     final userStream = ref.watch(authStateProvider);
 
     var user = userStream.value;
-    var docRef = firestore.collection('users').doc(user?.email);
+    var docRef = firestore.collection('users').doc(user?.uid);
     return docRef.snapshots().map((doc) => doc.data());
   },
 );

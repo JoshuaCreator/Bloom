@@ -1,14 +1,17 @@
 import 'package:basic_board/configs/text_config.dart';
+import 'package:basic_board/providers/firestore_provider.dart';
 import 'package:basic_board/views/dialogues/app_dialogues.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/models/message.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../services/date_time_formatter.dart';
 
-class MessageTile extends StatefulWidget {
+class MessageTile extends ConsumerStatefulWidget {
   const MessageTile({
     super.key,
     required this.message,
@@ -20,10 +23,10 @@ class MessageTile extends StatefulWidget {
   final void Function()? onTap;
 
   @override
-  State<MessageTile> createState() => _MessageTileState();
+  ConsumerState<MessageTile> createState() => _ConsumerMessageTileState();
 }
 
-class _MessageTileState extends State<MessageTile> {
+class _ConsumerMessageTileState extends ConsumerState<MessageTile> {
   late int numberOfReplies = 0;
 
   @override
@@ -39,6 +42,7 @@ class _MessageTileState extends State<MessageTile> {
 
   @override
   Widget build(BuildContext context) {
+    final firestore = ref.watch(firestoreProvider);
     return Padding(
       padding: EdgeInsets.only(left: five, top: five, right: five),
       child: InkWell(
@@ -52,7 +56,33 @@ class _MessageTileState extends State<MessageTile> {
             children: [
               !widget.message.isMe!
                   ? const SizedBox()
-                  : CircleAvatar(radius: size / 1.5),
+                  : FutureBuilder(
+                      future: firestore
+                          .collection('users')
+                          .doc(widget.message.senderId)
+                          .get(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(
+                            child: CircleAvatar(radius: size / 2),
+                          );
+                        }
+                        if (snapshot.hasError) {
+                          return const Center(
+                              child: Text("Oops! An error occurred"));
+                        }
+                        // if (snapshot.data!.docs.isEmpty || !snapshot.hasData) {
+                        //   return const Center(child: Text('No replies yet'));
+                        // }
+                        final data = snapshot.data?.data();
+                        return CircleAvatar(
+                          radius: size / 2,
+                          backgroundImage: CachedNetworkImageProvider(
+                            data?['image'],
+                          ),
+                        );
+                      }),
               !widget.message.isMe! ? const SizedBox() : SizedBox(width: ten),
               Expanded(
                 child: Column(
@@ -119,11 +149,7 @@ class _MessageTileState extends State<MessageTile> {
                         numberOfReplies == 1
                             ? '1 reply'
                             : '$numberOfReplies replies',
-                        style: TextStyle(
-                          fontSize: 12.0,
-                          // fontWeight: FontWeight.bold,
-                          color: Colors.grey[400],
-                        ),
+                        style: TextConfig.sub,
                       ),
                     )
                   ],

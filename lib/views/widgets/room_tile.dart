@@ -1,5 +1,5 @@
-import 'package:basic_board/configs/colour_config.dart';
 import 'package:basic_board/configs/consts.dart';
+import 'package:basic_board/views/widgets/image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -20,38 +20,11 @@ class RoomTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = MediaQuery.of(context).platformBrightness;
     return ListTile(
       leading: GestureDetector(
         onTap: () => showDialog(
           context: context,
-          builder: (context) => Center(
-            child: Container(
-              padding: EdgeInsets.all(twenty),
-              decoration: BoxDecoration(
-                color: ColourConfig.backgroundColour(brightness),
-                borderRadius: BorderRadius.circular(forty),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircleAvatar(
-                    radius: size * 4,
-                    backgroundImage: CachedNetworkImageProvider(image),
-                  ),
-                  height20,
-                  Text(
-                    name,
-                    style: TextStyle(
-                      fontSize: twenty,
-                      color: ColourConfig.foregroundColour(brightness),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          builder: (context) => ImageViewer(image: image, name: name),
         ),
         child: CircleAvatar(
           radius: circularAvatarRadius,
@@ -69,7 +42,7 @@ class RoomTile extends StatelessWidget {
       ),
       subtitle: Text(
         subtitle,
-        maxLines: 2,
+        maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontSize: 12.0),
       ),

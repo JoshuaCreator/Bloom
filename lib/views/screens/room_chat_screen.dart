@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:basic_board/services/message_db.dart';
 import 'package:basic_board/models/room.dart';
 import 'package:basic_board/providers/firestore_provider.dart';
-import 'package:basic_board/views/dialogues/room_info_screen.dart';
+import 'package:basic_board/views/screens/room_info_screen.dart';
 import 'package:basic_board/views/dialogues/loading_indicator.dart';
+import 'package:basic_board/views/screens/home_screen.dart';
 import 'package:basic_board/views/widgets/message_text_field.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,6 +15,7 @@ import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/models/message.dart';
 import 'package:basic_board/views/widgets/message_tile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../providers/auth_provider.dart';
 import '../dialogues/message_details_screen.dart';
@@ -76,11 +78,11 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
           if (snapshot.hasError) {
             return const Center(child: Text("Oops! An error occurred"));
           }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
-              child: Text('Be the first to send a message'),
-            );
-          }
+          // if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          //   return const Center(
+          //     child: Text('Be the first to send a message'),
+          //   );
+          // }
           final data = snapshot.data!.docs;
 
           return ListView.builder(
@@ -149,17 +151,9 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
         Padding(
           padding: EdgeInsets.only(right: ten),
           child: GestureDetector(
-            onTap: () => showModalBottomSheet(
-              isScrollControlled: true,
-              useSafeArea: true,
-              enableDrag: false,
-              context: context,
-              builder: (context) => RoomInfoScreen(
-                roomId: widget.room.id!,
-                name: widget.room.name,
-                desc: widget.room.desc ?? '',
-                image: widget.room.image!,
-              ),
+            onTap: () => context.push(
+              '${HomeScreen.id}/${RoomChatScreen.id}/${RoomInfoScreen.id}',
+              extra: widget.room,
             ),
             child: Hero(
               tag: 'room-img',

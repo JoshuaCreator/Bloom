@@ -1,6 +1,7 @@
 import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/views/dialogues/loading_indicator.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
+import 'package:basic_board/views/screens/room_info_screen.dart';
 import 'package:basic_board/views/widgets/room_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,8 @@ import '../../providers/auth_provider.dart';
 import '../../providers/firestore_provider.dart';
 import '../dialogues/snack_bar.dart';
 import '../widgets/app_text_buttons.dart';
+import 'home_screen.dart';
+import 'room_chat_screen.dart';
 
 class AllRoomsScreen extends ConsumerWidget {
   static String id = 'all-rooms';
@@ -52,14 +55,20 @@ class AllRoomsScreen extends ConsumerWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: data.length,
                   itemBuilder: (context, index) {
+                    DateTime timeStamp =
+                        (room.value?[index]['createdAt']) == null
+                            ? DateTime.now()
+                            : (room.value?[index]['createdAt']).toDate();
                     final Room roomData = Room(
                       id: room.value![index]['id'],
                       creator: room.value?[index]['creator'],
                       creatorId: auth!.uid,
                       name: room.value?[index]['name'],
+                      desc: room.value?[index]['desc'],
                       private: room.value?[index]['private'],
                       image: room.value?[index]['image'] ??
                           'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg',
+                      createdAt: timeStamp,
                       participants: room.value?[index]['participants'],
                     );
                     String numberOfParticipants() {
@@ -90,9 +99,10 @@ class AllRoomsScreen extends ConsumerWidget {
                                     .collection('participants')
                                     .doc(auth.uid)
                                     .set({
-                                  'fName': user?['fName'],
-                                  'lName': user?['lName'],
+                                  // 'name': user?['name'],
+                                  // 'lName': user?['lName'],
                                   'id': user?['id'],
+                                  // 'image': user?['image'],
                                   'joined': DateTime.now(),
                                 }).then((value) {
                                   firestore
@@ -109,6 +119,10 @@ class AllRoomsScreen extends ConsumerWidget {
                                   });
                                 });
                               },
+                      ),
+                      onTap: () => context.push(
+                        '${HomeScreen.id}/${RoomChatScreen.id}/${RoomInfoScreen.id}',
+                        extra: roomData,
                       ),
                     );
                   },

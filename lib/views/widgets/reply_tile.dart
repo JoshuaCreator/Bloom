@@ -1,23 +1,25 @@
 import 'package:basic_board/configs/text_config.dart';
+import 'package:basic_board/providers/firestore_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:readmore/readmore.dart';
 
 import '../../configs/consts.dart';
 
-class ReplyTile extends StatelessWidget {
-  const ReplyTile({
-    super.key,
-    required this.text,
-    required this.sender,
-    required this.time,
-  });
+class ReplyTile extends ConsumerWidget {
+  const ReplyTile(
+      {super.key,
+      required this.text,
+      required this.sender,
+      required this.time,
+      required this.replySenderId});
 
-  final String text;
-  final String sender;
-  final String time;
+  final String text, sender, time, replySenderId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final firestore = ref.watch(firestoreProvider);
     return Container(
       padding: EdgeInsets.all(ten),
       margin: EdgeInsets.symmetric(horizontal: ten, vertical: five),
@@ -30,7 +32,27 @@ class ReplyTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              CircleAvatar(radius: size / 1.5),
+              FutureBuilder(
+                  future:
+                      firestore.collection('users').doc(replySenderId).get(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: CircleAvatar(radius: size / 1.5),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return const Center(
+                          child: Text("Oops! An error occurred"));
+                    }
+                    final data = snapshot.data?.data();
+                    return CircleAvatar(
+                      radius: size / 2,
+                      backgroundImage: CachedNetworkImageProvider(
+                        data?['image'],
+                      ),
+                    );
+                  }),
               SizedBox(width: ten),
               Text(sender, style: TextConfig.small),
             ],
@@ -53,7 +75,6 @@ class ReplyTile extends StatelessWidget {
               trimCollapsedText: 'more',
             ),
           ),
-          height10,
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [

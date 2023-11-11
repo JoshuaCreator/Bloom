@@ -1,6 +1,7 @@
 import 'package:basic_board/configs/text_config.dart';
 import 'package:basic_board/models/reply.dart';
 import 'package:basic_board/views/widgets/seperator.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +17,7 @@ import '../widgets/reply_tile.dart';
 import 'loading_indicator.dart';
 import '../widgets/message_tile.dart';
 
-class MessageDetailsScreen extends StatefulWidget {
+class MessageDetailsScreen extends ConsumerStatefulWidget {
   const MessageDetailsScreen({
     super.key,
     required this.message,
@@ -26,10 +27,12 @@ class MessageDetailsScreen extends StatefulWidget {
   final CollectionReference repliesRef;
 
   @override
-  State<MessageDetailsScreen> createState() => _MessageDetailsScreenState();
+  ConsumerState<MessageDetailsScreen> createState() =>
+      _ConsumerMessageDetailsScreenState();
 }
 
-class _MessageDetailsScreenState extends State<MessageDetailsScreen> {
+class _ConsumerMessageDetailsScreenState
+    extends ConsumerState<MessageDetailsScreen> {
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
   final _replyTextController = TextEditingController();
   late Stream<QuerySnapshot<Map<String, dynamic>>>? repliesSnapshots;
@@ -44,6 +47,9 @@ class _MessageDetailsScreenState extends State<MessageDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = ref.watch(authStateProvider).value!;
+    final firestore = ref.watch(firestoreProvider);
+
     String time = DateFormat('hh:mm a').format(widget.message.time);
     String date = DateFormat('dd MMM').format(widget.message.time);
     double bottom = MediaQuery.viewInsetsOf(context).bottom + forty + ten;
@@ -61,6 +67,7 @@ class _MessageDetailsScreenState extends State<MessageDetailsScreen> {
             return const Center(child: Text('No replies yet'));
           }
           final data = snapshot.data!.docs;
+          final bool me = auth.uid == widget.message.senderId;
 
           return SingleChildScrollView(
             child: Column(
@@ -96,7 +103,32 @@ class _MessageDetailsScreenState extends State<MessageDetailsScreen> {
                             ),
                             Row(
                               children: [
-                                CircleAvatar(radius: size / 1.5),
+                                FutureBuilder(
+                                    future: firestore
+                                        .collection('users')
+                                        .doc(widget.message.senderId)
+                                        .get(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Center(
+                                          child: CircleAvatar(radius: size / 2),
+                                        );
+                                      }
+                                      if (snapshot.hasError) {
+                                        return const Center(
+                                            child: Text(
+                                                "Oops! An error occurred"));
+                                      }
+                                      final data = snapshot.data?.data();
+                                      return CircleAvatar(
+                                        radius: size / 2,
+                                        backgroundImage:
+                                            CachedNetworkImageProvider(
+                                          data?['image'],
+                                        ),
+                                      );
+                                    }),
                                 SizedBox(width: ten),
                                 Text(
                                   widget.message.senderName,
@@ -130,6 +162,45 @@ class _MessageDetailsScreenState extends State<MessageDetailsScreen> {
                   ),
                 ),
                 const Seperator(height: 0),
+                height5,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ReactionButton(
+                      label: 'Like',
+                      icon: Icons.thumb_up_outlined,
+                      onPressed: () {
+                        //! TODO Add Reaction
+                      },
+                    ),
+                    ReactionButton(
+                      label: me ? 'Edit' : 'Reply privately',
+                      icon: me ? Icons.edit_outlined : Icons.reply,
+                      onPressed: me
+                          ? () {
+                              //! Do something for me
+                            }
+                          : () {
+                              //! Do something for others
+                            },
+                    ),
+                    ReactionButton(
+                      label: 'Dislike',
+                      icon: me
+                          ? Icons.delete_forever_outlined
+                          : Icons.thumb_down_outlined,
+                      onPressed: me
+                          ? () {
+                              //! Do something for me
+                            }
+                          : () {
+                              //! Do something for others
+                            },
+                    ),
+                  ],
+                ),
+                height10,
+                const Seperator(height: 0),
                 height10,
                 Row(
                   children: [
@@ -156,6 +227,7 @@ class _MessageDetailsScreenState extends State<MessageDetailsScreen> {
                         ReplyTile(
                           text: data[index]['reply'],
                           sender: data[index]['replySenderName'],
+                          replySenderId: data[index]['replySenderId'],
                           time: timeAgo(timeStamp),
                         ),
                         // const Divider(height: 0),
@@ -203,6 +275,32 @@ class _MessageDetailsScreenState extends State<MessageDetailsScreen> {
           },
         ),
         SizedBox(height: bottom),
+      ],
+    );
+  }
+}
+
+class ReactionButton extends StatelessWidget {
+  const ReactionButton({
+    super.key,
+    required this.label,
+    required this.icon,
+    this.onPressed,
+  });
+  final String label;
+  final IconData icon;
+  final void Function()? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        IconButton(
+          padding: EdgeInsets.all(ten),
+          onPressed: onPressed,
+          icon: Icon(icon),
+        ),
+        Text(label, style: TextConfig.sub),
       ],
     );
   }
