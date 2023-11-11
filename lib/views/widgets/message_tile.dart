@@ -69,8 +69,7 @@ class _ConsumerMessageTileState extends ConsumerState<MessageTile> {
                           );
                         }
                         if (snapshot.hasError) {
-                          return const Center(
-                              child: Text("Oops! An error occurred"));
+                          return Center(child: CircleAvatar(radius: size / 2));
                         }
                         // if (snapshot.data!.docs.isEmpty || !snapshot.hasData) {
                         //   return const Center(child: Text('No replies yet'));
@@ -109,11 +108,27 @@ class _ConsumerMessageTileState extends ConsumerState<MessageTile> {
                     ),
                     Row(
                       children: [
-                        Text(
-                          !widget.message.isMe!
-                              ? ''
-                              : widget.message.senderName,
-                          style: TextConfig.intro,
+                        FutureBuilder(
+                          future: firestore
+                              .collection('users')
+                              .doc(widget.message.senderId)
+                              .get(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                child: Text("Some one"),
+                              );
+                            }
+                            if (snapshot.hasError) {
+                              return const Center(child: Text("Some one"));
+                            }
+                            final data = snapshot.data?.data();
+                            return Text(
+                              data?['name'],
+                              style: TextConfig.intro,
+                            );
+                          },
                         ),
                         !widget.message.isMe!
                             ? const SizedBox()

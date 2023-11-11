@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../configs/consts.dart';
+import '../widgets/app_text_buttons.dart';
+import 'loading_indicator_build.dart';
 
 linkAlertDialogue(
   BuildContext context, {
@@ -59,5 +61,44 @@ linkAlertDialogue(
         ],
       ),
     ),
+  );
+}
+
+deleteAlertDialogue(BuildContext context,
+    {required String msgId, required msgRef}) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        content: const Text('Delete message?\nThis can not be reversed'),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        shape: RoundedRectangleBorder(
+          borderRadius: defaultBorderRadius,
+        ),
+        insetPadding: EdgeInsets.all(ten),
+        actions: [
+          AppTextButton(
+            label: 'Proceed',
+            onPressed: () {
+              showLoadingIndicator(context);
+              msgRef.doc(msgId).delete().then((value) {
+                context.pop();
+                context.pop();
+                context.pop();
+                showSnackBar(context, msg: 'Message deleted');
+              }).catchError((e) {
+                context.pop();
+                context.pop();
+                showSnackBar(context, msg: 'Unable to delete message');
+              });
+            },
+          ),
+          AppTextButton(
+            label: 'Cancel',
+            onPressed: () => context.pop(),
+          ),
+        ],
+      );
+    },
   );
 }

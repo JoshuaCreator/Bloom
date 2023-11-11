@@ -30,32 +30,29 @@ class ReplyTile extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              FutureBuilder(
-                  future:
-                      firestore.collection('users').doc(replySenderId).get(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
-                        child: CircleAvatar(radius: size / 1.5),
-                      );
-                    }
-                    if (snapshot.hasError) {
-                      return const Center(
-                          child: Text("Oops! An error occurred"));
-                    }
-                    final data = snapshot.data?.data();
-                    return CircleAvatar(
-                      radius: size / 2,
-                      backgroundImage: CachedNetworkImageProvider(
-                        data?['image'],
-                      ),
-                    );
-                  }),
-              SizedBox(width: ten),
-              Text(sender, style: TextConfig.small),
-            ],
+          FutureBuilder(
+            future: firestore.collection('users').doc(replySenderId).get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: Text("Some one"),
+                );
+              }
+              if (snapshot.hasError) {
+                return const Center(child: Text("Some one"));
+              }
+              final data = snapshot.data?.data();
+              return Row(
+                children: [
+                  CircleAvatar(
+                    radius: size / 2,
+                    backgroundImage: CachedNetworkImageProvider(data?['image']),
+                  ),
+                  SizedBox(width: ten),
+                  Text(data?['name'], style: TextConfig.small),
+                ],
+              );
+            },
           ),
           Padding(
             padding: EdgeInsets.only(left: forty + ten),

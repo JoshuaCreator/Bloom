@@ -19,7 +19,7 @@ class MessageDB {
     try {
       await ref.add({
         'message': message.message,
-        'senderName': message.senderName,
+        // 'senderName': message.senderName,
         'senderId': message.senderId,
         'image': message.image,
         'time': message.time

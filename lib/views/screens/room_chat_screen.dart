@@ -98,7 +98,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                 id: data[index].id,
                 senderId: data[index]['senderId'],
                 isMe: isMe,
-                senderName: data[index]['senderName'],
+                // senderName: data[index]['senderName'],
                 message: data[index]['message'],
                 // image: data?[index]['image'],
                 time: (data[index]['time']).toDate(),
@@ -117,6 +117,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                       message: message,
                       repliesRef:
                           collectionRef.doc(message.id).collection('replies'),
+                      messageRef: collectionRef,
                     ),
                   );
                 },
@@ -199,9 +200,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                       senderId: senderId!,
                       message: _messageController.text.trim(),
                       time: DateTime.now(),
-                      senderName: (user?['fName'] + ' ' + user?['lName'])
-                          .toString()
-                          .trim(),
+                      
                     ),
                     context,
                   );

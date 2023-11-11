@@ -1,5 +1,6 @@
 import 'package:basic_board/configs/text_config.dart';
 import 'package:basic_board/models/reply.dart';
+import 'package:basic_board/views/dialogues/app_dialogues.dart';
 import 'package:basic_board/views/widgets/seperator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,9 +23,11 @@ class MessageDetailsScreen extends ConsumerStatefulWidget {
     super.key,
     required this.message,
     required this.repliesRef,
+    required this.messageRef,
   });
   final Message message;
   final CollectionReference repliesRef;
+  final CollectionReference messageRef;
 
   @override
   ConsumerState<MessageDetailsScreen> createState() =>
@@ -57,6 +60,7 @@ class _ConsumerMessageDetailsScreenState
       body: StreamBuilder(
         stream: repliesSnapshots,
         builder: (context, snapshot) {
+          final bool me = auth.uid == widget.message.senderId;
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: LoadingIndicator());
           }
@@ -64,143 +68,30 @@ class _ConsumerMessageDetailsScreenState
             return const Center(child: Text("Oops! An error occurred"));
           }
           if (snapshot.data!.docs.isEmpty || !snapshot.hasData) {
-            return const Center(child: Text('No replies yet'));
+            return Column(
+              children: [
+                MsgTile(
+                  widget: widget,
+                  firestore: firestore,
+                  date: date,
+                  time: time,
+                ),
+                ReactionTile(me: me, widget: widget),
+              ],
+            );
           }
           final data = snapshot.data!.docs;
-          final bool me = auth.uid == widget.message.senderId;
 
           return SingleChildScrollView(
             child: Column(
               children: [
-                Container(
-                  padding: EdgeInsets.all(ten),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Visibility(
-                              visible: true,
-                              child: widget.message.image != null
-                                  ? Column(
-                                      children: [
-                                        Image.network(
-                                          widget.message.image!,
-                                          fit: BoxFit.cover,
-                                          loadingBuilder: (context, child,
-                                                  loadingProgress) =>
-                                              const CircularProgressIndicator(),
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  const Text(
-                                                      '❗Unable to load image❗'),
-                                        ),
-                                        height20,
-                                      ],
-                                    )
-                                  : const SizedBox(),
-                            ),
-                            Row(
-                              children: [
-                                FutureBuilder(
-                                    future: firestore
-                                        .collection('users')
-                                        .doc(widget.message.senderId)
-                                        .get(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return Center(
-                                          child: CircleAvatar(radius: size / 2),
-                                        );
-                                      }
-                                      if (snapshot.hasError) {
-                                        return const Center(
-                                            child: Text(
-                                                "Oops! An error occurred"));
-                                      }
-                                      final data = snapshot.data?.data();
-                                      return CircleAvatar(
-                                        radius: size / 2,
-                                        backgroundImage:
-                                            CachedNetworkImageProvider(
-                                          data?['image'],
-                                        ),
-                                      );
-                                    }),
-                                SizedBox(width: ten),
-                                Text(
-                                  widget.message.senderName,
-                                  style: TextConfig.small,
-                                ),
-                              ],
-                            ),
-                            height10,
-                            Text.rich(
-                              TextSpan(
-                                children: extractText(
-                                  context,
-                                  widget.message.message,
-                                ),
-                              ),
-                            ),
-                            height10,
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '$date $time',
-                                  style: TextConfig.small,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                MsgTile(
+                  widget: widget,
+                  firestore: firestore,
+                  date: date,
+                  time: time,
                 ),
-                const Seperator(height: 0),
-                height5,
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    ReactionButton(
-                      label: 'Like',
-                      icon: Icons.thumb_up_outlined,
-                      onPressed: () {
-                        //! TODO Add Reaction
-                      },
-                    ),
-                    ReactionButton(
-                      label: me ? 'Edit' : 'Reply privately',
-                      icon: me ? Icons.edit_outlined : Icons.reply,
-                      onPressed: me
-                          ? () {
-                              //! Do something for me
-                            }
-                          : () {
-                              //! Do something for others
-                            },
-                    ),
-                    ReactionButton(
-                      label: 'Dislike',
-                      icon: me
-                          ? Icons.delete_forever_outlined
-                          : Icons.thumb_down_outlined,
-                      onPressed: me
-                          ? () {
-                              //! Do something for me
-                            }
-                          : () {
-                              //! Do something for others
-                            },
-                    ),
-                  ],
-                ),
-                height10,
-                const Seperator(height: 0),
+                ReactionTile(me: me, widget: widget),
                 height10,
                 Row(
                   children: [
@@ -276,6 +167,184 @@ class _ConsumerMessageDetailsScreenState
         ),
         SizedBox(height: bottom),
       ],
+    );
+  }
+}
+
+class ReactionTile extends StatelessWidget {
+  const ReactionTile({super.key, required this.me, required this.widget});
+  final bool me;
+  final MessageDetailsScreen widget;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Seperator(height: 0),
+        height5,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            ReactionButton(
+              label: 'Like',
+              icon: Icons.thumb_up_outlined,
+              onPressed: () {
+                //! TODO Add Reaction
+              },
+            ),
+            ReactionButton(
+              label: me ? 'Edit' : 'Reply privately',
+              icon: me ? Icons.edit_outlined : Icons.reply,
+              onPressed: me
+                  ? () {
+                      //! Do something for me
+                    }
+                  : () {
+                      //! Do something for others
+                    },
+            ),
+            ReactionButton(
+              label: me ? 'Delete' : 'Dislike',
+              icon: me
+                  ? Icons.delete_forever_outlined
+                  : Icons.thumb_down_outlined,
+              onPressed: me
+                  ? () => deleteAlertDialogue(
+                        context,
+                        msgId: widget.message.id!,
+                        msgRef: widget.messageRef,
+                      )
+                  : () {
+                      //! Do something for others
+                    },
+            ),
+          ],
+        ),
+        height10,
+        const Seperator(height: 0),
+      ],
+    );
+  }
+}
+
+class MsgTile extends StatelessWidget {
+  const MsgTile({
+    super.key,
+    required this.widget,
+    required this.firestore,
+    required this.date,
+    required this.time,
+  });
+
+  final MessageDetailsScreen widget;
+  final FirebaseFirestore firestore;
+  final String date;
+  final String time;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(ten),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Visibility(
+                  visible: true,
+                  child: widget.message.image != null
+                      ? Column(
+                          children: [
+                            Image.network(
+                              widget.message.image!,
+                              fit: BoxFit.cover,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) =>
+                                      const CircularProgressIndicator(),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Text('❗Unable to load image❗'),
+                            ),
+                            height20,
+                          ],
+                        )
+                      : const SizedBox(),
+                ),
+                Row(
+                  children: [
+                    FutureBuilder(
+                        future: firestore
+                            .collection('users')
+                            .doc(widget.message.senderId)
+                            .get(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(
+                              child: CircleAvatar(radius: size / 2),
+                            );
+                          }
+                          if (snapshot.hasError) {
+                            return const Center(
+                                child: Text("Oops! An error occurred"));
+                          }
+                          final data = snapshot.data?.data();
+                          return CircleAvatar(
+                            radius: size / 2,
+                            backgroundImage: CachedNetworkImageProvider(
+                              data?['image'],
+                            ),
+                          );
+                        }),
+                    SizedBox(width: ten),
+                    FutureBuilder(
+                      future: firestore
+                          .collection('users')
+                          .doc(widget.message.senderId)
+                          .get(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: Text("Some one"),
+                          );
+                        }
+                        if (snapshot.hasError) {
+                          return const Center(child: Text("Some one"));
+                        }
+                        final data = snapshot.data?.data();
+                        return Text(
+                          data?['name'],
+                          style: TextConfig.intro,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                height10,
+                Text.rich(
+                  TextSpan(
+                    children: extractText(
+                      context,
+                      widget.message.message,
+                    ),
+                  ),
+                ),
+                height10,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      '$date $time',
+                      style: TextConfig.small,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
