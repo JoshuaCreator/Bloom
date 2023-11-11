@@ -1,21 +1,4 @@
-import 'package:basic_board/views/dialogues/popup_menu.dart';
-import 'package:basic_board/views/screens/all_rooms_screen.dart';
-import 'package:basic_board/views/screens/room_chat_screen.dart';
-import 'package:basic_board/views/dialogues/loading_indicator.dart';
-import 'package:basic_board/views/screens/search_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import '../../configs/consts.dart';
-import '../../models/room.dart';
-import '../../providers/auth_provider.dart';
-import 'package:basic_board/providers/firestore_provider.dart';
-import '../../services/date_time_formatter.dart';
-import '../widgets/room_tile.dart';
-import '../widgets/search_tile.dart';
-import '../widgets/section_divider.dart';
-import 'create_room_screen.dart';
-import 'settings_screen.dart';
+import '../../utils/imports.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   static String id = '/home';
@@ -36,6 +19,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final room = ref.watch(roomProvider);
     final auth = ref.watch(authStateProvider).value;
+    final firestore = ref.watch(firestoreProvider);
 
     return Scaffold(
       // drawer: AppDrawer(room: room, user: user, auth: auth),
@@ -102,7 +86,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               : (room.value?[index]['createdAt']).toDate();
                       final Room roomData = Room(
                         id: room.value![index]['id'],
-                        creator: room.value?[index]['creator'],
                         creatorId: auth!.uid,
                         name: room.value?[index]['name'],
                         desc: room.value?[index]['desc'],
@@ -123,14 +106,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                       return Visibility(
                         visible: showRoom(),
-                        child: RoomTile(
-                          image: roomData.image!,
-                          name: roomData.name,
-                          subtitle: 'Created ${timeAgo(timeStamp)}',
-                          onTap: () {
-                            context.push(
-                              '${HomeScreen.id}/${RoomChatScreen.id}',
-                              extra: roomData,
+                        child: StreamBuilder(
+                          stream: firestore
+                              .collection('rooms')
+                              .doc(roomData.id)
+                              .collection('messages')
+                              .orderBy('time', descending: true)
+                              .limit(1)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            final senderId = snapshot.data?.docs[0]['senderId'];
+                            final message = snapshot.data?.docs[0]['message'];
+                            return StreamBuilder(
+                              stream: firestore
+                                  .collection('users')
+                                  .doc(senderId)
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                final bool me = auth.uid == senderId;
+                                final sender = snapshot.data?.data()?['name'];
+                                return RoomTile(
+                                  image: roomData.image!,
+                                  name: roomData.name,
+                                  subtitle: me
+                                      ? '~me: $message'
+                                      : '~$sender: $message',
+                                  onTap: () {
+                                    context.push(
+                                      '${HomeScreen.id}/${RoomChatScreen.id}',
+                                      extra: roomData,
+                                    );
+                                  },
+                                );
+                              },
                             );
                           },
                         ),

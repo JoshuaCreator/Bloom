@@ -1,15 +1,6 @@
-import 'package:basic_board/configs/text_config.dart';
-import 'package:basic_board/providers/firestore_provider.dart';
-import 'package:basic_board/views/dialogues/app_dialogues.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:basic_board/configs/consts.dart';
-import 'package:basic_board/models/message.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../services/date_time_formatter.dart';
+
+import '../../utils/imports.dart';
 
 class MessageTile extends ConsumerStatefulWidget {
   const MessageTile({

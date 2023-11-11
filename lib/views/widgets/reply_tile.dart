@@ -11,11 +11,10 @@ class ReplyTile extends ConsumerWidget {
   const ReplyTile(
       {super.key,
       required this.text,
-      required this.sender,
       required this.time,
       required this.replySenderId});
 
-  final String text, sender, time, replySenderId;
+  final String text, time, replySenderId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,6 +53,7 @@ class ReplyTile extends ConsumerWidget {
               );
             },
           ),
+          
           Padding(
             padding: EdgeInsets.only(left: forty + ten),
             child: ReadMoreText(

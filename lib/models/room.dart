@@ -1,5 +1,5 @@
 class Room {
-  final String name, creator, creatorId;
+  final String name, creatorId;
   final String? id, desc, image;
   final DateTime? createdAt;
   final bool private;
@@ -7,7 +7,6 @@ class Room {
 
   Room({
     required this.name,
-    required this.creator,
     required this.creatorId,
     this.id,
     this.desc,

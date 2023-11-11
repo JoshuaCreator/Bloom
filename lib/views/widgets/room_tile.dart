@@ -12,9 +12,7 @@ class RoomTile extends StatelessWidget {
     this.trailing,
     this.onTap,
   });
-  final String image;
-  final String name;
-  final String subtitle;
+  final String image, name, subtitle;
   final Widget? trailing;
   final void Function()? onTap;
 

@@ -117,7 +117,6 @@ class _ConsumerMessageDetailsScreenState
                       children: [
                         ReplyTile(
                           text: data[index]['reply'],
-                          sender: data[index]['replySenderName'],
                           replySenderId: data[index]['replySenderId'],
                           time: timeAgo(timeStamp),
                         ),
@@ -134,7 +133,7 @@ class _ConsumerMessageDetailsScreenState
       persistentFooterButtons: [
         Consumer(
           builder: (context, ref, child) {
-            final user = ref.watch(userProvider);
+            // final user = ref.watch(userProvider);
             final auth = ref.watch(authStateProvider).value;
             return Form(
               key: _key,
@@ -146,10 +145,6 @@ class _ConsumerMessageDetailsScreenState
                     Reply(
                       message: _replyTextController.text.trim(),
                       replySenderId: auth!.uid,
-                      replySenderName:
-                          (user.value?['fName'] + ' ' + user.value?['lName'])
-                              .toString()
-                              .trim(),
                       toMessageId: widget.message.id!,
                       toSenderId: widget.message.senderId,
                       time: DateTime.now(),

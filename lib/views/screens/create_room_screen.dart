@@ -92,8 +92,6 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                 final Room room = Room(
                   name: _nameController.text.trim(),
                   desc: _descController.text.trim(),
-                  creator:
-                      user?['fName'] + ' ' + user?['lName'].toString().trim(),
                   creatorId: auth!.uid,
                   private: value,
                   createdAt: DateTime.now(),

@@ -1,6 +1,8 @@
 import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/providers/auth_provider.dart';
 import 'package:basic_board/providers/firestore_provider.dart';
+import 'package:basic_board/services/room_db.dart';
+import 'package:basic_board/views/dialogues/app_dialogues.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:basic_board/views/dialogues/popup_menu.dart';
 import 'package:basic_board/views/dialogues/snack_bar.dart';
@@ -8,11 +10,11 @@ import 'package:basic_board/views/widgets/app_text_buttons.dart';
 import 'package:basic_board/views/widgets/seperator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:basic_board/views/dialogues/info_edit_dialogue.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:readmore/readmore.dart';
-
 import '../../configs/text_config.dart';
 import '../../models/room.dart';
 import '../../services/date_time_formatter.dart';
@@ -42,44 +44,13 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
       appBar: AppBar(
         actions: auth.uid == widget.room.creatorId
             ? [
-                AppPopupMenu(items: [
-                  AppPopupMenu.buildPopupMenuItem(
-                    context,
-                    label: 'Change Room info',
-                    onTap: () => infoEditDialogue(
-                      context,
-                      nameController: nameController,
-                      aboutController: aboutController,
-                      onSaved: () {
-                        if (nameController.text.trim().isEmpty) {
-                          return;
-                        }
-                        showLoadingIndicator(context);
-                        firestore
-                            .collection('rooms')
-                            .doc(widget.room.id)
-                            .update({
-                          'name': nameController.text.trim(),
-                          'desc': aboutController.text.trim(),
-                        }).then((value) {
-                          context.pop();
-                          context.pop();
-                          showSnackBar(
-                            context,
-                            msg: 'Room info updated successfully',
-                          );
-                        }).catchError((e) {
-                          context.pop();
-                          showSnackBar(
-                            context,
-                            msg:
-                                'Oops! Unable to update Room info. \n Try again',
-                          );
-                        });
-                      },
-                    ),
-                  ),
-                ]),
+                buildMenu(
+                  context,
+                  nameController: nameController,
+                  aboutController: aboutController,
+                  firestore: firestore,
+                  userId: auth.uid,
+                ),
               ]
             : null,
       ),
@@ -140,19 +111,34 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                       children: [
                         Text(
                           widget.room.name,
+                          textAlign: TextAlign.center,
                           style: TextStyle(fontSize: twenty),
                         ),
                         Text(numberOfParticipants()),
                       ],
                     ),
                     height10,
-                    Wrap(
-                      children: [
-                        Text(
-                          'Created by ${widget.room.creator} ${timeAgo(widget.room.createdAt!)}',
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                      ],
+                    FutureBuilder(
+                      future: firestore
+                          .collection('users')
+                          .doc(widget.room.creatorId)
+                          .get(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: Text("Some one"),
+                          );
+                        }
+                        if (snapshot.hasError) {
+                          return const Center(child: Text("Some one"));
+                        }
+                        final data = snapshot.data?.data();
+                        return Text(
+                          'Created by ${data?['name']} ${timeAgo(widget.room.createdAt!)}',
+                          style: TextConfig.intro,
+                        );
+                      },
                     ),
                     height10,
                     const Seperator(),
@@ -234,5 +220,93 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
             );
           }),
     );
+  }
+
+  AppPopupMenu buildMenu(
+    BuildContext context, {
+    required TextEditingController nameController,
+    required TextEditingController aboutController,
+    required FirebaseFirestore firestore,
+    required String userId,
+  }) {
+    return AppPopupMenu(items: [
+      AppPopupMenu.buildPopupMenuItem(
+        context,
+        label: 'Change Room info',
+        onTap: () => infoEditDialogue(
+          context,
+          nameController: nameController,
+          aboutController: aboutController,
+          onSaved: () {
+            if (nameController.text.trim().isEmpty) {
+              return;
+            }
+            showLoadingIndicator(context);
+            firestore.collection('rooms').doc(widget.room.id).update({
+              'name': nameController.text.trim(),
+              'desc': aboutController.text.trim(),
+            }).then((value) {
+              context.pop();
+              context.pop();
+              showSnackBar(
+                context,
+                msg: 'Room info updated successfully',
+              );
+            }).catchError((e) {
+              context.pop();
+              showSnackBar(
+                context,
+                msg: 'Oops! Unable to update Room info. \n Try again',
+              );
+            });
+          },
+        ),
+      ),
+      widget.room.participants.contains(userId)
+          ? AppPopupMenu.buildPopupMenuItem(
+              context,
+              label: 'Leave Room',
+              onTap: () {
+                //? Leave Room
+                leaveRoomDialogue(
+                  context,
+                  roomName: widget.room.name,
+                  userId: userId,
+                  roomId: widget.room.id!,
+                  onComplete: () => context.pop(),
+                );
+              },
+            )
+          : AppPopupMenu.buildPopupMenuItem(
+              context,
+              label: 'Join Room',
+              onTap: () {
+                //? Join Room
+                RoomDB().join(
+                  context,
+                  roomId: widget.room.id!,
+                  userId: userId,
+                  roomName: widget.room.name,
+                );
+              },
+            ),
+      widget.room.creatorId == userId
+          ? AppPopupMenu.buildPopupMenuItem(
+              context,
+              label: 'Delete Room',
+              onTap: () {
+                deleteRoomDialogue(
+                  context,
+                  roomId: widget.room.id!,
+                  roomName: widget.room.name,
+                );
+              },
+            )
+          : AppPopupMenu.buildPopupMenuItem(
+              context,
+              label: '',
+              onTap: () {},
+            ),
+    ]);
   }
 }

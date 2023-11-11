@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../configs/consts.dart';
+import '../../services/room_db.dart';
 import '../widgets/app_text_buttons.dart';
 import 'loading_indicator_build.dart';
 
@@ -96,6 +97,91 @@ deleteAlertDialogue(BuildContext context,
           AppTextButton(
             label: 'Cancel',
             onPressed: () => context.pop(),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+leaveRoomDialogue(
+  BuildContext context, {
+  required String roomName,
+  required String userId,
+  required String roomId,
+  void Function()? onComplete,
+}) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        content: Text('Leave $roomName?'),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        shape: RoundedRectangleBorder(
+          borderRadius: defaultBorderRadius,
+        ),
+        insetPadding: EdgeInsets.all(ten),
+        actions: [
+          AppTextButton(
+            label: 'Leave',
+            onPressed: () {
+              //? Leave Room
+              RoomDB().leave(
+                context,
+                roomId: roomId,
+                userId: userId,
+                roomName: roomName,
+                onComplete: onComplete,
+              );
+            },
+          ),
+          AppTextButton(
+            label: 'Cancel',
+            onPressed: () {
+              context.pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+deleteRoomDialogue(
+  BuildContext context, {
+  required String roomId,
+  required String roomName,
+  void Function()? onComplete,
+}) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        content: Text(
+          'You are about to delete $roomName.\nAll participants will be removed and all messages will be deleted.\nThis cannot be undone.',
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        shape: RoundedRectangleBorder(
+          borderRadius: defaultBorderRadius,
+        ),
+        insetPadding: EdgeInsets.all(ten),
+        actions: [
+          AppTextButton(
+            label: 'Delete',
+            onPressed: () {
+              //? Delete Room
+              RoomDB().delete(
+                context,
+                roomId: roomId,
+                roomName: roomName,
+              );
+            },
+          ),
+          AppTextButton(
+            label: 'Cancel',
+            onPressed: () {
+              context.pop();
+            },
           ),
         ],
       );

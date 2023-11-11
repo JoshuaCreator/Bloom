@@ -54,7 +54,7 @@ class MessageDB {
       await ref.add({
         'reply': reply.message,
         'replySenderId': reply.replySenderId,
-        'replySenderName': reply.replySenderName,
+        // 'replySenderName': reply.replySenderName,
         'toMessageId': reply.toMessageId,
         'toSenderId': reply.toSenderId,
         'time': reply.time
