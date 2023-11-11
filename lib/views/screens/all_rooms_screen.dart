@@ -1,8 +1,10 @@
+import 'package:basic_board/configs/colour_config.dart';
 import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/views/dialogues/loading_indicator.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:basic_board/views/screens/room_info_screen.dart';
 import 'package:basic_board/views/widgets/room_tile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -87,11 +89,46 @@ class AllRoomsScreen extends ConsumerWidget {
                       subtitle: numberOfParticipants(),
                       trailing: AppTextButton(
                         label: roomData.participants.contains(auth.uid)
-                            ? ''
+                            ? 'Leave'
                             : 'Join',
+                        colour: roomData.participants.contains(auth.uid)
+                            ? ColourConfig.danger
+                            : ColourConfig.go,
                         onPressed: roomData.participants.contains(auth.uid)
-                            ? null
+                            ? () {
+                                //? Leave Room
+                                showLoadingIndicator(context);
+                                firestore
+                                    .collection('rooms')
+                                    .doc(roomData.id)
+                                    .collection('participants')
+                                    .doc(auth.uid)
+                                    .delete()
+                                    .then((value) {
+                                  firestore
+                                      .collection('rooms')
+                                      .doc(roomData.id)
+                                      .update({
+                                    'participants':
+                                        FieldValue.arrayRemove([auth.uid]),
+                                  }).then((value) {
+                                    context.pop();
+                                    showSnackBar(
+                                      context,
+                                      msg: "You left ${roomData.name}",
+                                    );
+                                  }).catchError((e) {
+                                    context.pop();
+                                    showSnackBar(
+                                      context,
+                                      msg:
+                                          "Unable to exit ${roomData.name}. Try again",
+                                    );
+                                  });
+                                });
+                              }
                             : () {
+                                //? Join Room
                                 showLoadingIndicator(context);
                                 firestore
                                     .collection('rooms')
@@ -115,6 +152,13 @@ class AllRoomsScreen extends ConsumerWidget {
                                     showSnackBar(
                                       context,
                                       msg: "You've joined ${roomData.name}",
+                                    );
+                                  }).catchError((e) {
+                                    context.pop();
+                                    showSnackBar(
+                                      context,
+                                      msg:
+                                          "Unable to join ${roomData.name}. Try again",
                                     );
                                   });
                                 });

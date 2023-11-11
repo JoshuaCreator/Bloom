@@ -24,4 +24,8 @@ class ColourConfig {
       return Colors.white;
     }
   }
+
+  static Color danger = Colors.red;
+
+  static Color go = Colors.green;
 }

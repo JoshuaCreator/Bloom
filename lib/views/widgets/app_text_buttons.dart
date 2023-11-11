@@ -26,15 +26,20 @@ class AppTextButton extends StatelessWidget {
     super.key,
     required this.label,
     this.onPressed,
+    this.colour,
   });
   final String label;
   final void Function()? onPressed;
+  final Color? colour;
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: onPressed,
-      child: Text(label),
+      child: Text(
+        label,
+        style: TextStyle(color: colour),
+      ),
     );
   }
 }

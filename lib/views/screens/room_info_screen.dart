@@ -51,6 +51,9 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                       nameController: nameController,
                       aboutController: aboutController,
                       onSaved: () {
+                        if (nameController.text.trim().isEmpty) {
+                          return;
+                        }
                         showLoadingIndicator(context);
                         firestore
                             .collection('rooms')
@@ -161,6 +164,9 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                               isRoom: true,
                               aboutController: aboutController,
                               onSaved: () {
+                                if (aboutController.text.trim().isEmpty) {
+                                  return;
+                                }
                                 showLoadingIndicator(context);
                                 firestore
                                     .collection('rooms')

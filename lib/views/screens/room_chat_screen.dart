@@ -115,11 +115,6 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                     useSafeArea: true,
                     builder: (context) => MessageDetailsScreen(
                       message: message,
-                      // repliesSnapshots: collectionRef
-                      //     .doc(message.id)
-                      //     .collection('replies')
-                      //     .orderBy('time', descending: true)
-                      //     .get(),
                       repliesRef:
                           collectionRef.doc(message.id).collection('replies'),
                     ),
