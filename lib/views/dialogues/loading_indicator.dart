@@ -7,10 +7,11 @@ class LoadingIndicator extends StatelessWidget {
   const LoadingIndicator({
     super.key,
     this.isBuild = false,
+    this.label = 'Loading...',
   });
   final bool isBuild;
+  final String label;
 
-  
   @override
   Widget build(BuildContext context) {
     final brightness = MediaQuery.of(context).platformBrightness;
@@ -34,7 +35,7 @@ class LoadingIndicator extends StatelessWidget {
               ),
               height10,
               Text(
-                'Loading...',
+                label,
                 style: TextStyle(
                   fontSize: 16.0,
                   color: ColourConfig.foregroundColour(brightness),

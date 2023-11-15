@@ -8,11 +8,12 @@ class RoomTile extends StatelessWidget {
     super.key,
     required this.image,
     required this.name,
-    required this.subtitle,
+    this.subtitle,
     this.trailing,
     this.onTap,
   });
-  final String image, name, subtitle;
+  final String image, name;
+  final String? subtitle;
   final Widget? trailing;
   final void Function()? onTap;
 
@@ -38,12 +39,14 @@ class RoomTile extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontSize: 16.0),
       ),
-      subtitle: Text(
-        subtitle,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 12.0),
-      ),
+      subtitle: subtitle == null || subtitle!.isEmpty
+          ? null
+          : Text(
+              subtitle!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12.0),
+            ),
       trailing: trailing,
       onLongPress: () {
         //! Show Bottom Sheet With Options

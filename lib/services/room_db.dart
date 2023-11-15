@@ -1,23 +1,28 @@
-import 'package:basic_board/models/room.dart';
-import 'package:basic_board/views/screens/home_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../views/dialogues/loading_indicator_build.dart';
-import '../views/dialogues/snack_bar.dart';
+import '../utils/imports.dart';
 
 class RoomDB {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late CollectionReference _roomRef;
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseStorage storageRef = FirebaseStorage.instance;
 
-  Future<bool> create(Room room, BuildContext context, {required user}) async {
+  Future create(
+    Room room,
+    BuildContext context, {
+    required String userId,
+    required File? image,
+  }) async {
+    // _firestore.settings = const Settings(persistenceEnabled: false);
     _roomRef = _firestore.collection('rooms');
 
     try {
-      showLoadingIndicator(context);
+      showLoadingIndicator(context, label: 'Creating...');
       await _roomRef.add({
         'name': room.name,
         'desc': room.desc,
@@ -29,26 +34,42 @@ class RoomDB {
       }).then(
         (value) {
           value.update({'id': value.id}).then(
-            (room) => _roomRef
-                .doc(value.id)
-                .collection('participants')
-                .doc(user['id'])
-                .set({
-              'fName': user['fName'],
-              'lName': user['lName'],
-              'id': user['id'],
-              'joined': DateTime.now(),
-            }).then((value) {
-              context.go(HomeScreen.id);
-              showSnackBar(context, msg: 'Your Room has been created');
-            }),
-          );
+            (_) {
+              _roomRef
+                  .doc(value.id)
+                  .collection('participants')
+                  .doc(userId)
+                  .set({
+                'id': userId,
+                'joined': DateTime.now(),
+              }).then((_) async {
+                final path = 'rooms/${room.name}/${image?.path}';
+                // try {
+                if (image != null) {
+                  final uploadTask =
+                      await storageRef.ref().child(path).putFile(image);
+
+                  final downloadUrl = await uploadTask.ref.getDownloadURL();
+
+                  _roomRef.doc(value.id).update({'image': downloadUrl});
+                }
+                // } on FirebaseException catch (e) {
+                // if (context.mounted) {
+                //   showSnackBar(context, msg: 'An error occurred: $e');
+                // }
+                // }
+              });
+            },
+          ).then((value) {
+            context.go(HomeScreen.id);
+            showSnackBar(context, msg: 'Your Room has been created');
+          });
         },
       ).catchError((e) {
         context.pop();
         showSnackBar(context, msg: e);
       }).timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 20),
         onTimeout: () {
           context.pop();
           showSnackBar(
@@ -70,8 +91,9 @@ class RoomDB {
     required String userId,
     required String roomName,
   }) async {
+    _firestore.settings = const Settings(persistenceEnabled: false);
     try {
-      showLoadingIndicator(context);
+      showLoadingIndicator(context, label: 'Joining...');
       _firestore
           .collection('rooms')
           .doc(roomId)
@@ -98,7 +120,17 @@ class RoomDB {
             context,
             msg: "Unable to join $roomName. Try again",
           );
-        });
+        }).timeout(
+          const Duration(seconds: 20),
+          onTimeout: () {
+            context.pop();
+            showSnackBar(
+              context,
+              msg:
+                  'The connection timed out. Check your internet connection and try again',
+            );
+          },
+        );
       });
     } catch (e) {
       showSnackBar(
@@ -115,8 +147,9 @@ class RoomDB {
     required String roomName,
     void Function()? onComplete,
   }) async {
+    _firestore.settings = const Settings(persistenceEnabled: false);
     try {
-      showLoadingIndicator(context);
+      showLoadingIndicator(context, label: 'Exiting...');
       _firestore
           .collection('rooms')
           .doc(roomId)
@@ -141,7 +174,17 @@ class RoomDB {
             context,
             msg: "Unable to exit $roomName. Try again",
           );
-        });
+        }).timeout(
+          const Duration(seconds: 20),
+          onTimeout: () {
+            context.pop();
+            showSnackBar(
+              context,
+              msg:
+                  'The connection timed out. Check your internet connection and try again',
+            );
+          },
+        );
       });
     } catch (e) {
       showSnackBar(
@@ -156,8 +199,9 @@ class RoomDB {
     required String roomId,
     required String roomName,
   }) async {
+    _firestore.settings = const Settings(persistenceEnabled: false);
     try {
-      showLoadingIndicator(context);
+      showLoadingIndicator(context, label: 'Deleting...');
       _firestore.collection('rooms').doc(roomId).delete().then((value) {
         context.pop();
         context.pop();
@@ -173,7 +217,17 @@ class RoomDB {
           context,
           msg: "Unable to delete $roomName",
         );
-      });
+      }).timeout(
+        const Duration(seconds: 20),
+        onTimeout: () {
+          context.pop();
+          showSnackBar(
+            context,
+            msg:
+                'The connection timed out. Check your internet connection and try again',
+          );
+        },
+      );
     } catch (e) {
       showSnackBar(
         context,

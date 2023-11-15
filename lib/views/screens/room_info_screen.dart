@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/providers/auth_provider.dart';
 import 'package:basic_board/providers/firestore_provider.dart';
@@ -11,13 +13,18 @@ import 'package:basic_board/views/widgets/seperator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:basic_board/views/dialogues/info_edit_dialogue.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:readmore/readmore.dart';
 import '../../configs/text_config.dart';
 import '../../models/room.dart';
 import '../../services/date_time_formatter.dart';
+import '../dialogues/bottom_sheets.dart';
 import '../dialogues/loading_indicator.dart';
 
 class RoomInfoScreen extends ConsumerStatefulWidget {
@@ -33,10 +40,11 @@ class RoomInfoScreen extends ConsumerStatefulWidget {
 }
 
 class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
+  File? image;
   @override
   Widget build(BuildContext context) {
     final firestore = ref.watch(firestoreProvider);
-    final user = ref.watch(userProvider).value!;
+    final user = ref.watch(userProvider).value;
     final auth = ref.watch(authStateProvider).value!;
     final nameController = TextEditingController(text: widget.room.name);
     final aboutController = TextEditingController(text: widget.room.desc);
@@ -61,16 +69,6 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
               .collection('participants')
               .get(),
           builder: (_, snapshot) {
-            String numberOfParticipants() {
-              if (snapshot.data!.docs.isEmpty) {
-                return ' • 0 participants';
-              } else if (snapshot.data!.docs.length == 1) {
-                return ' • 1 participant';
-              } else {
-                return ' • ${snapshot.data!.docs.length} participants';
-              }
-            }
-
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: LoadingIndicator());
             }
@@ -80,6 +78,16 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
             if (!snapshot.hasData) {
               return const Center();
             }
+            String? numberOfParticipants() {
+              if (snapshot.data!.docs.isEmpty) {
+                return '0 participants';
+              } else if (snapshot.data!.docs.length == 1) {
+                return '1 participant';
+              } else {
+                return '${snapshot.data!.docs.length} participants';
+              }
+            }
+
             return ListView(
               shrinkWrap: true,
               children: [
@@ -87,26 +95,52 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     GestureDetector(
-                      // onTap: () => imagePickerDialogue(
-                      //   context,
-                      //   onStorageTapped: () {
-                      //     //! Pick Image From Device Storage
-                      //   },
-                      //   onCameraTapped: () {
-                      //     //! Pick Image From Camera
-                      //   },
-                      // ),
+                      onTap: () => imagePickerDialogue(
+                        context,
+                        onStorageTapped: () {
+                          _pickImage(ImageSource.gallery).then((value) {
+                            showLoadingIndicator(context, label: 'Saving...');
+                            _uploadImage(
+                              context,
+                              image: image,
+                              roomRef: firestore
+                                  .collection('rooms')
+                                  .doc(widget.room.id!),
+                              userId: widget.room.id!,
+                            ).then((value) => context.pop());
+                          });
+                        },
+                        onCameraTapped: () {
+                          _pickImage(ImageSource.camera).then((value) {
+                            showLoadingIndicator(context, label: 'Saving...');
+                            _uploadImage(
+                              context,
+                              image: image,
+                              roomRef: firestore
+                                  .collection('rooms')
+                                  .doc(widget.room.id!),
+                              userId: widget.room.id!,
+                            ).then((value) => context.pop());
+                          });
+                        },
+                      ),
                       child: Hero(
                         tag: 'room-img',
-                        child: CircleAvatar(
-                          radius: size * 2,
-                          backgroundImage:
-                              CachedNetworkImageProvider(widget.room.image!),
-                        ),
+                        child: image == null
+                            ? CircleAvatar(
+                                radius: size * 2,
+                                backgroundImage: CachedNetworkImageProvider(
+                                    widget.room.image!),
+                              )
+                            : CircleAvatar(
+                                radius: size * 2,
+                                backgroundImage: FileImage(image!),
+                              ),
                       ),
                     ),
                     height20,
                     Wrap(
+                      alignment: WrapAlignment.center,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
@@ -114,7 +148,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                           textAlign: TextAlign.center,
                           style: TextStyle(fontSize: twenty),
                         ),
-                        Text(numberOfParticipants()),
+                        Text(' • ${numberOfParticipants()}'),
                       ],
                     ),
                     height10,
@@ -126,12 +160,10 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const Center(
-                            child: Text("Some one"),
-                          );
+                          return const Text("Some one");
                         }
                         if (snapshot.hasError) {
-                          return const Center(child: Text("Some one"));
+                          return const Text("Some one");
                         }
                         final data = snapshot.data?.data();
                         return Text(
@@ -187,7 +219,10 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                       children: [
                         Padding(
                           padding: EdgeInsets.only(left: ten),
-                          child: Text('Participants', style: TextConfig.intro),
+                          child: Text(
+                            numberOfParticipants() ?? '',
+                            style: TextConfig.intro,
+                          ),
                         ),
                       ],
                     ),
@@ -195,18 +230,20 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: snapshot.data?.size,
+                      itemCount: snapshot.data?.docs.length,
                       itemBuilder: (context, index) {
-                        // final data = snapshot.data!.docs[index];
+                        final bool me = user?['id'] == auth.uid;
                         return ListTile(
                           onTap: () {},
                           leading: CircleAvatar(
                             radius: circularAvatarRadius,
                             backgroundImage: CachedNetworkImageProvider(
-                              user['image'],
+                              user?['image'],
                             ),
                           ),
-                          title: Text('${user['name']}'),
+                          title: Text(
+                            me ? '${user?['name']} (You)' : '${user?['name']}',
+                          ),
                           contentPadding: EdgeInsets.symmetric(
                             horizontal: ten,
                             vertical: five,
@@ -220,6 +257,36 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
             );
           }),
     );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    context.pop();
+    showLoadingIndicator(context);
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: source);
+      await _cropImage(image);
+      if (context.mounted && image == null) context.pop();
+    } on PlatformException catch (e) {
+      if (context.mounted) {
+        context.pop();
+        showSnackBar(context, msg: 'An error occurred: $e');
+      }
+    }
+  }
+
+  Future<void> _cropImage(XFile? image) async {
+    final ImageCropper cropper = ImageCropper();
+    if (image != null) {
+      final CroppedFile? croppedImg =
+          await cropper.cropImage(sourcePath: image.path);
+      final File temporaryImage = File(croppedImg!.path);
+      setState(() {
+        this.image = temporaryImage;
+      });
+
+      if (context.mounted) context.pop();
+    }
   }
 
   AppPopupMenu buildMenu(
@@ -308,5 +375,25 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
               onTap: () {},
             ),
     ]);
+  }
+}
+
+Future<void> _uploadImage(
+  BuildContext context, {
+  required File? image,
+  required DocumentReference roomRef,
+  required String userId,
+}) async {
+  final path = 'users/$userId/${image?.path}';
+  try {
+    final storageRef = FirebaseStorage.instance;
+
+    final uploadTask = await storageRef.ref().child(path).putFile(image!);
+
+    // final snapshot = await uploadTask.whenComplete(() {});
+    final downloadUrl = await uploadTask.ref.getDownloadURL();
+    roomRef.update({'image': downloadUrl});
+  } on FirebaseException catch (e) {
+    if (context.mounted) showSnackBar(context, msg: 'An error occurred: $e');
   }
 }

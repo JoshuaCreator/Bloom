@@ -40,6 +40,18 @@ final roomProvider = StreamProvider(
   },
 );
 
+//? *************** Get Departments ***************//
+// final departmentProvider = StreamProvider(
+//   (ref) {
+//     // final userStream = ref.watch(authStateProvider);
+//     final firestore = ref.watch(firestoreProvider);
+
+//     var docRef =
+//         firestore.collection('departments').orderBy('createdAt', descending: true);
+//     return docRef.snapshots().map((data) => data.docs);
+//   },
+// );
+
 //? *************** Get Last Message ******************//
 final lastMessageProvider = StreamProvider((ref) {
   final firestore = ref.watch(firestoreProvider);
@@ -47,7 +59,9 @@ final lastMessageProvider = StreamProvider((ref) {
   var docRef = firestore
       .collection('rooms')
       .doc()
-      .collection('messages').orderBy('time', descending: true).limit(1);
+      .collection('messages')
+      .orderBy('time', descending: true)
+      .limit(1);
   return docRef.snapshots().map((data) => data.docs);
 });
 

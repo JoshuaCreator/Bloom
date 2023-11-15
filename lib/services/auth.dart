@@ -20,7 +20,7 @@ class Auth {
     required String email,
     required String password,
   }) async {
-    showLoadingIndicator(context);
+    showLoadingIndicator(context, label: 'Logging in...');
     try {
       if (email.isEmpty || password.isEmpty) {
         showSnackBar(context,
@@ -78,7 +78,7 @@ class Auth {
     required AppUser user,
   }) async {
     _userRef = _firestore.collection('users');
-    showLoadingIndicator(context);
+    showLoadingIndicator(context, label: 'Registering...');
     try {
       if (email.isEmpty || password.isEmpty) {
         showSnackBar(
@@ -202,6 +202,53 @@ class Auth {
     } catch (e) {
       if (context.mounted) {
         showSnackBar(context, msg: e.toString());
+      }
+    }
+  }
+
+//! Feature suspended due to feature being disabled in Firebase
+  Future updateEmail(BuildContext context, {required String newEmail}) async {
+    showLoadingIndicator(context);
+    final String oldEmail = _auth.currentUser!.email!;
+    try {
+      await _auth.currentUser?.updateEmail(newEmail).then((value) {
+        context.pop();
+        context.pop();
+        showSnackBar(
+          context,
+          msg: 'Your email has been changed from $oldEmail to $newEmail',
+        );
+      });
+    } catch (e) {
+      if (context.mounted) {
+        context.pop();
+        context.pop();
+        showSnackBar(context, msg: 'An error occurred: $e');
+      }
+    }
+  }
+
+  Future deleteAccount(BuildContext context) async {
+    showLoadingIndicator(context);
+    try {
+      await _auth.currentUser?.delete().then((value) {
+        context.pop();
+        showSnackBar(
+          context,
+          msg: 'Your account has been deleted',
+        );
+      }).catchError((_) {
+        context.pop();
+        showSnackBar(
+          context,
+          msg: 'Unable to delete your account',
+        );
+      });
+    } catch (e) {
+      if (context.mounted) {
+        context.pop();
+        context.pop();
+        showSnackBar(context, msg: 'An error occurred: $e');
       }
     }
   }

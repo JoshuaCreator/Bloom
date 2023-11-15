@@ -1,28 +1,42 @@
+import 'dart:io';
+
 import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/configs/text_config.dart';
 import 'package:basic_board/providers/auth_provider.dart';
 import 'package:basic_board/providers/firestore_provider.dart';
-import 'package:basic_board/views/dialogues/image_picker_dialogue.dart';
+import 'package:basic_board/views/dialogues/bottom_sheets.dart';
 import 'package:basic_board/views/dialogues/info_edit_dialogue.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../dialogues/loading_indicator_build.dart';
 import '../dialogues/snack_bar.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   static String id = 'profile';
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ConsumerProfileScreenState();
+}
+
+class _ConsumerProfileScreenState extends ConsumerState<ProfileScreen> {
+  File? image;
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
     final firestore = ref.watch(firestoreProvider);
     final auth = ref.watch(authStateProvider).value!;
+    var userRef = firestore.collection('users');
     final nameController = TextEditingController(text: user.value?['name']);
     final aboutController = TextEditingController(text: user.value?['about']);
     return Scaffold(
@@ -39,23 +53,45 @@ class ProfileScreen extends ConsumerWidget {
             onTap: () => imagePickerDialogue(
               context,
               onStorageTapped: () {
-                //! Pick Image From Device Storage
+                _pickImage(ImageSource.gallery).then((value) {
+                  showLoadingIndicator(context, label: 'Saving...');
+                  _uploadImage(
+                    context,
+                    image: image,
+                    userRef: userRef,
+                    userId: user.value?['id'],
+                  ).then((value) => context.pop());
+                });
               },
               onCameraTapped: () {
-                //! Pick Image From Camera
+                _pickImage(ImageSource.camera).then((value) {
+                  showLoadingIndicator(context, label: 'Saving...');
+                  _uploadImage(
+                    context,
+                    image: image,
+                    userRef: userRef,
+                    userId: user.value?['id'],
+                  ).then((value) => context.pop());
+                });
               },
             ),
             child: Column(
               children: [
                 Hero(
                   tag: 'user-profile',
-                  child: CircleAvatar(
-                    radius: size * 2,
-                    // child: Text(user.value!['fName'].toString().substring(0, 1)),
-                    backgroundImage: user.value!['image'] == null
-                        ? null
-                        : CachedNetworkImageProvider(user.value!['image']),
-                  ),
+                  child: image == null
+                      ? CircleAvatar(
+                          radius: size * 2,
+                          backgroundImage: user.value!['image'] == null
+                              ? null
+                              : CachedNetworkImageProvider(
+                                  user.value!['image'],
+                                ),
+                        )
+                      : CircleAvatar(
+                          radius: size * 2,
+                          backgroundImage: FileImage(image!),
+                        ),
                 ),
                 height5,
                 const Text('Tap to edit', textAlign: TextAlign.center),
@@ -93,6 +129,36 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    context.pop();
+    showLoadingIndicator(context);
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: source);
+      await _cropImage(image);
+      if (context.mounted && image == null) context.pop();
+    } on PlatformException catch (e) {
+      if (context.mounted) {
+        context.pop();
+        showSnackBar(context, msg: 'An error occurred: $e');
+      }
+    }
+  }
+
+  Future<void> _cropImage(XFile? image) async {
+    final ImageCropper cropper = ImageCropper();
+    if (image != null) {
+      final CroppedFile? croppedImg =
+          await cropper.cropImage(sourcePath: image.path);
+      final File temporaryImage = File(croppedImg!.path);
+      setState(() {
+        this.image = temporaryImage;
+      });
+
+      if (context.mounted) context.pop();
+    }
+  }
+
   editName(
     BuildContext context, {
     required TextEditingController nameController,
@@ -106,7 +172,7 @@ class ProfileScreen extends ConsumerWidget {
       title: 'Edit name',
       nameController: nameController,
       onSaved: () {
-        showLoadingIndicator(context);
+        showLoadingIndicator(context, label: 'Saving...');
         if (nameController.text.trim() == user.value?['name']) {
           context.pop();
           context.pop();
@@ -146,7 +212,7 @@ class ProfileScreen extends ConsumerWidget {
       title: 'Edit about',
       aboutController: aboutController,
       onSaved: () {
-        showLoadingIndicator(context);
+        showLoadingIndicator(context, label: 'Saving...');
         if (aboutController.text.trim() == user.value?['about']) {
           context.pop();
           context.pop();
@@ -171,6 +237,26 @@ class ProfileScreen extends ConsumerWidget {
         });
       },
     );
+  }
+}
+
+Future<void> _uploadImage(
+  BuildContext context, {
+  required File? image,
+  required CollectionReference userRef,
+  required String userId,
+}) async {
+  final path = 'users/$userId/${image?.path}';
+  try {
+    final storageRef = FirebaseStorage.instance;
+
+    final uploadTask = await storageRef.ref().child(path).putFile(image!);
+
+    // final snapshot = await uploadTask.whenComplete(() {});
+    final downloadUrl = await uploadTask.ref.getDownloadURL();
+    userRef.doc(userId).update({'image': downloadUrl});
+  } on FirebaseException catch (e) {
+    if (context.mounted) showSnackBar(context, msg: 'An error occurred: $e');
   }
 }
 

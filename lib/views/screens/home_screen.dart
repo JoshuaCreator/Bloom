@@ -1,4 +1,5 @@
 import '../../utils/imports.dart';
+import '../widgets/app_drawer.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   static String id = '/home';
@@ -19,10 +20,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final room = ref.watch(roomProvider);
     final auth = ref.watch(authStateProvider).value;
+    final user = ref.watch(userProvider);
     final firestore = ref.watch(firestoreProvider);
 
     return Scaffold(
-      // drawer: AppDrawer(room: room, user: user, auth: auth),
+      drawer: AppDrawer(room: room, user: user, auth: auth),
       appBar: AppBar(
         title: const Text("Joshua's chat app"),
         actions: [
@@ -115,8 +117,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               .limit(1)
                               .snapshots(),
                           builder: (context, snapshot) {
+                            if (!snapshot.hasData ||
+                                snapshot.data!.docs.isEmpty) {
+                              return RoomTile(
+                                image: roomData.image!,
+                                name: roomData.name,
+                                subtitle: 'No recent message',
+                                onTap: () {
+                                  context.push(
+                                    '${HomeScreen.id}/${RoomChatScreen.id}',
+                                    extra: roomData,
+                                  );
+                                },
+                              );
+                            }
                             final senderId = snapshot.data?.docs[0]['senderId'];
-                            final message = snapshot.data?.docs[0]['message'];
+                            final message =
+                                snapshot.data?.docs[0]['message'] ?? '';
                             return StreamBuilder(
                               stream: firestore
                                   .collection('users')
@@ -124,13 +141,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   .snapshots(),
                               builder: (context, snapshot) {
                                 final bool me = auth.uid == senderId;
-                                final sender = snapshot.data?.data()?['name'];
+                                final sender =
+                                    snapshot.data?.data()?['name'] ?? '';
+                                var subtitle =
+                                    me ? '~me: $message' : '~$sender: $message';
                                 return RoomTile(
                                   image: roomData.image!,
                                   name: roomData.name,
-                                  subtitle: me
-                                      ? '~me: $message'
-                                      : '~$sender: $message',
+                                  subtitle: subtitle,
                                   onTap: () {
                                     context.push(
                                       '${HomeScreen.id}/${RoomChatScreen.id}',

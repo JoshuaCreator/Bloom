@@ -114,6 +114,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                     isScrollControlled: true,
                     useSafeArea: true,
                     builder: (context) => MessageDetailsScreen(
+                      room: widget.room,
                       message: message,
                       repliesRef:
                           collectionRef.doc(message.id).collection('replies'),
@@ -200,7 +201,6 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                       senderId: senderId!,
                       message: _messageController.text.trim(),
                       time: DateTime.now(),
-                      
                     ),
                     context,
                   );

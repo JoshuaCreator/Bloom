@@ -67,7 +67,7 @@ infoEditDialogue(
                           : TextInputAction.done,
                       autofocus: true,
                       controller: nameController,
-                      onFieldSubmitted: (_) => onSaved!(),
+                      onFieldSubmitted: showAbout ? null : (_) => onSaved!(),
                     ),
                     height10,
                   ],
@@ -83,6 +83,45 @@ infoEditDialogue(
                   controller: aboutController,
                   onFieldSubmitted: (_) => onSaved!(),
                 ),
+              ),
+              height30,
+              AppButton(label: 'Save', onTap: onSaved),
+              height10,
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+messageEditDialogue(
+  BuildContext context, {
+  required TextEditingController messageController,
+  required void Function()? onSaved,
+}) {
+  showModalBottomSheet(
+    isScrollControlled: true,
+    useSafeArea: true,
+    enableDrag: false,
+    context: context,
+    builder: (context) {
+      double bottom = MediaQuery.viewInsetsOf(context).bottom;
+      return Padding(
+        padding: EdgeInsets.fromLTRB(ten, ten, ten, bottom),
+        child: Form(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(children: [Text('Edit message', style: TextConfig.intro)]),
+              height10,
+              AppTextField(
+                hintText: 'New message',
+                borderless: true,
+                maxLines: 2,
+                autofocus: true,
+                controller: messageController,
+                onFieldSubmitted: (_) => onSaved!(),
               ),
               height30,
               AppButton(label: 'Save', onTap: onSaved),

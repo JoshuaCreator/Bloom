@@ -1,13 +1,12 @@
-import 'package:basic_board/models/room.dart';
-import 'package:basic_board/providers/auth_provider.dart';
-import 'package:basic_board/providers/firestore_provider.dart';
-import 'package:basic_board/services/room_db.dart';
-import 'package:basic_board/views/dialogues/image_picker_dialogue.dart';
-import 'package:flutter/material.dart';
-import 'package:basic_board/configs/consts.dart';
+import 'dart:io';
+import 'package:basic_board/utils/imports.dart';
+import 'package:basic_board/views/dialogues/bottom_sheets.dart';
+import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:basic_board/views/widgets/app_button.dart';
 import 'package:basic_board/views/widgets/app_text_field.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CreateRoomScreen extends ConsumerStatefulWidget {
   static String id = 'create-room';
@@ -22,12 +21,14 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
   bool value = false;
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
+  File? image;
 
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(userProvider).value;
     final auth = ref.watch(authStateProvider).value;
     final theme = MediaQuery.of(context).platformBrightness;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Create Room')),
       body: SingleChildScrollView(
@@ -39,23 +40,24 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                 GestureDetector(
                   onTap: () => imagePickerDialogue(
                     context,
-                    onStorageTapped: () {
-                      //! Pick Image From Device Storage
-                    },
-                    onCameraTapped: () {
-                      //! Pick Image From Camera
-                    },
+                    onStorageTapped: () => _pickImage(ImageSource.gallery),
+                    onCameraTapped: () => _pickImage(ImageSource.camera),
                   ),
-                  child: CircleAvatar(
-                    radius: size,
-                    backgroundColor: Colors.grey.withOpacity(0.3),
-                    child: Icon(
-                      Icons.camera_alt_outlined,
-                      color: theme == Brightness.light
-                          ? Colors.black
-                          : Colors.white,
-                    ),
-                  ),
+                  child: image != null
+                      ? CircleAvatar(
+                          radius: size,
+                          backgroundImage: FileImage(image!),
+                        )
+                      : CircleAvatar(
+                          radius: size,
+                          backgroundColor: Colors.grey.withOpacity(0.3),
+                          child: Icon(
+                            Icons.camera_alt_outlined,
+                            color: theme == Brightness.light
+                                ? Colors.black
+                                : Colors.white,
+                          ),
+                        ),
                 ),
                 SizedBox(width: ten),
                 Expanded(
@@ -88,16 +90,22 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
             AppButton(
               label: 'Create',
               onTap: () {
-                if (_nameController.text.trim().isEmpty) return;
                 final Room room = Room(
                   name: _nameController.text.trim(),
                   desc: _descController.text.trim(),
+                  image: '',
                   creatorId: auth!.uid,
                   private: value,
                   createdAt: DateTime.now(),
                   participants: [auth.uid],
                 );
-                RoomDB().create(room, context, user: user);
+                if (_nameController.text.trim().isEmpty) return;
+                RoomDB().create(
+                  room,
+                  context,
+                  userId: user?['id'],
+                  image: image,
+                );
               },
             ),
           ],
@@ -105,6 +113,36 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
       ),
     );
   }
+
+  Future<void> _pickImage(ImageSource source) async {
+    context.pop();
+    showLoadingIndicator(context);
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: source);
+      await _cropImage(image);
+      if (context.mounted && image == null) context.pop();
+    } on PlatformException catch (e) {
+      if (context.mounted) {
+        context.pop();
+        showSnackBar(context, msg: 'An error occurred: $e');
+      }
+    }
+  }
+
+  Future<void> _cropImage(XFile? image) async {
+    final ImageCropper cropper = ImageCropper();
+    if (image != null) {
+      final CroppedFile? croppedImg =
+          await cropper.cropImage(sourcePath: image.path, compressQuality: 10);
+      final File temporaryImage = File(croppedImg!.path);
+      setState(() {
+        this.image = temporaryImage;
+      });
+      if (context.mounted) context.pop();
+    }
+  }
+
 }
 
 class PrivacySwitch extends StatelessWidget {
@@ -123,3 +161,20 @@ class PrivacySwitch extends StatelessWidget {
     );
   }
 }
+
+// Future<void> _uploadImage(
+//   BuildContext context, {
+//   required String roomName,
+//   required File? image,
+// }) async {
+//   final path = 'rooms/$roomName/${image?.path}';
+//   try {
+//     final storageRef = FirebaseStorage.instance.ref().child(path);
+//     final uploadTask = storageRef.putFile(image!);
+
+//     final snapshot = await uploadTask.whenComplete(() {});
+//     final downloadUrl = await snapshot.ref.getDownloadURL();
+//   } on FirebaseException catch (e) {
+//     if (context.mounted) showSnackBar(context, msg: 'An error occurred: $e');
+//   }
+// }

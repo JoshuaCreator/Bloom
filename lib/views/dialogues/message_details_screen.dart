@@ -1,31 +1,16 @@
-import 'package:basic_board/configs/text_config.dart';
-import 'package:basic_board/models/reply.dart';
-import 'package:basic_board/views/dialogues/app_dialogues.dart';
-import 'package:basic_board/views/widgets/seperator.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../configs/consts.dart';
-import '../../models/message.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/firestore_provider.dart';
-import '../../services/date_time_formatter.dart';
-import '../../services/message_db.dart';
-import '../widgets/message_text_field.dart';
-import '../widgets/reply_tile.dart';
-import 'loading_indicator.dart';
-import '../widgets/message_tile.dart';
+import '../../utils/imports.dart';
 
 class MessageDetailsScreen extends ConsumerStatefulWidget {
   const MessageDetailsScreen({
     super.key,
     required this.message,
+    required this.room,
     required this.repliesRef,
     required this.messageRef,
   });
   final Message message;
+  final Room room;
   final CollectionReference repliesRef;
   final CollectionReference messageRef;
 
@@ -167,12 +152,18 @@ class _ConsumerMessageDetailsScreenState
 }
 
 class ReactionTile extends StatelessWidget {
-  const ReactionTile({super.key, required this.me, required this.widget});
+  const ReactionTile({
+    super.key,
+    required this.me,
+    required this.widget,
+  });
   final bool me;
   final MessageDetailsScreen widget;
 
   @override
   Widget build(BuildContext context) {
+    final messageController =
+        TextEditingController(text: widget.message.message);
     return Column(
       children: [
         const Seperator(height: 0),
@@ -192,7 +183,22 @@ class ReactionTile extends StatelessWidget {
               icon: me ? Icons.edit_outlined : Icons.reply,
               onPressed: me
                   ? () {
-                      //! Do something for me
+                      messageEditDialogue(
+                        context,
+                        messageController: messageController,
+                        onSaved: () {
+                          if (widget.message.message ==
+                              messageController.text.trim()) {
+                            return;
+                          }
+                          MessageDB().edit(
+                            context,
+                            roomId: widget.room.id!,
+                            messageId: widget.message.id!,
+                            newMessage: messageController.text.trim(),
+                          );
+                        },
+                      );
                     }
                   : () {
                       //! Do something for others

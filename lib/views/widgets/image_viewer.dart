@@ -14,28 +14,39 @@ class ImageViewer extends StatelessWidget {
     return Center(
       child: Container(
         padding: EdgeInsets.all(twenty),
+        margin: EdgeInsets.symmetric(horizontal: twenty),
+        height: size * 10,
+        width: double.infinity,
         decoration: BoxDecoration(
           color: ColourConfig.backgroundColour(brightness),
           borderRadius: BorderRadius.circular(forty),
+          border: Border.all(
+            width: five,
+            color: ColourConfig.backgroundColour(brightness),
+          ),
+          image: DecorationImage(
+            image: CachedNetworkImageProvider(image),
+            fit: BoxFit.cover,
+          ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: size * 4,
-              backgroundImage: CachedNetworkImageProvider(image),
-            ),
-            height20,
-            Text(
-              name,
-              style: TextStyle(
-                fontSize: twenty,
-                color: ColourConfig.foregroundColour(brightness),
-              ),
-            ),
-          ],
-        ),
+        // child: Column(
+        //   mainAxisAlignment: MainAxisAlignment.center,
+        //   mainAxisSize: MainAxisSize.min,
+        //   children: [
+        //     CircleAvatar(
+        //       radius: size * 4,
+        //       backgroundImage: CachedNetworkImageProvider(image),
+        //     ),
+        //     height20,
+        //     Text(
+        //       name,
+        //       style: TextStyle(
+        //         fontSize: twenty,
+        //         color: ColourConfig.foregroundColour(brightness),
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ),
     );
   }

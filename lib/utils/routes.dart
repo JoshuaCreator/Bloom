@@ -1,4 +1,5 @@
 import 'package:basic_board/models/room.dart';
+import 'package:basic_board/views/screens/create_dept_screen.dart';
 import 'package:basic_board/views/screens/room_info_screen.dart';
 import 'package:basic_board/views/screens/account_screen.dart';
 import 'package:basic_board/views/screens/all_rooms_screen.dart';
@@ -65,6 +66,10 @@ GoRouter goRouter = GoRouter(
         GoRoute(
           path: AllRoomsScreen.id,
           builder: (context, state) => const AllRoomsScreen(),
+        ),
+        GoRoute(
+          path: CreateDeptScreen.id,
+          builder: (context, state) =>  CreateDeptScreen(),
         ),
       ],
     ),

@@ -1,3 +1,4 @@
+import 'package:basic_board/services/auth.dart';
 import 'package:basic_board/views/dialogues/snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -175,6 +176,38 @@ deleteRoomDialogue(
                 roomId: roomId,
                 roomName: roomName,
               );
+            },
+          ),
+          AppTextButton(
+            label: 'Cancel',
+            onPressed: () {
+              context.pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+deleteAccountDialogue(
+  BuildContext context,
+) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        content: const Text(
+          'You are about to delete your account. This cannot be reversed and your data will be lost forever.',
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        shape: RoundedRectangleBorder(borderRadius: defaultBorderRadius),
+        insetPadding: EdgeInsets.all(ten),
+        actions: [
+          AppTextButton(
+            label: 'Delete',
+            onPressed: () {
+              Auth().deleteAccount(context);
             },
           ),
           AppTextButton(

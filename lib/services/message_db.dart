@@ -11,11 +11,12 @@ class MessageDB {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late CollectionReference _messageRef;
 
-  Future<bool> send(
+  Future send(
     Message message,
     BuildContext context, {
     required CollectionReference ref,
   }) async {
+    _firestore.settings = const Settings(persistenceEnabled: false);
     try {
       await ref.add({
         'message': message.message,
@@ -26,11 +27,6 @@ class MessageDB {
       }).then(
         (value) {
           value.update({'id': value.id});
-          // context.pop();
-          // showSnackBar(
-          //   context,
-          //   msg: '',
-          // );
         },
       ).catchError((e) {
         context.pop();
@@ -39,17 +35,17 @@ class MessageDB {
           msg: e,
         );
       });
-      return true;
     } catch (e) {
       return Future.error(e.toString());
     }
   }
 
-  Future<bool> reply(
+  Future reply(
     Reply reply,
     BuildContext context, {
     required CollectionReference ref,
   }) async {
+    FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: false);
     try {
       await ref.add({
         'reply': reply.message,
@@ -75,56 +71,53 @@ class MessageDB {
     }
   }
 
-  // Future<bool> edit(BuildContext context,
-  //     {required NoteModel note, required String id}) async {
-  //   _noteRef = _firestore
-  //       .collection('users')
-  //       .doc(_firebaseAuth.currentUser?.uid)
-  //       .collection('study_notes');
+  Future edit(
+    BuildContext context, {
+    required String roomId,
+    required String messageId,
+    required String newMessage,
+  }) async {
+    _firestore.settings = const Settings(persistenceEnabled: false);
+    try {
+      _firestore
+          .collection('rooms')
+          .doc(roomId)
+          .collection('messages')
+          .doc(messageId)
+          .update({
+        'message': newMessage,
+      }).then((value) {
+        context.pop();
+        showSnackBar(
+          context,
+          msg: 'Message edited',
+        );
+      }).catchError((e) {
+        context.pop();
+        showSnackBar(
+          context,
+          msg: 'Oops! Unable to message.',
+        );
+      }).timeout(
+        const Duration(seconds: 20),
+        onTimeout: () {
+          showSnackBar(
+            context,
+            msg: 'Your connection timed out',
+          );
+        },
+      );
+    } catch (e) {
+      showSnackBar(context, msg: 'An error occurred: $e');
+    }
+  }
 
-  //   try {
-  //     showLoadingIndicator(context);
-  //     await _noteRef.doc(id).update({
-  //       'title': note.title,
-  //       'note': note.content,
-  //       'createdAt': DateTime.now(),
-  //     }).then(
-  //       (value) {
-  //         context.pop();
-  //         context.pop();
-  //         showSnackBar(
-  //           context,
-  //           msg: 'Note updated',
-  //         );
-  //       },
-  //     ).catchError((e) {
-  //       context.pop();
-  //       showSnackBar(
-  //         context,
-  //         msg: e,
-  //       );
-  //     }).timeout(
-  //       const Duration(seconds: 10),
-  //       onTimeout: () {
-  //         context.pop();
-  //         context.pop();
-  //         showSnackBar(
-  //           context,
-  //           msg: 'The connection timed out. Check your internet connection',
-  //         );
-  //       },
-  //     );
-  //     return true;
-  //   } catch (e) {
-  //     return Future.error(e.toString());
-  //   }
-  // }
-
-  Future<bool> delete(String id, BuildContext context) async {
+  Future delete(String id, BuildContext context) async {
+    _firestore.settings = const Settings(persistenceEnabled: false);
     _messageRef = _firestore.collection('anouncements');
 
     try {
-      showLoadingIndicator(context);
+      showLoadingIndicator(context, label: 'Deleting...');
       await _messageRef.doc(id).delete().then(
         (value) {
           context.pop();
