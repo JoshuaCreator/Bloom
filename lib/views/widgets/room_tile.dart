@@ -3,34 +3,45 @@ import 'package:basic_board/views/widgets/image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-class RoomTile extends StatelessWidget {
+import '../../utils/imports.dart';
+
+class RoomTile extends ConsumerWidget {
   const RoomTile({
     super.key,
+    required this.id,
     required this.image,
     required this.name,
     this.subtitle,
     this.trailing,
     this.onTap,
   });
-  final String image, name;
-  final String? subtitle;
+  final String id, name;
+  final String? image, subtitle;
   final Widget? trailing;
   final void Function()? onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // final image = ref.watch(roomImageProvider(id)).value;
+    // final String img = image!['image'].toString().isEmpty
+    //     ? 'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg'
+    //     : image['image'] ??
+    //         'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg';
     return ListTile(
       leading: GestureDetector(
         onTap: () => showDialog(
           context: context,
-          builder: (context) => ImageViewer(image: image, name: name),
+          builder: (context) => ImageViewer(
+            image: image ??
+                'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg',
+          ),
         ),
         child: CircleAvatar(
           radius: circularAvatarRadius,
-          // child: Icon(leading),
-          backgroundImage: CachedNetworkImageProvider(image),
-          onBackgroundImageError: (exception, stackTrace) =>
-              const Icon(Icons.group_outlined),
+          backgroundImage: CachedNetworkImageProvider(
+            image ??
+                'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg',
+          ),
         ),
       ),
       title: Text(
@@ -52,7 +63,6 @@ class RoomTile extends StatelessWidget {
         //! Show Bottom Sheet With Options
       },
       onTap: onTap,
-      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ten)),
     );
   }
 }

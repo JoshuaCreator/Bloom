@@ -1,29 +1,18 @@
 import 'dart:async';
+import 'package:basic_board/views/screens/dept_screen.dart';
 
-import 'package:basic_board/services/message_db.dart';
-import 'package:basic_board/models/room.dart';
-import 'package:basic_board/providers/firestore_provider.dart';
-import 'package:basic_board/views/screens/room_info_screen.dart';
-import 'package:basic_board/views/dialogues/loading_indicator.dart';
-import 'package:basic_board/views/screens/home_screen.dart';
-import 'package:basic_board/views/widgets/message_text_field.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/material.dart';
-import 'package:basic_board/configs/consts.dart';
-import 'package:basic_board/models/message.dart';
-import 'package:basic_board/views/widgets/message_tile.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-
-import '../../providers/auth_provider.dart';
+import '../../utils/imports.dart';
 import '../dialogues/message_details_screen.dart';
 
 class RoomChatScreen extends ConsumerStatefulWidget {
-  static String id = 'room';
-  const RoomChatScreen({super.key, required this.room});
+  static String id = 'room-chat';
+  const RoomChatScreen({
+    super.key,
+    required this.room,
+    required this.deptId,
+  });
   final Room room;
+  final String deptId;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _RoomScreenState();
@@ -40,6 +29,8 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
   void initState() {
     super.initState();
     messageSnapshots = FirebaseFirestore.instance
+        .collection('departments')
+        .doc(widget.room.deptId)
         .collection('rooms')
         .doc(widget.room.id)
         .collection('messages')
@@ -149,7 +140,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
           padding: EdgeInsets.only(right: ten),
           child: GestureDetector(
             onTap: () => context.push(
-              '${HomeScreen.id}/${RoomChatScreen.id}/${RoomInfoScreen.id}',
+              '${DeptScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.deptId}/${RoomInfoScreen.id}/${widget.deptId}',
               extra: widget.room,
             ),
             child: Hero(

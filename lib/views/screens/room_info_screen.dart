@@ -1,39 +1,20 @@
 import 'dart:io';
+import '../../utils/imports.dart';
 
-import 'package:basic_board/configs/consts.dart';
-import 'package:basic_board/providers/auth_provider.dart';
-import 'package:basic_board/providers/firestore_provider.dart';
-import 'package:basic_board/services/room_db.dart';
-import 'package:basic_board/views/dialogues/app_dialogues.dart';
-import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
-import 'package:basic_board/views/dialogues/popup_menu.dart';
-import 'package:basic_board/views/dialogues/snack_bar.dart';
-import 'package:basic_board/views/widgets/app_text_buttons.dart';
-import 'package:basic_board/views/widgets/seperator.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:basic_board/views/dialogues/info_edit_dialogue.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:readmore/readmore.dart';
-import '../../configs/text_config.dart';
-import '../../models/room.dart';
-import '../../services/date_time_formatter.dart';
 import '../dialogues/bottom_sheets.dart';
-import '../dialogues/loading_indicator.dart';
+import '../widgets/user_tile.dart';
 
 class RoomInfoScreen extends ConsumerStatefulWidget {
   static String id = 'room-info';
-  const RoomInfoScreen({
-    super.key,
-    required this.room,
-  });
+  const RoomInfoScreen({super.key, required this.room, required this.depmtId});
   final Room room;
+  final String depmtId;
 
   @override
   ConsumerState<RoomInfoScreen> createState() => _ConsumerRoomInfoScreenState();
@@ -64,6 +45,8 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
       ),
       body: FutureBuilder(
           future: firestore
+              .collection('departments')
+              .doc(widget.depmtId)
               .collection('rooms')
               .doc(widget.room.id)
               .collection('participants')
@@ -77,15 +60,6 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
             }
             if (!snapshot.hasData) {
               return const Center();
-            }
-            String? numberOfParticipants() {
-              if (snapshot.data!.docs.isEmpty) {
-                return '0 participants';
-              } else if (snapshot.data!.docs.length == 1) {
-                return '1 participant';
-              } else {
-                return '${snapshot.data!.docs.length} participants';
-              }
             }
 
             return ListView(
@@ -139,17 +113,10 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                       ),
                     ),
                     height20,
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          widget.room.name,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: twenty),
-                        ),
-                        Text(' • ${numberOfParticipants()}'),
-                      ],
+                    Text(
+                      widget.room.name,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: twenty),
                     ),
                     height10,
                     FutureBuilder(
@@ -220,7 +187,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                         Padding(
                           padding: EdgeInsets.only(left: ten),
                           child: Text(
-                            numberOfParticipants() ?? '',
+                            'Participants(${widget.room.participants.length})',
                             style: TextConfig.intro,
                           ),
                         ),
@@ -233,21 +200,11 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                       itemCount: snapshot.data?.docs.length,
                       itemBuilder: (context, index) {
                         final bool me = user?['id'] == auth.uid;
-                        return ListTile(
-                          onTap: () {},
-                          leading: CircleAvatar(
-                            radius: circularAvatarRadius,
-                            backgroundImage: CachedNetworkImageProvider(
-                              user?['image'],
-                            ),
-                          ),
-                          title: Text(
-                            me ? '${user?['name']} (You)' : '${user?['name']}',
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: ten,
-                            vertical: five,
-                          ),
+                        return UserTile(
+                          title: me
+                              ? '${user?['name']} (You)'
+                              : '${user?['name']}',
+                          image: user?['image'],
                         );
                       },
                     ),
@@ -337,10 +294,10 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                 //? Leave Room
                 leaveRoomDialogue(
                   context,
+                  deptId: widget.depmtId,
                   roomName: widget.room.name,
                   userId: userId,
                   roomId: widget.room.id!,
-                  onComplete: () => context.pop(),
                 );
               },
             )
@@ -351,6 +308,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                 //? Join Room
                 RoomDB().join(
                   context,
+                  deptId: widget.depmtId,
                   roomId: widget.room.id!,
                   userId: userId,
                   roomName: widget.room.name,

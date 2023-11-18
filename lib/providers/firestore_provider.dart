@@ -16,7 +16,7 @@ final anouncementProvider = StreamProvider(
   },
 );
 
-//? *************** Get User ***************//
+//? *************** Get Current User ***************//
 final userProvider = StreamProvider(
   (ref) {
     final firestore = ref.watch(firestoreProvider);
@@ -28,41 +28,63 @@ final userProvider = StreamProvider(
   },
 );
 
+//? *************** Get Any User *****************//
+final anyUserProvider = StreamProvider.family((ref, String userId) {
+  final firestore = ref.watch(firestoreProvider);
+  final userRef = firestore.collection('users');
+
+  return userRef.doc(userId).snapshots().map((user) => user.data());
+});
+
+// //? *************** Get Room Image *****************//
+// final roomImageProvider = StreamProvider.family((ref, DocumentReference roomCollection) {
+//   final firestore = ref.watch(firestoreProvider);
+//   final roomRef = firestore.roomCollection;
+  
+
+//   return roomRef.snapshots().map((value) => value.data());
+// });
+
 //? *************** Get Rooms ***************//
-final roomProvider = StreamProvider(
-  (ref) {
-    // final userStream = ref.watch(authStateProvider);
+final roomProvider = StreamProvider.family(
+  (ref, String deptId) {
     final firestore = ref.watch(firestoreProvider);
 
-    var docRef =
-        firestore.collection('rooms').orderBy('createdAt', descending: true);
-    return docRef.snapshots().map((data) => data.docs);
+    final collectionRef = firestore
+        .collection('departments')
+        .doc(deptId)
+        .collection('rooms')
+        .orderBy('createdAt', descending: true);
+    return collectionRef.snapshots().map((data) => data.docs);
   },
 );
 
 //? *************** Get Departments ***************//
-// final departmentProvider = StreamProvider(
-//   (ref) {
-//     // final userStream = ref.watch(authStateProvider);
-//     final firestore = ref.watch(firestoreProvider);
+final deptsProvider = StreamProvider((ref) {
+  final firestore = ref.watch(firestoreProvider);
+  final collectionRef = firestore.collection('departments');
+  return collectionRef.snapshots().map((value) => value.docs);
+});
 
-//     var docRef =
-//         firestore.collection('departments').orderBy('createdAt', descending: true);
-//     return docRef.snapshots().map((data) => data.docs);
-//   },
-// );
+//? *************** Get Individial Departments *****************//
+final deptDataProvider = StreamProvider.family((ref, String deptId) {
+  final firestore = ref.watch(firestoreProvider);
+  final userRef = firestore.collection('departments');
+
+  return userRef.doc(deptId).snapshots().map((value) => value.data());
+});
 
 //? *************** Get Last Message ******************//
-final lastMessageProvider = StreamProvider((ref) {
+final lastMessageProvider = StreamProvider.family((ref, String roomId) {
   final firestore = ref.watch(firestoreProvider);
 
-  var docRef = firestore
+  var collectionRef = firestore
       .collection('rooms')
-      .doc()
+      .doc(roomId)
       .collection('messages')
       .orderBy('time', descending: true)
       .limit(1);
-  return docRef.snapshots().map((data) => data.docs);
+  return collectionRef.snapshots().map((data) => data.docs);
 });
 
 final firestoreProvider = Provider<FirebaseFirestore>((ref) {

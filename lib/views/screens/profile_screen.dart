@@ -99,7 +99,7 @@ class _ConsumerProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ),
           height40,
-          UserTile(
+          UserInfoTile(
             leading: Icons.person_outline,
             title: user.value?['name'] ?? 'Tap to edit',
             subtitle: 'Name',
@@ -112,7 +112,7 @@ class _ConsumerProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ),
           height5,
-          UserTile(
+          UserInfoTile(
             leading: Icons.info_outline_rounded,
             title: user.value?['about'] ?? 'Tap to edit',
             subtitle: 'About',
@@ -260,8 +260,8 @@ Future<void> _uploadImage(
   }
 }
 
-class UserTile extends StatelessWidget {
-  const UserTile({
+class UserInfoTile extends StatelessWidget {
+  const UserInfoTile({
     super.key,
     required this.title,
     required this.subtitle,

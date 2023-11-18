@@ -38,8 +38,7 @@ class _ConsumerMessageDetailsScreenState
     final auth = ref.watch(authStateProvider).value!;
     final firestore = ref.watch(firestoreProvider);
 
-    String time = DateFormat('hh:mm a').format(widget.message.time);
-    String date = DateFormat('dd MMM').format(widget.message.time);
+    String dateTime = DateFormat('dd MMM hh:mm a').format(widget.message.time);
     double bottom = MediaQuery.viewInsetsOf(context).bottom + forty + ten;
     return Scaffold(
       body: StreamBuilder(
@@ -58,8 +57,7 @@ class _ConsumerMessageDetailsScreenState
                 MsgTile(
                   widget: widget,
                   firestore: firestore,
-                  date: date,
-                  time: time,
+                  date: dateTime,
                 ),
                 ReactionTile(me: me, widget: widget),
               ],
@@ -73,8 +71,7 @@ class _ConsumerMessageDetailsScreenState
                 MsgTile(
                   widget: widget,
                   firestore: firestore,
-                  date: date,
-                  time: time,
+                  date: dateTime,
                 ),
                 ReactionTile(me: me, widget: widget),
                 height10,
@@ -234,13 +231,11 @@ class MsgTile extends StatelessWidget {
     required this.widget,
     required this.firestore,
     required this.date,
-    required this.time,
   });
 
   final MessageDetailsScreen widget;
   final FirebaseFirestore firestore;
   final String date;
-  final String time;
 
   @override
   Widget build(BuildContext context) {
@@ -336,7 +331,7 @@ class MsgTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      '$date $time',
+                      date,
                       style: TextConfig.small,
                     ),
                   ],

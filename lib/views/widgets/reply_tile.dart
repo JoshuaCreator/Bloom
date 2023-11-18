@@ -3,16 +3,17 @@ import 'package:basic_board/providers/firestore_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:readmore/readmore.dart';
 
 import '../../configs/consts.dart';
+import 'show_more_text.dart';
 
 class ReplyTile extends ConsumerStatefulWidget {
-  const ReplyTile(
-      {super.key,
-      required this.text,
-      required this.time,
-      required this.replySenderId});
+  const ReplyTile({
+    super.key,
+    required this.text,
+    required this.time,
+    required this.replySenderId,
+  });
 
   final String text, time, replySenderId;
 
@@ -41,13 +42,7 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
               margin: EdgeInsets.symmetric(horizontal: ten),
               decoration: BoxDecoration(
                 color: Colors.grey.shade300.withOpacity(0.5),
-                borderRadius: showReactions
-                    ? BorderRadius.only(
-                        topLeft: Radius.circular(ten),
-                        topRight: Radius.circular(ten),
-                        bottomRight: Radius.circular(ten),
-                      )
-                    : BorderRadius.circular(ten),
+                borderRadius: BorderRadius.circular(ten),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -77,8 +72,9 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
                         children: [
                           CircleAvatar(
                             radius: size / 2,
-                            backgroundImage:
-                                CachedNetworkImageProvider(data?['image']),
+                            backgroundImage: CachedNetworkImageProvider(
+                              data?['image'],
+                            ),
                           ),
                           SizedBox(width: ten),
                           Text(data?['name'], style: TextConfig.small),
@@ -88,21 +84,7 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
                   ),
                   Padding(
                     padding: EdgeInsets.only(left: forty + ten),
-                    child: ReadMoreText(
-                      widget.text,
-                      moreStyle: const TextStyle(
-                        fontSize: 12.0,
-                        color: Colors.amber,
-                      ),
-                      lessStyle: const TextStyle(
-                        fontSize: 12.0,
-                        color: Colors.amber,
-                      ),
-                      trimMode: TrimMode.Line,
-                      trimLines: 3,
-                      trimExpandedText: '\t\tless',
-                      trimCollapsedText: 'more',
-                    ),
+                    child: AppShowMoreText(text: widget.text),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -115,28 +97,18 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
             ),
             Visibility(
               visible: showReactions,
-              child: Container(
-                margin: EdgeInsets.only(left: ten),
-                decoration: BoxDecoration(
-                  color: Colors.grey,
-                  borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(ten),
-                    bottomLeft: Radius.circular(ten),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  buildReactionIconButton(
+                    icon: Icons.favorite_border_outlined,
+                    onPressed: () {},
                   ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    buildReactionIconButton(
-                      icon: Icons.favorite_border_outlined,
-                      onPressed: () {},
-                    ),
-                    buildReactionIconButton(
-                      icon: Icons.thumb_down_alt_outlined,
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
+                  buildReactionIconButton(
+                    icon: Icons.thumb_down_alt_outlined,
+                    onPressed: () {},
+                  ),
+                ],
               ),
             ),
           ],

@@ -65,9 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     AppTextButton(
-                      onPressed: () => context.go(
-                        PasswordResetScreen.id,
-                      ),
+                      onPressed: () => context.go(PasswordResetScreen.id),
                       label: 'Reset password',
                     ),
                   ],

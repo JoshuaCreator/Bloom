@@ -10,7 +10,8 @@ import 'package:image_picker/image_picker.dart';
 
 class CreateRoomScreen extends ConsumerStatefulWidget {
   static String id = 'create-room';
-  const CreateRoomScreen({super.key});
+  const CreateRoomScreen({super.key, required this.deptId});
+  final String deptId;
 
   @override
   ConsumerState<CreateRoomScreen> createState() =>
@@ -93,7 +94,6 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                 final Room room = Room(
                   name: _nameController.text.trim(),
                   desc: _descController.text.trim(),
-                  image: '',
                   creatorId: auth!.uid,
                   private: value,
                   createdAt: DateTime.now(),
@@ -103,6 +103,7 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                 RoomDB().create(
                   room,
                   context,
+                  deptId: widget.deptId,
                   userId: user?['id'],
                   image: image,
                 );
@@ -142,7 +143,6 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
       if (context.mounted) context.pop();
     }
   }
-
 }
 
 class PrivacySwitch extends StatelessWidget {

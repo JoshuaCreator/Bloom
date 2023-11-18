@@ -16,10 +16,12 @@ class RoomDB {
     Room room,
     BuildContext context, {
     required String userId,
+    required String deptId,
     required File? image,
   }) async {
     // _firestore.settings = const Settings(persistenceEnabled: false);
-    _roomRef = _firestore.collection('rooms');
+    _roomRef =
+        _firestore.collection('departments').doc(deptId).collection('rooms');
 
     try {
       showLoadingIndicator(context, label: 'Creating...');
@@ -35,6 +37,9 @@ class RoomDB {
         (value) {
           value.update({'id': value.id}).then(
             (_) {
+              _roomRef.doc(value.id).update({
+                'rooms': [value.id]
+              });
               _roomRef
                   .doc(value.id)
                   .collection('participants')
@@ -44,82 +49,86 @@ class RoomDB {
                 'joined': DateTime.now(),
               }).then((_) async {
                 final path = 'rooms/${room.name}/${image?.path}';
-                // try {
-                if (image != null) {
-                  final uploadTask =
-                      await storageRef.ref().child(path).putFile(image);
-
-                  final downloadUrl = await uploadTask.ref.getDownloadURL();
-
-                  _roomRef.doc(value.id).update({'image': downloadUrl});
-                }
-                // } on FirebaseException catch (e) {
-                // if (context.mounted) {
-                //   showSnackBar(context, msg: 'An error occurred: $e');
-                // }
-                // }
+                await _roomRef.doc(value.id).update({
+                  'image': await uploadImageGetUrl(
+                    context,
+                    path: path,
+                    image: image,
+                  ),
+                });
               });
             },
           ).then((value) {
-            context.go(HomeScreen.id);
-            showSnackBar(context, msg: 'Your Room has been created');
+            context.pop();
+            context.pop();
+            showSnackBar(context, msg: '${room.name} has been created');
           });
         },
       ).catchError((e) {
         context.pop();
-        showSnackBar(context, msg: e);
+        showSnackBar(context, msg: 'An error occurred: $e');
       }).timeout(
         const Duration(seconds: 20),
         onTimeout: () {
           context.pop();
           showSnackBar(
             context,
-            msg:
-                'The connection timed out. Check your internet connection and try again',
+            msg: 'The connection timed out',
           );
         },
       );
       return true;
     } catch (e) {
-      return Future.error(e.toString());
+      return Future.error('An error occurred: $e');
     }
+  }
+
+  Future<String> uploadImageGetUrl(
+    BuildContext context, {
+    File? image,
+    required String path,
+  }) async {
+    if (image == null) return '';
+    final uploadTask = storageRef.ref().child(path).putFile(image);
+    final snapshot = await uploadTask.whenComplete(() => null);
+
+    final downloadUrl = await snapshot.ref.getDownloadURL();
+    return downloadUrl;
   }
 
   Future join(
     BuildContext context, {
+    required String deptId,
     required String roomId,
     required String userId,
     required String roomName,
   }) async {
-    _firestore.settings = const Settings(persistenceEnabled: false);
     try {
       showLoadingIndicator(context, label: 'Joining...');
       _firestore
+          .collection('departments')
+          .doc(deptId)
           .collection('rooms')
           .doc(roomId)
           .collection('participants')
           .doc(userId)
           .set({
-        // 'name': user?['name'],
-        // 'lName': user?['lName'],
         'id': userId,
-        // 'image': user?['image'],
         'joined': DateTime.now(),
       }).then((value) {
-        _firestore.collection('rooms').doc(roomId).update({
+        _firestore
+            .collection('departments')
+            .doc(deptId)
+            .collection('rooms')
+            .doc(roomId)
+            .update({
           'participants': [userId],
         }).then((value) {
           context.pop();
-          showSnackBar(
-            context,
-            msg: "You've joined $roomName",
-          );
+          showSnackBar(context, msg: "You've joined $roomName");
         }).catchError((e) {
           context.pop();
-          showSnackBar(
-            context,
-            msg: "Unable to join $roomName. Try again",
-          );
+          showSnackBar(context, msg: "Unable to join $roomName. Try again");
         }).timeout(
           const Duration(seconds: 20),
           onTimeout: () {
@@ -143,37 +152,35 @@ class RoomDB {
   Future leave(
     BuildContext context, {
     required String roomId,
+    required String deptId,
     required String userId,
     required String roomName,
-    void Function()? onComplete,
   }) async {
-    _firestore.settings = const Settings(persistenceEnabled: false);
     try {
       showLoadingIndicator(context, label: 'Exiting...');
       _firestore
+          .collection('departments')
+          .doc(deptId)
           .collection('rooms')
           .doc(roomId)
           .collection('participants')
           .doc(userId)
           .delete()
           .then((value) {
-        _firestore.collection('rooms').doc(roomId).update({
-          'participants': FieldValue.arrayRemove([userId]),
+        _firestore
+            .collection('departments')
+            .doc(deptId)
+            .collection('rooms')
+            .doc(roomId)
+            .update({
+          'participants': FieldValue.arrayRemove([userId])
         }).then((value) {
           context.pop();
           context.pop();
-          onComplete!();
-          showSnackBar(
-            context,
-            msg: "You left $roomName",
-          );
+          showSnackBar(context, msg: "You left $roomName");
         }).catchError((e) {
           context.pop();
-          context.pop();
-          showSnackBar(
-            context,
-            msg: "Unable to exit $roomName. Try again",
-          );
+          showSnackBar(context, msg: "Unable to exit $roomName. Try again");
         }).timeout(
           const Duration(seconds: 20),
           onTimeout: () {
@@ -187,10 +194,7 @@ class RoomDB {
         );
       });
     } catch (e) {
-      showSnackBar(
-        context,
-        msg: "An error occurred: $e",
-      );
+      showSnackBar(context, msg: "An error occurred: $e");
     }
   }
 

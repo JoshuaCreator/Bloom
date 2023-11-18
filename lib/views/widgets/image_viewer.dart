@@ -5,8 +5,8 @@ import '../../configs/colour_config.dart';
 import '../../configs/consts.dart';
 
 class ImageViewer extends StatelessWidget {
-  const ImageViewer({super.key, required this.image, required this.name});
-  final String image, name;
+  const ImageViewer({super.key, required this.image});
+  final String image;
 
   @override
   Widget build(BuildContext context) {

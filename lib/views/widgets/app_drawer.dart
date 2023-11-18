@@ -1,48 +1,21 @@
-// import 'package:basic_board/views/screens/create_room_screen.dart';
-// import 'package:basic_board/views/screens/home_screen.dart';
-// import 'package:basic_board/views/screens/settings_screen.dart';
-// import 'package:basic_board/views/widgets/app_text_buttons.dart';
-// import 'package:basic_board/views/widgets/room_tile.dart';
-// import '../../models/room.dart';
+import 'package:basic_board/models/dept.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/screens/create_dept_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
-// import '../../configs/consts.dart';
-// import '../screens/account_screen.dart';
-import '../../configs/consts.dart';
-import '../../models/room.dart';
-import 'profile_tile.dart';
-import 'room_tile.dart';
+import 'dept_tile.dart';
 
-class AppDrawer extends StatelessWidget {
+class AppDrawer extends ConsumerWidget {
   const AppDrawer({
     super.key,
-    required this.user,
-    required this.room,
-    this.auth,
   });
-  final AsyncValue<Map<String, dynamic>?> user;
-  final AsyncValue<List<QueryDocumentSnapshot<Map<String, dynamic>>>> room;
-  final User? auth;
   @override
-  Widget build(BuildContext context) {
-    // final uid = auth?.uid;
-    // bool visible = user.value?['admin'];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final depts = ref.watch(deptsProvider);
     return Drawer(
+      width: double.infinity,
       child: Column(
         children: [
-          // ColoredBox(
-          //   color: Colors.cyan,
-          //   child: DrawerHeader(
-          //     margin: EdgeInsets.zero,
-          //     child: ProfileTile(user: user, email: email),
-          //   ),
-          // ),
           Padding(
             padding: EdgeInsets.only(top: size + ten, left: ten, right: ten),
             child: Row(
@@ -59,49 +32,60 @@ class AppDrawer extends StatelessWidget {
                     context.push('${HomeScreen.id}/${CreateDeptScreen.id}');
                   },
                 ),
+              
               ],
             ),
           ),
-
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Expanded(
-                  child: room.when(
-                    data: (data) => ListView.builder(
-                      padding: EdgeInsets.only(top: ten),
-                      itemCount: room.value?.length,
-                      itemBuilder: (context, index) {
-                        final Room roomData = Room(
-                          creatorId: room.value?[index]['creatorId'],
-                          name: room.value?[index]['name'],
-                          private: room.value?[index]['private'],
-                          participants: room.value?[index]['participants'],
-                          createdAt: (room.value?[index]['createdAt']).toDate(),
-                          id: room.value?[index].id,
-                          image: room.value?[index]['image'],
-                        );
-                        // bool visible = roomData.private;
-                        // return Visibility(
-                        //   visible: true,
-                        //   child: RoomTile(
-                        //     name: roomData.name,
-                        //     subtitle: '',
-                        //     image: roomData.image ?? '',
-                        //   ),
-                        // );
-                        return DepartmentTile(
-                          id: roomData.id!,
-                          title: roomData.name,
-                          subtitle: 'Created ${roomData.createdAt}',
-                          onTap: () {
-                            // context.pop();
-                            context.go(AllRoomsScreen.id);
-                          },
-                        );
-                      },
-                    ),
+                  child: depts.when(
+                    data: (data) => data.isEmpty
+                        ? const Center(
+                            child: Text(
+                              "You haven't been added to any Departments yet.\n Contact your supervisor.",
+                              textAlign: TextAlign.center,
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: EdgeInsets.only(top: ten),
+                            itemCount: data.length,
+                            itemBuilder: (context, index) {
+                              final Department dept = Department(
+                                id: data[index].id,
+                                name: data[index]['name'],
+                                desc: data[index]['desc'],
+                                participants: data[index]['participants'],
+                                createdAt: data[index]['createdAt'].toDate(),
+                              );
+                              String dateTime = DateFormat('dd MMM hh:mm a')
+                                  .format(dept.createdAt);
+
+                              // bool visible = roomData.private;
+                              // return Visibility(
+                              //   visible: true,
+                              //   child: RoomTile(
+                              //     name: roomData.name,
+                              //     subtitle: '',
+                              //     image: roomData.image ?? '',
+                              //   ),
+                              // );
+                              return DepartmentTile(
+                                id: dept.id!,
+                                title: dept.name,
+                                subtitle: 'Created $dateTime',
+                                onTap: () {
+                                  context.pop();
+                                  context.go(
+                                    HomeScreen.id,
+                                    extra: dept,
+                                  );
+                                },
+                              );
+                            },
+                          ),
                     error: (error, stackTrace) => const Center(
                       child: Text('An error occurred'),
                     ),
@@ -144,50 +128,10 @@ class AppDrawer extends StatelessWidget {
                 // )
               ],
             ),
+          
           )
+        
         ],
-      ),
-    );
-  }
-}
-
-class DepartmentTile extends StatelessWidget {
-  const DepartmentTile({
-    super.key,
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    this.onTap,
-  });
-  final String id, title, subtitle;
-  final void Function()? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: twenty, vertical: ten),
-        margin: EdgeInsets.symmetric(horizontal: ten, vertical: five),
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: defaultBorderRadius,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: twenty - 2, color: Colors.white),
-            ),
-            Text(
-              subtitle,
-              style: TextStyle(color: Colors.white.withOpacity(0.7)),
-            ),
-          ],
-        ),
       ),
     );
   }

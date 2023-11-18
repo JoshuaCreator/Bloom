@@ -1,5 +1,8 @@
+import 'package:basic_board/models/dept.dart';
 import 'package:basic_board/models/room.dart';
 import 'package:basic_board/views/screens/create_dept_screen.dart';
+import 'package:basic_board/views/screens/dept_info_screen.dart';
+import 'package:basic_board/views/screens/dept_screen.dart';
 import 'package:basic_board/views/screens/room_info_screen.dart';
 import 'package:basic_board/views/screens/account_screen.dart';
 import 'package:basic_board/views/screens/all_rooms_screen.dart';
@@ -25,51 +28,72 @@ GoRouter goRouter = GoRouter(
       builder: (context, state) => const AuthChecker(),
     ),
     GoRoute(
-      path: HomeScreen.id,
-      builder: (context, state) => const HomeScreen(),
+      path: DeptScreen.id,
+      builder: (context, state) => const DeptScreen(),
       routes: [
         GoRoute(
-          path: SettingsScreen.id,
-          builder: (context, state) => const SettingsScreen(),
+          path: HomeScreen.id,
+          builder: (context, state) => HomeScreen(
+            dept: state.extra as Department,
+          ),
           routes: [
             GoRoute(
-              path: ProfileScreen.id,
-              builder: (context, state) => const ProfileScreen(),
+              path: SettingsScreen.id,
+              builder: (context, state) => const SettingsScreen(),
+              routes: [
+                GoRoute(
+                  path: ProfileScreen.id,
+                  builder: (context, state) => const ProfileScreen(),
+                ),
+                GoRoute(
+                  path: AccountScreen.id,
+                  builder: (context, state) => const AccountScreen(),
+                ),
+                GoRoute(
+                  path: ThemeSelectorScreen.id,
+                  builder: (context, state) => const ThemeSelectorScreen(),
+                ),
+              ],
             ),
             GoRoute(
-              path: AccountScreen.id,
-              builder: (context, state) => const AccountScreen(),
+              path: '${CreateRoomScreen.id}/:deptId',
+              builder: (context, state) => CreateRoomScreen(
+                deptId: state.pathParameters['deptId']!,
+              ),
             ),
             GoRoute(
-              path: ThemeSelectorScreen.id,
-              builder: (context, state) => const ThemeSelectorScreen(),
+              path: '${RoomChatScreen.id}/:deptId',
+              builder: (context, state) => RoomChatScreen(
+                room: state.extra as Room,
+                deptId: state.pathParameters['deptId']!,
+              ),
+              routes: [
+                GoRoute(
+                  path: '${RoomInfoScreen.id}/:depmtId',
+                  builder: (context, state) => RoomInfoScreen(
+                    depmtId: state.pathParameters['depmtId']!,
+                    room: state.extra as Room,
+                  ),
+                ),
+              ],
+            ),
+            GoRoute(
+              path: DeptInfoScreen.id,
+              builder: (context, state) => DeptInfoScreen(
+                deptData: state.extra as Department,
+              ),
+            ),
+            GoRoute(
+              path: "${AllRoomsScreen.id}/:deptId",
+              builder: (context, state) => AllRoomsScreen(
+                deptId: state.pathParameters['deptId']!,
+              ),
+            ),
+            GoRoute(
+              path: CreateDeptScreen.id,
+              builder: (context, state) => const CreateDeptScreen(),
             ),
           ],
-        ),
-        GoRoute(
-          path: CreateRoomScreen.id,
-          builder: (context, state) => const CreateRoomScreen(),
-        ),
-        GoRoute(
-            path: RoomChatScreen.id,
-            builder: (context, state) => RoomChatScreen(
-                  room: state.extra as Room,
-                ),
-            routes: [
-              GoRoute(
-                path: RoomInfoScreen.id,
-                builder: (context, state) => RoomInfoScreen(
-                  room: state.extra as Room,
-                ),
-              ),
-            ]),
-        GoRoute(
-          path: AllRoomsScreen.id,
-          builder: (context, state) => const AllRoomsScreen(),
-        ),
-        GoRoute(
-          path: CreateDeptScreen.id,
-          builder: (context, state) =>  CreateDeptScreen(),
         ),
       ],
     ),

@@ -1,5 +1,3 @@
-
-
 import '../../utils/imports.dart';
 
 class MessageTile extends ConsumerStatefulWidget {
@@ -124,8 +122,10 @@ class _ConsumerMessageTileState extends ConsumerState<MessageTile> {
                         !widget.message.isMe!
                             ? const SizedBox()
                             : SizedBox(width: ten),
-                        Text(timeAgo(widget.message.time),
-                            style: TextConfig.intro),
+                        Text(
+                          timeAgo(widget.message.time),
+                          style: TextConfig.intro,
+                        ),
                         SizedBox(width: ten),
                         widget.message.pending!
                             ? Icon(

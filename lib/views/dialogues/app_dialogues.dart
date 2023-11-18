@@ -110,7 +110,7 @@ leaveRoomDialogue(
   required String roomName,
   required String userId,
   required String roomId,
-  void Function()? onComplete,
+  required String deptId,
 }) {
   showDialog(
     context: context,
@@ -129,10 +129,10 @@ leaveRoomDialogue(
               //? Leave Room
               RoomDB().leave(
                 context,
+                deptId: deptId,
                 roomId: roomId,
                 userId: userId,
                 roomName: roomName,
-                onComplete: onComplete,
               );
             },
           ),

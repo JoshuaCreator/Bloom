@@ -1,7 +1,7 @@
+import 'package:basic_board/views/screens/dept_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:basic_board/providers/auth_provider.dart';
-import 'package:basic_board/views/screens/home_screen.dart';
 import 'package:basic_board/views/screens/login_screen.dart';
 import 'package:basic_board/views/screens/verify_email_screen.dart';
 
@@ -15,7 +15,7 @@ class AuthChecker extends ConsumerWidget {
     return authState.when(
       data: (data) {
         if (data != null && data.emailVerified) {
-          return const HomeScreen();
+          return const DeptScreen();
         } else if (data != null && !data.emailVerified) {
           
           return const VerifyEmailScreen();
