@@ -21,6 +21,7 @@ class AppTextField extends StatelessWidget {
     this.validate = true,
     this.borderless = false,
     this.autofocus = false,
+    this.expands = false,
   });
   final String? label;
   final String hintText;
@@ -37,6 +38,7 @@ class AppTextField extends StatelessWidget {
   final bool validate;
   final bool borderless;
   final bool autofocus;
+  final bool expands;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +51,7 @@ class AppTextField extends StatelessWidget {
               return null;
             }
           : null,
+      expands: expands,
       onChanged: onChanged,
       controller: controller,
       obscureText: obscureText,

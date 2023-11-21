@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     AppOutlinedButton(
-                      label: 'Get registered',
+                      label: 'Register',
                       onTap: () => context.go(RegisterScreeen.id),
                     ),
                     AppButton(

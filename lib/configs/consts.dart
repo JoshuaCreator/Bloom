@@ -19,3 +19,15 @@ SizedBox height10 = SizedBox(height: ten);
 SizedBox height5 = SizedBox(height: five);
 
 BorderRadius defaultBorderRadius = BorderRadius.circular(five);
+
+BorderRadius myBorderRadius = BorderRadius.only(
+  topLeft: Radius.circular(twenty),
+  bottomLeft: Radius.circular(twenty),
+  bottomRight: Radius.circular(twenty),
+);
+
+BorderRadius yourBorderRadius = BorderRadius.only(
+  topRight: Radius.circular(twenty),
+  bottomLeft: Radius.circular(twenty),
+  bottomRight: Radius.circular(twenty),
+);

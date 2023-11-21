@@ -16,11 +16,14 @@ class AppButton extends ConsumerWidget {
       borderRadius: BorderRadius.circular(50.0),
       onTap: onTap,
       child: Container(
-        // width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: thirty, vertical: ten),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50.0),
           color: Colors.purple.withOpacity(0.5),
+          border: Border.all(
+            color: Colors.purple.withOpacity(0.5),
+            width: 2.0,
+          ),
         ),
         child: Text(
           label,
@@ -48,7 +51,6 @@ class AppOutlinedButton extends ConsumerWidget {
       borderRadius: BorderRadius.circular(50.0),
       onTap: onTap,
       child: Container(
-        // width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: thirty, vertical: ten),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50.0),

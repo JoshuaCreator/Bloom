@@ -1,170 +1,166 @@
 import '../../utils/imports.dart';
+import '../screens/user_screen.dart';
+import 'image_viewer.dart';
 
 class MessageTile extends ConsumerStatefulWidget {
   const MessageTile({
     super.key,
     required this.message,
     required this.messageRef,
+    required this.repliesRef,
     this.onTap,
+    required this.deptId,
   });
   final Message message;
   final CollectionReference<Object?> messageRef;
+  final CollectionReference repliesRef;
   final void Function()? onTap;
+  final String deptId;
 
   @override
   ConsumerState<MessageTile> createState() => _ConsumerMessageTileState();
 }
 
 class _ConsumerMessageTileState extends ConsumerState<MessageTile> {
-  late int numberOfReplies = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.messageRef
-        .doc(widget.message.id)
-        .collection('replies')
-        .count()
-        .get()
-        .then((value) => setState(() => numberOfReplies = value.count));
-  }
-
   @override
   Widget build(BuildContext context) {
-    final firestore = ref.watch(firestoreProvider);
-    return Padding(
-      padding: EdgeInsets.only(left: five, top: five, right: five),
-      child: InkWell(
-        onTap: widget.onTap,
-        borderRadius: defaultBorderRadius,
-        child: Container(
-          padding: EdgeInsets.all(five),
-          decoration: BoxDecoration(borderRadius: defaultBorderRadius),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              !widget.message.isMe!
-                  ? const SizedBox()
-                  : FutureBuilder(
-                      future: firestore
-                          .collection('users')
-                          .doc(widget.message.senderId)
-                          .get(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Center(
-                            child: CircleAvatar(radius: size / 2),
-                          );
-                        }
-                        if (snapshot.hasError) {
-                          return Center(child: CircleAvatar(radius: size / 2));
-                        }
-                        // if (snapshot.data!.docs.isEmpty || !snapshot.hasData) {
-                        //   return const Center(child: Text('No replies yet'));
-                        // }
-                        final data = snapshot.data?.data();
-                        return CircleAvatar(
-                          radius: size / 2,
-                          backgroundImage: CachedNetworkImageProvider(
-                            data?['image'],
-                          ),
-                        );
-                      }),
-              !widget.message.isMe! ? const SizedBox() : SizedBox(width: ten),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Visibility(
-                      visible: true,
-                      child: widget.message.image != null
-                          ? Column(
-                              children: [
-                                Image.network(
-                                  widget.message.image!,
-                                  fit: BoxFit.cover,
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) =>
-                                          const CircularProgressIndicator(),
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Text('Unable to load image'),
-                                ),
-                                height20,
-                              ],
-                            )
-                          : const SizedBox(),
-                    ),
-                    Row(
-                      children: [
-                        FutureBuilder(
-                          future: firestore
-                              .collection('users')
-                              .doc(widget.message.senderId)
-                              .get(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Center(
-                                child: Text("Some one"),
-                              );
-                            }
-                            if (snapshot.hasError) {
-                              return const Center(child: Text("Some one"));
-                            }
-                            final data = snapshot.data?.data();
-                            return Text(
-                              data?['name'],
-                              style: TextConfig.intro,
-                            );
-                          },
-                        ),
-                        !widget.message.isMe!
-                            ? const SizedBox()
-                            : SizedBox(width: ten),
-                        Text(
-                          timeAgo(widget.message.time),
-                          style: TextConfig.intro,
-                        ),
-                        SizedBox(width: ten),
-                        widget.message.pending!
-                            ? Icon(
-                                Icons.access_time_rounded,
-                                color: Colors.grey,
-                                size: size / 2.3,
-                              )
-                            : Icon(
-                                Icons.done_rounded,
-                                color: Colors.green,
-                                size: size / 2.3,
-                              ),
-                      ],
-                    ),
-                    height5,
-                    Text.rich(
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                      TextSpan(
-                        children: extractText(context, widget.message.message),
-                      ),
-                    ),
-                    height5,
-                    Visibility(
-                      visible: numberOfReplies > 0,
-                      child: Text(
-                        numberOfReplies == 1
-                            ? '1 reply'
-                            : '$numberOfReplies replies',
-                        style: TextConfig.sub,
-                      ),
-                    )
-                  ],
-                ),
+    final user = ref.watch(anyUserProvider(widget.message.senderId));
+    final replies = ref.watch(repliesCountProvider(widget.repliesRef));
+    final repliesCount = replies.value?.length ?? 0;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: widget.message.isMe!
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
+      children: [
+        Padding(
+          padding:
+              EdgeInsets.only(left: five, top: five, right: five, bottom: ten),
+          child: InkWell(
+            onTap: widget.onTap,
+            borderRadius:
+                widget.message.isMe! ? myBorderRadius : yourBorderRadius,
+            child: Container(
+              padding: EdgeInsets.all(five),
+              decoration: BoxDecoration(
+                borderRadius:
+                    widget.message.isMe! ? myBorderRadius : yourBorderRadius,
               ),
-            ],
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                textDirection: widget.message.isMe!
+                    ? TextDirection.rtl
+                    : TextDirection.ltr,
+                children: [
+                  GestureDetector(
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (context) => ImageViewer(
+                        image: user.value?['image'] ?? '',
+                        onInfoIconPressed: widget.message.isMe!
+                            ? null
+                            : () => context.push(
+                                  '${DeptScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.deptId}/${RoomInfoScreen.id}/${widget.deptId}/${UserScreen.id}/${widget.message.senderId}',
+                                ),
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: size / 2,
+                      backgroundImage: CachedNetworkImageProvider(
+                        user.value?['image'] ?? '',
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: five),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: widget.message.isMe!
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            constraints: BoxConstraints(maxWidth: size * 3.5),
+                            child: Text(
+                              widget.message.isMe! ? '' : user.value?['name'],
+                              overflow: TextOverflow.ellipsis,
+                              style: TextConfig.intro,
+                            ),
+                          ),
+                          SizedBox(width: ten),
+                          Text(
+                            timeAgo(widget.message.time),
+                            style: TextConfig.intro.copyWith(fontSize: ten),
+                          ),
+                          SizedBox(width: ten),
+                          widget.message.isMe! && widget.message.pending!
+                              ? Icon(
+                                  Icons.access_time_rounded,
+                                  color: Colors.grey,
+                                  size: size / 2.3,
+                                )
+                              : const SizedBox(),
+                          SizedBox(width: ten),
+                        ],
+                      ),
+                      height10,
+                      Visibility(
+                        visible: widget.message.image != null &&
+                            widget.message.image!.isNotEmpty,
+                        child: widget.message.image != null &&
+                                widget.message.image!.isNotEmpty
+                            ? Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: defaultBorderRadius,
+                                    child: CachedNetworkImage(
+                                      imageUrl: widget.message.image ?? '',
+                                      fit: BoxFit.contain,
+                                      height: size * 4,
+                                    ),
+                                  ),
+                                  height5,
+                                ],
+                              )
+                            : const SizedBox(),
+                      ),
+                      widget.message.message.isEmpty
+                          ? const SizedBox()
+                          : SizedBox(
+                              width: size * 7,
+                              child: Text.rich(
+                                maxLines: 5,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: widget.message.isMe!
+                                    ? TextAlign.right
+                                    : TextAlign.left,
+                                TextSpan(
+                                  children: extractText(
+                                      context, widget.message.message),
+                                ),
+                              ),
+                            ),
+                      height5,
+                      Visibility(
+                        visible: repliesCount > 0,
+                        child: Text(
+                          'Replies ($repliesCount)',
+                          style: TextConfig.sub,
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

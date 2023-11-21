@@ -5,15 +5,15 @@ import '../../configs/colour_config.dart';
 import '../../configs/consts.dart';
 
 class ImageViewer extends StatelessWidget {
-  const ImageViewer({super.key, required this.image});
+  const ImageViewer({super.key, required this.image, this.onInfoIconPressed});
   final String image;
+  final void Function()? onInfoIconPressed;
 
   @override
   Widget build(BuildContext context) {
     final brightness = MediaQuery.of(context).platformBrightness;
     return Center(
       child: Container(
-        padding: EdgeInsets.all(twenty),
         margin: EdgeInsets.symmetric(horizontal: twenty),
         height: size * 10,
         width: double.infinity,
@@ -29,24 +29,26 @@ class ImageViewer extends StatelessWidget {
             fit: BoxFit.cover,
           ),
         ),
-        // child: Column(
-        //   mainAxisAlignment: MainAxisAlignment.center,
-        //   mainAxisSize: MainAxisSize.min,
-        //   children: [
-        //     CircleAvatar(
-        //       radius: size * 4,
-        //       backgroundImage: CachedNetworkImageProvider(image),
-        //     ),
-        //     height20,
-        //     Text(
-        //       name,
-        //       style: TextStyle(
-        //         fontSize: twenty,
-        //         color: ColourConfig.foregroundColour(brightness),
-        //       ),
-        //     ),
-        //   ],
-        // ),
+        child: onInfoIconPressed == null
+            ? null
+            : Stack(
+                alignment: AlignmentDirectional.topEnd,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(thirty),
+                        bottomLeft: Radius.circular(ten),
+                      ),
+                    ),
+                    child: IconButton(
+                      onPressed: onInfoIconPressed,
+                      icon: const Icon(Icons.info_outline_rounded),
+                    ),
+                  )
+                ],
+              ),
       ),
     );
   }

@@ -51,12 +51,11 @@ class MessageTextField extends StatelessWidget {
         filled: true,
         fillColor: Colors.grey.withOpacity(0.3),
         enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(30)),
+          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(30),
+        ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: Colors.grey.withOpacity(0.7),
-          ),
+          borderSide: BorderSide(color: Colors.grey.withOpacity(0.7)),
           borderRadius: BorderRadius.circular(30),
         ),
       ),

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../configs/consts.dart';
+import '../../services/dept_db.dart';
 import '../../services/room_db.dart';
 import '../widgets/app_text_buttons.dart';
 import 'loading_indicator_build.dart';
@@ -152,7 +153,7 @@ deleteRoomDialogue(
   BuildContext context, {
   required String roomId,
   required String roomName,
-  void Function()? onComplete,
+  required String deptId,
 }) {
   showDialog(
     context: context,
@@ -175,6 +176,7 @@ deleteRoomDialogue(
                 context,
                 roomId: roomId,
                 roomName: roomName,
+                deptId: deptId,
               );
             },
           ),
@@ -190,9 +192,7 @@ deleteRoomDialogue(
   );
 }
 
-deleteAccountDialogue(
-  BuildContext context,
-) {
+deleteAccountDialogue(BuildContext context) {
   showDialog(
     context: context,
     builder: (context) {
@@ -208,6 +208,40 @@ deleteAccountDialogue(
             label: 'Delete',
             onPressed: () {
               Auth().deleteAccount(context);
+            },
+          ),
+          AppTextButton(
+            label: 'Cancel',
+            onPressed: () {
+              context.pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+deleteDepartmentDialogue(
+  BuildContext context, {
+  required String deptName,
+  required String deptId,
+}) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        content: Text(
+          'You are about to delete $deptName. All Rooms will be deleted and participants removed. This cannot be reversed.',
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        shape: RoundedRectangleBorder(borderRadius: defaultBorderRadius),
+        insetPadding: EdgeInsets.all(ten),
+        actions: [
+          AppTextButton(
+            label: 'Delete',
+            onPressed: () {
+              DeptDB().delete(context, deptName: deptName, deptId: deptId);
             },
           ),
           AppTextButton(

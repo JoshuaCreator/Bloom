@@ -1,18 +1,7 @@
-import 'package:basic_board/configs/consts.dart';
-import 'package:basic_board/views/screens/login_screen.dart';
-import 'package:basic_board/views/widgets/app_text_buttons.dart';
-import 'package:basic_board/views/widgets/profile_tile.dart';
-import 'package:basic_board/views/widgets/seperator.dart';
 import 'package:basic_board/views/widgets/settings_tile.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/firestore_provider.dart';
+import 'package:basic_board/views/widgets/profile_tile.dart';
 import '../../services/auth.dart';
-import 'account_screen.dart';
-import 'home_screen.dart';
-import 'theme_selector_screen.dart';
+import '../../utils/imports.dart';
 
 class SettingsScreen extends ConsumerWidget {
   static String id = 'settings';
@@ -29,40 +18,29 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           Expanded(
             child: ListView(
-              // padding: EdgeInsets.all(ten),
               children: [
                 ProfileTile(user: user, email: email),
-                const Seperator(),
+                const Separator(),
                 SettingTile(
                   title: 'Account',
                   leading: Icons.account_circle_outlined,
                   onTap: () {
                     context.push(
-                      '${HomeScreen.id}/${SettingsScreen.id}/${AccountScreen.id}',
+                      '${DeptScreen.id}/${HomeScreen.id}/${SettingsScreen.id}/${AccountScreen.id}',
                     );
                   },
                 ),
-                const Seperator(),
-                // SettingTile(
-                //   title: 'Privacy',
-                //   leading: Icons.lock_outline,
-                //   onTap: () {},
-                // ),
-                // SettingTile(
-                //   title: 'Notifications',
-                //   leading: Icons.notifications_outlined,
-                //   onTap: () {},
-                // ),
+                const Separator(),
                 SettingTile(
                   title: 'Appearance',
                   leading: Icons.light_mode_outlined,
                   onTap: () {
                     context.push(
-                      '${HomeScreen.id}/${SettingsScreen.id}/${ThemeSelectorScreen.id}',
+                      '${DeptScreen.id}/${HomeScreen.id}/${SettingsScreen.id}/${ThemeSelectorScreen.id}',
                     );
                   },
                 ),
-                const Seperator(),
+                const Separator(),
               ],
             ),
           ),

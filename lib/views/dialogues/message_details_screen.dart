@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../utils/imports.dart';
 
@@ -5,14 +6,15 @@ class MessageDetailsScreen extends ConsumerStatefulWidget {
   const MessageDetailsScreen({
     super.key,
     required this.message,
+    required this.deptId,
     required this.room,
     required this.repliesRef,
     required this.messageRef,
   });
   final Message message;
+  final String deptId;
   final Room room;
-  final CollectionReference repliesRef;
-  final CollectionReference messageRef;
+  final CollectionReference repliesRef, messageRef;
 
   @override
   ConsumerState<MessageDetailsScreen> createState() =>
@@ -23,55 +25,36 @@ class _ConsumerMessageDetailsScreenState
     extends ConsumerState<MessageDetailsScreen> {
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
   final _replyTextController = TextEditingController();
-  late Stream<QuerySnapshot<Map<String, dynamic>>>? repliesSnapshots;
-
-  @override
-  void initState() {
-    super.initState();
-    repliesSnapshots = widget.repliesRef
-        .orderBy('time', descending: true)
-        .snapshots() as Stream<QuerySnapshot<Map<String, dynamic>>>?;
-  }
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(anyUserProvider(widget.message.senderId));
     final auth = ref.watch(authStateProvider).value!;
     final firestore = ref.watch(firestoreProvider);
+    final replies = ref.watch(repliesProvider(widget.repliesRef));
+    final bool me = auth.uid == widget.message.senderId;
 
     String dateTime = DateFormat('dd MMM hh:mm a').format(widget.message.time);
     double bottom = MediaQuery.viewInsetsOf(context).bottom + forty + ten;
     return Scaffold(
-      body: StreamBuilder(
-        stream: repliesSnapshots,
-        builder: (context, snapshot) {
-          final bool me = auth.uid == widget.message.senderId;
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: LoadingIndicator());
-          }
-          if (snapshot.hasError) {
-            return const Center(child: Text("Oops! An error occurred"));
-          }
-          if (snapshot.data!.docs.isEmpty || !snapshot.hasData) {
-            return Column(
-              children: [
-                MsgTile(
-                  widget: widget,
-                  firestore: firestore,
-                  date: dateTime,
-                ),
-                ReactionTile(me: me, widget: widget),
-              ],
-            );
-          }
-          final data = snapshot.data!.docs;
-
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          onPressed: () => context.pop(),
+          icon: const Icon(Icons.keyboard_arrow_down),
+        ),
+      ),
+      body: replies.when(
+        data: (data) {
           return SingleChildScrollView(
             child: Column(
               children: [
                 MsgTile(
                   widget: widget,
+                  user: user,
                   firestore: firestore,
                   date: dateTime,
+                  me: me,
                 ),
                 ReactionTile(me: me, widget: widget),
                 height10,
@@ -80,7 +63,7 @@ class _ConsumerMessageDetailsScreenState
                     Padding(
                       padding: EdgeInsets.only(left: ten),
                       child: Text(
-                        '${data.length} Replies',
+                        'Replies (${data.length})',
                         style: TextConfig.intro,
                       ),
                     )
@@ -95,15 +78,22 @@ class _ConsumerMessageDetailsScreenState
                     DateTime timeStamp = (data[index]['time']) == null
                         ? DateTime.now()
                         : (data[index]['time']).toDate();
-                    return Column(
-                      children: [
-                        ReplyTile(
-                          text: data[index]['reply'],
-                          replySenderId: data[index]['replySenderId'],
-                          time: timeAgo(timeStamp),
-                        ),
-                        // const Divider(height: 0),
-                      ],
+                    final bool pending = data[index].metadata.hasPendingWrites;
+                    final Reply reply = Reply(
+                      message: data[index]['reply'],
+                      replySenderId: data[index]['replySenderId'],
+                      toMessageId: widget.message.id!,
+                      toSenderId: widget.message.senderId,
+                      isMe: auth.uid == data[index]['replySenderId'],
+                      pending: pending,
+                      time: timeStamp,
+                      likes: data[index]['likes'],
+                    );
+
+                    return ReplyTile(
+                      reply: reply,
+                      replyRef: widget.repliesRef.doc(data[index].id),
+                      deptId: widget.deptId,
                     );
                   },
                 ),
@@ -111,36 +101,38 @@ class _ConsumerMessageDetailsScreenState
             ),
           );
         },
+        error: (error, stackTrace) {
+          return const Center(child: Text('Oops! An error occurred'));
+        },
+        loading: () {
+          return const Center(child: LoadingIndicator());
+        },
       ),
       persistentFooterButtons: [
-        Consumer(
-          builder: (context, ref, child) {
-            // final user = ref.watch(userProvider);
-            final auth = ref.watch(authStateProvider).value;
-            return Form(
-              key: _key,
-              child: MessageTextField(
-                onSuffixPressed: () {
-                  if (_replyTextController.text.trim().isEmpty) return;
-                  MessageDB().reply(
-                    ref: widget.repliesRef,
-                    Reply(
-                      message: _replyTextController.text.trim(),
-                      replySenderId: auth!.uid,
-                      toMessageId: widget.message.id!,
-                      toSenderId: widget.message.senderId,
-                      time: DateTime.now(),
-                    ),
-                    context,
-                  );
-                  _replyTextController.clear();
-                },
-                hintText: 'Type a reply',
-                textController: _replyTextController,
-                hasPrefix: false,
-              ),
-            );
-          },
+        Form(
+          key: _key,
+          child: MessageTextField(
+            onSuffixPressed: () {
+              if (_replyTextController.text.trim().isEmpty) return;
+              MessageDB().reply(
+                ref: widget.repliesRef,
+                Reply(
+                  message: _replyTextController.text.trim(),
+                  replySenderId: auth.uid,
+                  toMessageId: widget.message.id!,
+                  toSenderId: widget.message.senderId,
+                  time: DateTime.now(),
+                  likes: [],
+                ),
+                context,
+              );
+              _replyTextController.clear();
+              FocusManager.instance.primaryFocus!.unfocus();
+            },
+            hintText: 'Type a reply',
+            textController: _replyTextController,
+            hasPrefix: false,
+          ),
         ),
         SizedBox(height: bottom),
       ],
@@ -163,23 +155,25 @@ class ReactionTile extends StatelessWidget {
         TextEditingController(text: widget.message.message);
     return Column(
       children: [
-        const Seperator(height: 0),
+        const Separator(height: 0),
         height5,
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             ReactionButton(
-              label: 'Like',
-              icon: Icons.thumb_up_outlined,
-              onPressed: () {
-                //! TODO Add Reaction
-              },
+              label: 'Copy',
+              icon: Icons.copy,
+              onPressed: () => Clipboard.setData(
+                ClipboardData(text: widget.message.image!),
+              ).then(
+                (value) => showSnackBar(context, msg: 'Copied to clipboard'),
+              ),
             ),
-            ReactionButton(
-              label: me ? 'Edit' : 'Reply privately',
-              icon: me ? Icons.edit_outlined : Icons.reply,
-              onPressed: me
-                  ? () {
+            me
+                ? ReactionButton(
+                    label: 'Edit',
+                    icon: Icons.edit_outlined,
+                    onPressed: () {
                       messageEditDialogue(
                         context,
                         messageController: messageController,
@@ -191,21 +185,18 @@ class ReactionTile extends StatelessWidget {
                           MessageDB().edit(
                             context,
                             roomId: widget.room.id!,
+                            deptId: widget.deptId,
                             messageId: widget.message.id!,
                             newMessage: messageController.text.trim(),
                           );
                         },
                       );
-                    }
-                  : () {
-                      //! Do something for others
                     },
-            ),
+                  )
+                : const SizedBox(),
             ReactionButton(
-              label: me ? 'Delete' : 'Dislike',
-              icon: me
-                  ? Icons.delete_forever_outlined
-                  : Icons.thumb_down_outlined,
+              label: me ? 'Delete' : 'Reply privately',
+              icon: me ? Icons.delete_forever_outlined : Icons.reply,
               onPressed: me
                   ? () => deleteAlertDialogue(
                         context,
@@ -219,7 +210,7 @@ class ReactionTile extends StatelessWidget {
           ],
         ),
         height10,
-        const Seperator(height: 0),
+        const Separator(height: 0),
       ],
     );
   }
@@ -230,12 +221,16 @@ class MsgTile extends StatelessWidget {
     super.key,
     required this.widget,
     required this.firestore,
+    required this.user,
     required this.date,
+    required this.me,
   });
 
   final MessageDetailsScreen widget;
   final FirebaseFirestore firestore;
+  final AsyncValue<Map<String, dynamic>?> user;
   final String date;
+  final bool me;
 
   @override
   Widget build(BuildContext context) {
@@ -247,75 +242,49 @@ class MsgTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          radius: size / 2,
+                          backgroundImage: CachedNetworkImageProvider(
+                            user.value?['image'],
+                          ),
+                        ),
+                        SizedBox(width: ten),
+                        Text(
+                          me
+                              ? '${user.value?['name']} (You)'
+                              : user.value?['name'],
+                          style: TextConfig.small,
+                        ),
+                      ],
+                    ),
+                    Text(date, style: TextConfig.intro)
+                  ],
+                ),
+                height10,
                 Visibility(
-                  visible: true,
-                  child: widget.message.image != null
+                  visible: widget.message.image != null &&
+                      widget.message.image!.isNotEmpty,
+                  child: widget.message.image != null &&
+                          widget.message.image!.isNotEmpty
                       ? Column(
                           children: [
-                            Image.network(
-                              widget.message.image!,
-                              fit: BoxFit.cover,
-                              loadingBuilder:
-                                  (context, child, loadingProgress) =>
-                                      const CircularProgressIndicator(),
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Text('❗Unable to load image❗'),
+                            ClipRRect(
+                              borderRadius: defaultBorderRadius,
+                              child: CachedNetworkImage(
+                                imageUrl: widget.message.image!,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                            height20,
+                            height5,
                           ],
                         )
                       : const SizedBox(),
-                ),
-                Row(
-                  children: [
-                    FutureBuilder(
-                        future: firestore
-                            .collection('users')
-                            .doc(widget.message.senderId)
-                            .get(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(
-                              child: CircleAvatar(radius: size / 2),
-                            );
-                          }
-                          if (snapshot.hasError) {
-                            return const Center(
-                                child: Text("Oops! An error occurred"));
-                          }
-                          final data = snapshot.data?.data();
-                          return CircleAvatar(
-                            radius: size / 2,
-                            backgroundImage: CachedNetworkImageProvider(
-                              data?['image'],
-                            ),
-                          );
-                        }),
-                    SizedBox(width: ten),
-                    FutureBuilder(
-                      future: firestore
-                          .collection('users')
-                          .doc(widget.message.senderId)
-                          .get(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: Text("Some one"),
-                          );
-                        }
-                        if (snapshot.hasError) {
-                          return const Center(child: Text("Some one"));
-                        }
-                        final data = snapshot.data?.data();
-                        return Text(
-                          data?['name'],
-                          style: TextConfig.intro,
-                        );
-                      },
-                    ),
-                  ],
                 ),
                 height10,
                 Text.rich(
@@ -325,16 +294,6 @@ class MsgTile extends StatelessWidget {
                       widget.message.message,
                     ),
                   ),
-                ),
-                height10,
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      date,
-                      style: TextConfig.small,
-                    ),
-                  ],
                 ),
               ],
             ),

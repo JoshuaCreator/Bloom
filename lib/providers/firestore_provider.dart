@@ -5,17 +5,6 @@ import 'auth_provider.dart';
 
 // ⭐⭐ RETRIEVE DATA FROM FIRESTORE ⭐⭐
 
-//? *************** Get Anouncements ***************//
-final anouncementProvider = StreamProvider(
-  (ref) {
-    final firestore = ref.watch(firestoreProvider);
-
-    var docRef =
-        firestore.collection('anouncements').orderBy('time', descending: true);
-    return docRef.snapshots().map((data) => data.docs);
-  },
-);
-
 //? *************** Get Current User ***************//
 final userProvider = StreamProvider(
   (ref) {
@@ -36,17 +25,16 @@ final anyUserProvider = StreamProvider.family((ref, String userId) {
   return userRef.doc(userId).snapshots().map((user) => user.data());
 });
 
-// //? *************** Get Room Image *****************//
-// final roomImageProvider = StreamProvider.family((ref, DocumentReference roomCollection) {
-//   final firestore = ref.watch(firestoreProvider);
-//   final roomRef = firestore.roomCollection;
-  
-
-//   return roomRef.snapshots().map((value) => value.data());
-// });
-
-//? *************** Get Rooms ***************//
+//? *************** Get A Room ***************//
 final roomProvider = StreamProvider.family(
+  (ref, DocumentReference<Map<String, dynamic>> roomRef) {
+    final collectionRef = roomRef;
+    return collectionRef.snapshots().map((data) => data.data());
+  },
+);
+
+//? *************** Get Rooms Of A Dept ***************//
+final deptRoomsProvider = StreamProvider.family(
   (ref, String deptId) {
     final firestore = ref.watch(firestoreProvider);
 
@@ -63,7 +51,10 @@ final roomProvider = StreamProvider.family(
 final deptsProvider = StreamProvider((ref) {
   final firestore = ref.watch(firestoreProvider);
   final collectionRef = firestore.collection('departments');
-  return collectionRef.snapshots().map((value) => value.docs);
+  return collectionRef
+      .orderBy('createdAt')
+      .snapshots()
+      .map((value) => value.docs);
 });
 
 //? *************** Get Individial Departments *****************//
@@ -74,17 +65,47 @@ final deptDataProvider = StreamProvider.family((ref, String deptId) {
   return userRef.doc(deptId).snapshots().map((value) => value.data());
 });
 
-//? *************** Get Last Message ******************//
-final lastMessageProvider = StreamProvider.family((ref, String roomId) {
-  final firestore = ref.watch(firestoreProvider);
+//? *************** Get Participants ******************//
+final participantsProvider =
+    StreamProvider.family((ref, CollectionReference participantsRef) {
+  final collectionRef = participantsRef;
 
-  var collectionRef = firestore
-      .collection('rooms')
-      .doc(roomId)
-      .collection('messages')
-      .orderBy('time', descending: true)
-      .limit(1);
   return collectionRef.snapshots().map((data) => data.docs);
+});
+
+//? *************** Get Replies ******************//
+final repliesProvider =
+    StreamProvider.family((ref, CollectionReference repliesRef) {
+  final collectionRef = repliesRef;
+
+  return collectionRef
+      .orderBy('time', descending: true)
+      .snapshots(includeMetadataChanges: true)
+      .map((data) => data.docs);
+});
+
+//? *************** Get Number Of Replies ******************//
+final repliesCountProvider =
+    StreamProvider.family((ref, CollectionReference repliesRef) {
+  final collectionRef = repliesRef;
+
+  return collectionRef.snapshots().map((data) => data.docs);
+});
+
+//? *************** Get Last Message ******************//
+final lastMessageProvider =
+    StreamProvider.family((ref, Query<Map<String, dynamic>> lastMessageRef) {
+  final collectionRef = lastMessageRef;
+  return collectionRef.snapshots().map((data) => data.docs);
+});
+
+//? *************** Get All Messages ******************//
+final messagesProvider =
+    StreamProvider.family((ref, Query<Map<String, dynamic>> messagesRef) {
+  final collectionRef = messagesRef;
+  return collectionRef
+      .snapshots(includeMetadataChanges: true)
+      .map((data) => data.docs);
 });
 
 final firestoreProvider = Provider<FirebaseFirestore>((ref) {

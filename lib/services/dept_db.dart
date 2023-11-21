@@ -1,5 +1,6 @@
 import 'package:basic_board/models/dept.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
+import 'package:basic_board/views/screens/dept_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -26,14 +27,13 @@ class DeptDB {
       }).then((value) {
         _deptRef.doc(value.id).update({
           'id': value.id,
-          'rooms': [value.id]
-        });
-        _deptRef.doc(value.id).collection('participants').doc(userId).set({
-          'id': userId,
-          'joined': DateTime.now(),
-        }).then((value) {
+          'Departments': [value.id]
+        }).then((_) {
           context.pop();
           context.pop();
+          // context.push(
+          //   '${DeptScreen.id}/${HomeScreen.id}/${CreateRoomScreen.id}/${value.id}',
+          // );
           showSnackBar(context, msg: '${dept.name} has been created');
         });
       }).catchError((e) {
@@ -48,6 +48,76 @@ class DeptDB {
       );
     } catch (e) {
       if (context.mounted) showSnackBar(context, msg: 'An error occurred: $e');
+    }
+  }
+
+  Future edit(
+    BuildContext context, {
+    required String deptId,
+    String? name,
+    String? desc,
+  }) async {
+    try {
+      showLoadingIndicator(context);
+      _firestore
+          .collection('departments')
+          .doc(deptId)
+          .update({'name': name, 'desc': desc}).then((value) {
+        context.pop();
+        context.pop();
+        showSnackBar(
+          context,
+          msg: 'Department info updated successfully',
+        );
+      }).catchError((e) {
+        context.pop();
+        context.pop();
+        showSnackBar(
+          context,
+          msg: 'Oops! Unable to update Department info. \n Try again',
+        );
+      });
+    } catch (e) {
+      showSnackBar(context, msg: "An error occurred: $e");
+    }
+  }
+
+  Future delete(
+    BuildContext context, {
+    required String deptName,
+    required String deptId,
+  }) async {
+    try {
+      showLoadingIndicator(context, label: 'Deleting...');
+      _firestore.collection('departments').doc(deptId).delete().then((value) {
+        context.go(DeptScreen.id);
+        showSnackBar(
+          context,
+          msg: "$deptName deleted",
+        );
+      }).catchError((e) {
+        context.pop();
+        context.pop();
+        showSnackBar(
+          context,
+          msg: "Unable to delete $deptName",
+        );
+      }).timeout(
+        const Duration(seconds: 20),
+        onTimeout: () {
+          context.pop();
+          showSnackBar(
+            context,
+            msg:
+                'The connection timed out. Check your internet connection and try again',
+          );
+        },
+      );
+    } catch (e) {
+      showSnackBar(
+        context,
+        msg: "An error occurred: $e",
+      );
     }
   }
 }

@@ -16,8 +16,11 @@ String timeAgo(DateTime time) {
     return DateFormat.E().add_jm().format(time);
   }
   if (diff.inHours > 0) {
-    return "Today ${DateFormat('jm').format(time)}";
+    return "${(diff.inHours).floor()} ${(diff.inHours).floor() == 1 ? "hour" : "hours"} ago";
   }
+  // if (diff.inHours > 0) {
+  //   return "Today, ${DateFormat('jm').format(time)}";
+  // }
   // if (diff.inHours > 0) {
   //   return "${(diff.inHours).floor()} hours ago ${DateFormat('jm').format(time)}";
   // }

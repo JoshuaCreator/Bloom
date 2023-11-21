@@ -13,21 +13,24 @@ class AppShowMoreText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ReadMoreText(
-      text,
-      textAlign: textAlign,
-      moreStyle: const TextStyle(
-        fontSize: 12.0,
-        color: Colors.amber,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: ten),
+      child: ReadMoreText(
+        text,
+        textAlign: textAlign,
+        moreStyle: const TextStyle(
+          fontSize: 12.0,
+          color: Colors.amber,
+        ),
+        lessStyle: const TextStyle(
+          fontSize: 12.0,
+          color: Colors.amber,
+        ),
+        trimMode: TrimMode.Line,
+        trimLines: 3,
+        trimExpandedText: '\t\tless',
+        trimCollapsedText: 'more',
       ),
-      lessStyle: const TextStyle(
-        fontSize: 12.0,
-        color: Colors.amber,
-      ),
-      trimMode: TrimMode.Line,
-      trimLines: 3,
-      trimExpandedText: '\t\tless',
-      trimCollapsedText: 'more',
     );
   }
 }

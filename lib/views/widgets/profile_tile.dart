@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../configs/consts.dart';
+import '../screens/dept_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/settings_screen.dart';
@@ -19,13 +20,12 @@ class ProfileTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final theme = MediaQuery.of(context).platformBrightness;
     return Column(
       children: [
         InkWell(
           onTap: () {
             context.push(
-              '${HomeScreen.id}/${SettingsScreen.id}/${ProfileScreen.id}',
+              '${DeptScreen.id}/${HomeScreen.id}/${SettingsScreen.id}/${ProfileScreen.id}',
             );
           },
           child: Ink(
@@ -36,11 +36,12 @@ class ProfileTile extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Hero(tag: 'user-profile',
+                    Hero(
+                      tag: 'user-profile',
                       child: CircleAvatar(
                           radius: thirty,
                           backgroundImage: CachedNetworkImageProvider(
-                            user.value?['image'],
+                            user.value?['image'] ?? '',
                           )),
                     ),
                     SizedBox(width: ten),
@@ -51,30 +52,23 @@ class ProfileTile extends StatelessWidget {
                         SizedBox(
                           width: size * 5,
                           child: Text(
-                            user.value?['name'],
+                            user.value?['name'] ?? '',
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(fontSize: 20.0),
                           ),
                         ),
-                        SizedBox(
-                          width: size * 5,
-                          child: Text(
-                            email!,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 14.0,
-                              color: Colors.grey.shade600,
-                            ),
+                        Text(
+                          email ?? '',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14.0,
+                            color: Colors.grey.shade600,
                           ),
                         ),
                       ],
                     ),
                   ],
                 ),
-                // IconButton(
-                //   onPressed: () {},
-                //   icon: const Icon(Icons.image),
-                // ),
               ],
             ),
           ),

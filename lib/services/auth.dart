@@ -1,4 +1,5 @@
 import 'package:basic_board/models/user.dart';
+import 'package:basic_board/views/screens/dept_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ class Auth {
         if (!_auth.currentUser!.emailVerified) {
           context.go(VerifyEmailScreen.id);
         } else {
-          context.go(HomeScreen.id);
+          context.go('${DeptScreen.id}/${HomeScreen.id}');
         }
       });
     } on FirebaseAuthException catch (e) {
@@ -91,15 +92,11 @@ class Auth {
       await _auth
           .createUserWithEmailAndPassword(email: email, password: password)
           .then((value) {
-        _userRef.doc().set({
+        _userRef.doc(_auth.currentUser?.uid).set({
           'id': _auth.currentUser?.uid,
-          'title': user.title,
-          // 'fName': user.fName,
-          // 'lName': user.lName,
-          'oName': user.displayName,
+          'name': user.name,
           'phone': user.phone,
           'email': email,
-          'admin': email.contains('joshua'),
         });
       }).then(
         (value) {
@@ -189,8 +186,6 @@ class Auth {
     } catch (e) {
       if (context.mounted) {
         context.pop();
-      }
-      if (context.mounted) {
         showSnackBar(context, msg: e.toString());
       }
     }

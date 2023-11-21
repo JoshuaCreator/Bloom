@@ -25,10 +25,8 @@ class _RegisterScreeenState extends State<RegisterScreeen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool obscureText = true;
-  List titles = ['Mr', 'Mrs', 'Miss', 'Sir'];
   @override
   Widget build(BuildContext context) {
-    String? title = titles[0];
     return Scaffold(
       appBar: AppBar(title: const Text('Register')),
       body: Center(
@@ -39,37 +37,6 @@ class _RegisterScreeenState extends State<RegisterScreeen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // AppDropdownField(
-                //   value: title,
-                //   hintText: 'How would you like to be addressed',
-                //   items: List.generate(
-                //     titles.length,
-                //     (index) => DropdownMenuItem(
-                //       value: '${titles[index]}',
-                //       child: Text('${titles[index]}'),
-                //     ),
-                //   ),
-                //   onChanged: (newTitle) {
-                //     title = newTitle;
-                //   },
-                // ),
-                // height20,
-                // AppTextField(
-                //   label: 'First name*',
-                //   hintText: 'Enter your first name',
-                //   textInputAction: TextInputAction.next,
-                //   controller: fNameController,
-                //   keyboardType: TextInputType.name,
-                // ),
-                // height20,
-                // AppTextField(
-                //   label: 'Last name*',
-                //   hintText: 'Enter your last name',
-                //   textInputAction: TextInputAction.next,
-                //   controller: lNameController,
-                //   keyboardType: TextInputType.name,
-                // ),
-                // height20,
                 AppTextField(
                   label: 'Display name',
                   hintText: 'e.g. Joshua Ewaoche',
@@ -124,16 +91,14 @@ class _RegisterScreeenState extends State<RegisterScreeen> {
                       label: 'Register',
                       onTap: () {
                         AppUser user = AppUser(
-                          title: title,
-                          // fName: fNameController.text.trim(),
-                          // lName: lNameController.text.trim(),
-                          displayName: nameController.text.trim(),
+                          name: nameController.text.trim(),
+                          email: emailController.text.trim(),
                           phone: int.parse(phoneController.text),
                         );
                         if (_formKey.currentState!.validate()) {
                           Auth().register(
                             context,
-                            email: emailController.text.trim(),
+                            email: user.email!,
                             password: passwordController.text.trim(),
                             user: user,
                           );
@@ -142,9 +107,6 @@ class _RegisterScreeenState extends State<RegisterScreeen> {
                     ),
                   ],
                 ),
-                // height40,
-                // const AppDivider(),
-                // height20,
               ],
             ),
           ),
@@ -155,8 +117,6 @@ class _RegisterScreeenState extends State<RegisterScreeen> {
 
   @override
   void dispose() {
-    // fNameController.dispose();
-    // lNameController.dispose();
     nameController.dispose();
     phoneController.dispose();
     emailController.dispose();

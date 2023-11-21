@@ -14,6 +14,7 @@ infoEditDialogue(
   TextEditingController? nameController,
   TextEditingController? aboutController,
   final String? title,
+  // final TextInputAction descTextInputAction = TextInputAction.done,
 }) {
   String defaultTitle = '';
   String name = '';
@@ -78,15 +79,76 @@ infoEditDialogue(
                 child: AppTextField(
                   hintText: about,
                   borderless: true,
-                  maxLines: 2,
+                  maxLines: 5,
                   autofocus: true,
                   controller: aboutController,
-                  onFieldSubmitted: (_) => onSaved!(),
+                  keyboardType: TextInputType.multiline,
+                  textInputAction: TextInputAction.newline,
                 ),
               ),
               height30,
               AppButton(label: 'Save', onTap: onSaved),
               height10,
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+userInfoEditDialogue(
+  BuildContext context, {
+  required void Function()? onSaved,
+  required TextEditingController nameController,
+  required TextEditingController aboutController,
+  required TextEditingController phoneController,
+  required bool autofocusName,
+  required bool autofocusAbout,
+  required bool autofocusPhone,
+}) {
+  showModalBottomSheet(
+    isScrollControlled: true,
+    useSafeArea: true,
+    enableDrag: false,
+    context: context,
+    builder: (context) {
+      double bottom = MediaQuery.viewInsetsOf(context).bottom;
+      return Padding(
+        padding: EdgeInsets.fromLTRB(ten, ten, ten, bottom),
+        child: Form(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(children: [Text('Edit your info', style: TextConfig.intro)]),
+              height10,
+              AppTextField(
+                hintText: 'Name',
+                borderless: true,
+                textInputAction: TextInputAction.next,
+                autofocus: autofocusName,
+                controller: nameController,
+              ),
+              height10,
+              AppTextField(
+                hintText: 'Phone',
+                borderless: true,
+                maxLines: 5,
+                autofocus: autofocusAbout,
+                controller: aboutController,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
+              ),
+              height10,
+              AppTextField(
+                hintText: 'Phone',
+                borderless: true,
+                autofocus: autofocusPhone,
+                textInputAction: TextInputAction.done,
+                controller: phoneController,
+              ),
+              height30,
+              AppButton(label: 'Save', onTap: onSaved),
             ],
           ),
         ),
@@ -118,7 +180,7 @@ messageEditDialogue(
               AppTextField(
                 hintText: 'New message',
                 borderless: true,
-                maxLines: 2,
+                maxLines: 5,
                 autofocus: true,
                 controller: messageController,
                 onFieldSubmitted: (_) => onSaved!(),

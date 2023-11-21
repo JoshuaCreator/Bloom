@@ -1,4 +1,4 @@
-import 'package:basic_board/configs/consts.dart';
+import 'package:basic_board/views/screens/dept_screen.dart';
 import 'package:basic_board/views/widgets/image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -8,25 +8,24 @@ import '../../utils/imports.dart';
 class RoomTile extends ConsumerWidget {
   const RoomTile({
     super.key,
-    required this.id,
     required this.image,
     required this.name,
     this.subtitle,
+    this.deptId,
     this.trailing,
+    required this.roomData,
+    this.showInfoIcon = false,
     this.onTap,
   });
-  final String id, name;
-  final String? image, subtitle;
+  final String name;
+  final String? image, subtitle, deptId;
   final Widget? trailing;
+  final Room roomData;
+  final bool showInfoIcon;
   final void Function()? onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final image = ref.watch(roomImageProvider(id)).value;
-    // final String img = image!['image'].toString().isEmpty
-    //     ? 'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg'
-    //     : image['image'] ??
-    //         'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg';
     return ListTile(
       leading: GestureDetector(
         onTap: () => showDialog(
@@ -34,6 +33,12 @@ class RoomTile extends ConsumerWidget {
           builder: (context) => ImageViewer(
             image: image ??
                 'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg',
+            onInfoIconPressed: showInfoIcon
+                ? () => context.push(
+                      '${DeptScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${roomData.id}/${RoomInfoScreen.id}/$deptId',
+                      extra: roomData,
+                    )
+                : null,
           ),
         ),
         child: CircleAvatar(
@@ -59,9 +64,6 @@ class RoomTile extends ConsumerWidget {
               style: const TextStyle(fontSize: 12.0),
             ),
       trailing: trailing,
-      onLongPress: () {
-        //! Show Bottom Sheet With Options
-      },
       onTap: onTap,
     );
   }

@@ -1,24 +1,7 @@
-import 'package:basic_board/models/dept.dart';
-import 'package:basic_board/models/room.dart';
-import 'package:basic_board/views/screens/create_dept_screen.dart';
-import 'package:basic_board/views/screens/dept_info_screen.dart';
-import 'package:basic_board/views/screens/dept_screen.dart';
-import 'package:basic_board/views/screens/room_info_screen.dart';
-import 'package:basic_board/views/screens/account_screen.dart';
-import 'package:basic_board/views/screens/all_rooms_screen.dart';
-import 'package:basic_board/views/screens/profile_screen.dart';
-import 'package:basic_board/views/screens/create_room_screen.dart';
-import 'package:basic_board/views/screens/room_chat_screen.dart';
-import 'package:basic_board/views/screens/settings_screen.dart';
-import 'package:basic_board/views/screens/theme_selector_screen.dart';
-import 'package:go_router/go_router.dart';
-import 'package:basic_board/views/screens/auth_checker.dart';
-import 'package:basic_board/views/screens/home_screen.dart';
-import 'package:basic_board/views/screens/login_screen.dart';
-import 'package:basic_board/views/screens/password_reset_screen.dart';
-import 'package:basic_board/views/screens/register_screen.dart';
+import 'package:basic_board/views/screens/user_screen.dart';
 
 import '../views/screens/verify_email_screen.dart';
+import '../utils/imports.dart';
 
 GoRouter goRouter = GoRouter(
   initialLocation: AuthChecker.id,
@@ -38,6 +21,7 @@ GoRouter goRouter = GoRouter(
           ),
           routes: [
             GoRoute(
+              //! TODO Let Settings be directly under Departments screen
               path: SettingsScreen.id,
               builder: (context, state) => const SettingsScreen(),
               routes: [
@@ -74,6 +58,12 @@ GoRouter goRouter = GoRouter(
                     depmtId: state.pathParameters['depmtId']!,
                     room: state.extra as Room,
                   ),
+                  routes: [
+                    GoRoute(
+                      path: '${UserScreen.id}/:userId',
+                      builder: (context, state) => UserScreen(userId: state.pathParameters['userId']!,),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -83,17 +73,11 @@ GoRouter goRouter = GoRouter(
                 deptData: state.extra as Department,
               ),
             ),
-            GoRoute(
-              path: "${AllRoomsScreen.id}/:deptId",
-              builder: (context, state) => AllRoomsScreen(
-                deptId: state.pathParameters['deptId']!,
-              ),
-            ),
-            GoRoute(
-              path: CreateDeptScreen.id,
-              builder: (context, state) => const CreateDeptScreen(),
-            ),
           ],
+        ),
+        GoRoute(
+          path: CreateDeptScreen.id,
+          builder: (context, state) => const CreateDeptScreen(),
         ),
       ],
     ),

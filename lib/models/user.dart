@@ -1,13 +1,10 @@
 class AppUser {
-  // final String fName, lName;
-  final String? userId, displayName, title;
+  final String? userId, name, email;
   final int phone;
   const AppUser({
-    // required this.fName,
-    // required this.lName,
     this.userId,
-    this.displayName,
-    this.title,
+    this.name,
+    this.email,
     required this.phone,
   });
 }

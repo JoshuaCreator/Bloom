@@ -5,7 +5,6 @@ class AppTheme {
     colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
     useMaterial3: true,
     appBarTheme: const AppBarTheme(
-      // centerTitle: true,
       surfaceTintColor: Colors.transparent,
     ),
     bottomSheetTheme: const BottomSheetThemeData(
@@ -19,14 +18,12 @@ class AppTheme {
       ),
     ),
     dividerColor: Colors.black.withOpacity(0.3),
-        // dividerTheme: const DividerThemeData(color: Colors.transparent)
   );
 
   static ThemeData darkTheme = ThemeData(
     colorScheme: const ColorScheme.dark(),
     useMaterial3: true,
     appBarTheme: const AppBarTheme(
-      // centerTitle: true,
       surfaceTintColor: Colors.transparent,
     ),
     bottomSheetTheme: const BottomSheetThemeData(
@@ -40,6 +37,5 @@ class AppTheme {
       ),
     ),
     dividerColor: Colors.white.withOpacity(0.3),
-        // dividerTheme: const DividerThemeData(color: Colors.transparent)
   );
 }

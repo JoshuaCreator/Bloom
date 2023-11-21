@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class Seperator extends StatelessWidget {
-  const Seperator({
+class Separator extends StatelessWidget {
+  const Separator({
     super.key,
     this.height = 20,
   });

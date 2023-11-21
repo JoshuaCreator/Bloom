@@ -2,7 +2,6 @@ import 'package:basic_board/models/dept.dart';
 import 'package:basic_board/views/screens/dept_screen.dart';
 
 import '../../utils/imports.dart';
-import 'dept_info_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   static String id = 'home';
@@ -22,146 +21,148 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final firstDept = ref.watch(deptsProvider);
-    // final firstDeptId = firstDept.value?[0].id;
-    final room = ref.watch(roomProvider(widget.dept!.id!));
+    final room = ref.watch(deptRoomsProvider(widget.dept!.id!));
     final auth = ref.watch(authStateProvider).value;
+    final firestore = ref.watch(firestoreProvider);
 
-    return Scaffold(
-      // drawer: const AppDrawer(),
-      appBar: AppBar(
-        title: Text(widget.dept!.name),
-        actions: [buildPopupMenu(context)],
+    return RefreshIndicator(
+      onRefresh: () => ref.refresh(
+        deptRoomsProvider(widget.dept!.id!).future,
       ),
-      body: room.when(
-        data: (data) => data.isEmpty
-            ? const Center(
-                child: Text(
-                  'There are no Rooms available in this Department yet.\n Contact your supervisor',
-                  textAlign: TextAlign.center,
-                ),
-              )
-            : Column(
-                children: [
-                  height10,
-                  SearchTile(
-                    label: 'search...',
-                    icon: Icons.search_rounded,
-                    onTap: () => showSearch(
-                      context: context,
-                      delegate: CustomSearchDelegate(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.dept!.name),
+          actions: [
+            IconButton(
+              onPressed: () => context.push(
+                '${DeptScreen.id}/${HomeScreen.id}/${DeptInfoScreen.id}',
+                extra: widget.dept,
+              ),
+              icon: const Icon(Icons.info_outline),
+              tooltip: 'Department info',
+            ),
+          ],
+        ),
+        body: room.when(
+          data: (data) => data.isEmpty
+              ? const Center(
+                  child: Text(
+                    'There are no Rooms available in this Department yet.\n Contact your supervisor',
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : Column(
+                  children: [
+                    height10,
+                    SearchTile(
+                      label: 'search...',
+                      icon: Icons.search_rounded,
+                      onTap: () => showSearch(
+                        context: context,
+                        delegate: CustomSearchDelegate(),
+                      ),
                     ),
-                  ),
-                  height20,
-                  SectionDivider(
-                    title: 'Rooms',
-                    turns: turns,
-                    onTap: () => setState(() {
-                      showRooms ? showRooms = false : showRooms = true;
-                      showRooms ? turns -= 1.0 / 2.0 : turns += 1.0 / 2.0;
-                    }),
-                  ),
-                  VisibilityAnimator(
-                    show: showRooms,
-                    child: ListView.builder(
-                      itemCount: room.value?.length,
-                      itemBuilder: (context, index) {
-                        final Room roomData = Room(
-                          id: room.value![index]['id'],
-                          // deptId: room.value![index][''],
-                          creatorId: room.value?[index]['creatorId'],
-                          name: room.value?[index]['name'],
-                          desc: room.value?[index]['desc'],
-                          private: room.value?[index]['private'],
-                          image: room.value?[index]['image'] ??
-                              'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg',
-                          createdAt: (room.value?[index]['createdAt']).toDate(),
-                          participants: room.value?[index]['participants'],
-                        );
+                    height20,
+                    SectionDivider(
+                      title: 'Rooms',
+                      turns: turns,
+                      onTap: () => setState(() {
+                        showRooms ? showRooms = false : showRooms = true;
+                        showRooms ? turns -= 1.0 / 2.0 : turns += 1.0 / 2.0;
+                      }),
+                    ),
+                    VisibilityAnimator(
+                      show: showRooms,
+                      child: ListView.builder(
+                        itemCount: room.value?.length,
+                        itemBuilder: (context, index) {
+                          final Room roomData = Room(
+                            id: room.value![index]['id'],
+                            creatorId: room.value?[index]['creatorId'],
+                            name: room.value?[index]['name'],
+                            desc: room.value?[index]['desc'],
+                            private: room.value?[index]['private'],
+                            image: room.value?[index]['image'] ??
+                                'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg',
+                            createdAt:
+                                (room.value?[index]['createdAt']).toDate(),
+                            participants: room.value?[index]['participants'],
+                          );
+                          final lastMessage = ref.watch(
+                            lastMessageProvider(firestore
+                                .collection('departments')
+                                .doc(widget.dept?.id)
+                                .collection('rooms')
+                                .doc(roomData.id)
+                                .collection('messages')
+                                .orderBy('time', descending: true)
+                                .limit(1)),
+                          );
+                          final String senderId = lastMessage.value == null ||
+                                  lastMessage.value!.isEmpty
+                              ? ''
+                              : lastMessage.value?[0]['senderId'];
 
-                        return Visibility(
-                          visible: roomData.participants.contains(auth?.uid),
-                          child: Consumer(builder: (context, ref, child) {
-                            final lastMessage =
-                                ref.watch(lastMessageProvider(roomData.id!));
+                          final user = ref.watch(anyUserProvider(senderId));
 
-                            final String senderId = lastMessage.value!.isEmpty
-                                ? 'random_string'
-                                : lastMessage.value?[0]['senderId'];
+                          final bool me = auth?.uid == senderId;
 
-                            final user = ref.watch(anyUserProvider(senderId));
+                          final String last = lastMessage.value == null ||
+                                  lastMessage.value!.isEmpty
+                              ? ''
+                              : lastMessage.value?[0]['message'];
 
-                            final bool me = auth?.uid == senderId;
+                          final String subtitle = lastMessage.value == null ||
+                                  lastMessage.value!.isEmpty
+                              ? 'No messages yet'
+                              : me
+                                  ? '~me: $last'
+                                  : '~${user.value?['name'] ?? ''}: $last';
 
-                            final String last = lastMessage.value!.isEmpty
-                                ? ''
-                                : lastMessage.value?[0]['message'];
-
-                            final String subtitle = lastMessage.value!.isEmpty
-                                ? 'No messages yet'
-                                : me
-                                    ? '~me: $last'
-                                    : '~${user.value?['name'] ?? ''}: $last';
-
-                            return RoomTile(
-                              id: roomData.id!,
+                          return Visibility(
+                            visible: roomData.participants.contains(auth?.uid),
+                            child: RoomTile(
+                              showInfoIcon: true,
+                              roomData: roomData,
                               image: roomData.image!,
                               name: roomData.name,
                               subtitle: subtitle,
+                              deptId: widget.dept?.id,
                               onTap: () {
                                 context.push(
                                   '${DeptScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.dept!.id}',
                                   extra: roomData,
                                 );
                               },
-                            );
-                          }),
-                        );
-                      },
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              ),
-        error: (error, stackTrace) => const Center(
-          child: Text('An error occurred'),
+                  ],
+                ),
+          error: (error, stackTrace) => Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('An error occurred. Tap to refresh'),
+                IconButton(
+                  onPressed: () => ref.refresh(deptsProvider),
+                  icon: const Icon(Icons.refresh),
+                ),
+              ],
+            ),
+          ),
+          loading: () => const LoadingIndicator(),
         ),
-        loading: () => const LoadingIndicator(),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () => context.push(
+        //     '${DeptScreen.id}/${HomeScreen.id}/${DeptInfoScreen.id}',
+        //     extra: widget.dept,
+        //   ),
+        //   child: const Icon(Icons.info_outline),
+        // ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push(
-          '${DeptScreen.id}/${HomeScreen.id}/${AllRoomsScreen.id}/${widget.dept?.id}',
-        ),
-        child: const Icon(Icons.add_rounded),
-      ),
-    );
-  }
-
-  AppPopupMenu buildPopupMenu(BuildContext context) {
-    return AppPopupMenu(
-      items: [
-        AppPopupMenu.buildPopupMenuItem(
-          context,
-          label: 'Dept info',
-          onTap: () => context.push(
-            '${DeptScreen.id}/${HomeScreen.id}/${DeptInfoScreen.id}',
-            extra: widget.dept,
-          ),
-        ),
-        AppPopupMenu.buildPopupMenuItem(
-          context,
-          label: 'New Room',
-          onTap: () => context.push(
-            '${DeptScreen.id}/${HomeScreen.id}/${CreateRoomScreen.id}/${widget.dept!.id!}',
-          ),
-        ),
-        AppPopupMenu.buildPopupMenuItem(
-          context,
-          label: 'Settings',
-          onTap: () => context.push(
-            '${DeptScreen.id}/${HomeScreen.id}/${SettingsScreen.id}',
-          ),
-        ),
-      ],
     );
   }
 }

@@ -1,21 +1,20 @@
-import 'package:basic_board/configs/text_config.dart';
-import 'package:basic_board/providers/firestore_provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../configs/consts.dart';
+import 'package:basic_board/utils/imports.dart';
+import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
+import 'package:basic_board/views/screens/user_screen.dart';
+import 'package:basic_board/views/widgets/image_viewer.dart';
 import 'show_more_text.dart';
 
 class ReplyTile extends ConsumerStatefulWidget {
   const ReplyTile({
     super.key,
-    required this.text,
-    required this.time,
-    required this.replySenderId,
+    required this.reply,
+    required this.replyRef,
+    required this.deptId,
   });
 
-  final String text, time, replySenderId;
+  final Reply reply;
+  final DocumentReference replyRef;
+  final String deptId;
 
   @override
   ConsumerState<ReplyTile> createState() => _ConsumerReplyTileState();
@@ -25,7 +24,9 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
   bool showReactions = false;
   @override
   Widget build(BuildContext context) {
-    final firestore = ref.watch(firestoreProvider);
+    final user = ref.watch(anyUserProvider(widget.reply.replySenderId));
+    final auth = ref.watch(authStateProvider).value!;
+    final textController = TextEditingController(text: widget.reply.message);
     return Padding(
       padding: EdgeInsets.only(bottom: five),
       child: GestureDetector(
@@ -47,49 +48,59 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  FutureBuilder(
-                    future: firestore
-                        .collection('users')
-                        .doc(widget.replySenderId)
-                        .get(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Row(
-                          children: [
-                            CircleAvatar(
-                              radius: size / 2,
-                            ),
-                            SizedBox(width: ten),
-                            Text('Some one', style: TextConfig.small),
-                          ],
-                        );
-                      }
-                      if (snapshot.hasError) {
-                        return const Center(child: Text("Some one"));
-                      }
-                      final data = snapshot.data?.data();
-                      return Row(
-                        children: [
-                          CircleAvatar(
-                            radius: size / 2,
-                            backgroundImage: CachedNetworkImageProvider(
-                              data?['image'],
-                            ),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => showDialog(
+                          context: context,
+                          builder: (context) => ImageViewer(
+                            image: user.value?['image'],
+                            onInfoIconPressed: widget.reply.isMe!
+                                ? null
+                                : () => context.push(
+                                      '${DeptScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.deptId}/${RoomInfoScreen.id}/${widget.deptId}/${UserScreen.id}/${widget.reply.replySenderId}',
+                                    ),
                           ),
-                          SizedBox(width: ten),
-                          Text(data?['name'], style: TextConfig.small),
-                        ],
-                      );
-                    },
+                        ),
+                        child: CircleAvatar(
+                          radius: size / 2,
+                          backgroundImage: CachedNetworkImageProvider(
+                            user.value?['image'],
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: ten),
+                      Text(
+                        widget.reply.isMe!
+                            ? '${user.value?['name']} (You)'
+                            : user.value?['name'],
+                        style: TextConfig.small,
+                      ),
+                      widget.reply.pending!
+                          ? Icon(
+                              Icons.access_time_rounded,
+                              color: Colors.grey,
+                              size: size / 2.3,
+                            )
+                          : const SizedBox(),
+                    ],
                   ),
                   Padding(
                     padding: EdgeInsets.only(left: forty + ten),
-                    child: AppShowMoreText(text: widget.text),
+                    child: AppShowMoreText(text: widget.reply.message),
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(widget.time, style: TextConfig.small),
+                      Text(
+                        widget.reply.likes!.isEmpty
+                            ? ''
+                            : widget.reply.likes?.length == 1
+                                ? '1 like'
+                                : '${widget.reply.likes?.length} likes',
+                        style: TextConfig.small,
+                      ),
+                      Text(timeAgo(widget.reply.time), style: TextConfig.small),
                     ],
                   ),
                 ],
@@ -101,13 +112,80 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   buildReactionIconButton(
-                    icon: Icons.favorite_border_outlined,
-                    onPressed: () {},
+                    icon: widget.reply.likes!.contains(auth.uid)
+                        ? Icons.favorite
+                        : Icons.favorite_border_outlined,
+                    color: widget.reply.likes!.contains(auth.uid)
+                        ? ColourConfig.danger
+                        : null,
+                    tooltip: widget.reply.likes!.contains(auth.uid)
+                        ? 'Revoke like'
+                        : 'Like',
+                    onPressed: () {
+                      widget.reply.likes!.contains(auth.uid)
+                          ? setState(() {
+                              widget.replyRef.update({
+                                'likes': FieldValue.arrayRemove([auth.uid])
+                              });
+                            })
+                          : setState(
+                              () {
+                                widget.replyRef.update({
+                                  'likes': FieldValue.arrayUnion([auth.uid])
+                                });
+                              },
+                            );
+                    },
                   ),
-                  buildReactionIconButton(
-                    icon: Icons.thumb_down_alt_outlined,
-                    onPressed: () {},
-                  ),
+                  widget.reply.isMe!
+                      ? buildReactionIconButton(
+                          icon: Icons.delete_outline,
+                          tooltip: 'Delete reply',
+                          onPressed: () => showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              content: const Text('Delete reply?'),
+                              actions: [
+                                AppTextButton(
+                                  label: 'Delete',
+                                  onPressed: () => widget.replyRef
+                                      .delete()
+                                      .then((value) => context.pop()),
+                                ),
+                                AppTextButton(
+                                  label: 'Cancel',
+                                  onPressed: () => context.pop(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
+                  widget.reply.isMe!
+                      ? buildReactionIconButton(
+                          icon: Icons.edit_outlined,
+                          tooltip: 'Edit reply',
+                          onPressed: () => messageEditDialogue(
+                            context,
+                            messageController: textController,
+                            onSaved: () {
+                              if (widget.reply.message ==
+                                  textController.text.trim()) {
+                                return;
+                              }
+                              showLoadingIndicator(context, label: 'Saving...');
+                              widget.replyRef.update(
+                                  {'reply': textController.text.trim()}).then(
+                                (value) {
+                                  context.pop();
+                                  context.pop();
+                                  showSnackBar(context, msg: 'Reply edited');
+                                },
+                              );
+                            },
+                          ),
+                        )
+                      : const SizedBox(),
                 ],
               ),
             ),
@@ -120,6 +198,8 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
   IconButton buildReactionIconButton({
     required IconData icon,
     void Function()? onPressed,
+    Color? color,
+    required String? tooltip,
   }) {
     return IconButton(
       onPressed: onPressed,
@@ -127,6 +207,8 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
       iconSize: size / 2,
       padding: EdgeInsets.zero,
       splashRadius: 1,
+      color: color,
+      tooltip: tooltip,
     );
   }
 }

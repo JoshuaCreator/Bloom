@@ -10,23 +10,28 @@ class UserTile extends StatelessWidget {
     required this.title,
     required this.image,
     this.trailing,
+    this.onTap,
   });
 
   final String title, image;
   final Widget? trailing;
+  final void Function()? onTap;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onTap: () {},
+      onTap: onTap,
       leading: GestureDetector(
         onTap: () => showDialog(
           context: context,
           builder: (context) => ImageViewer(image: image),
         ),
-        child: CircleAvatar(
-          radius: circularAvatarRadius,
-          backgroundImage: CachedNetworkImageProvider(image),
+        child: Hero(
+          tag: 'user-display-img',
+          child: CircleAvatar(
+            radius: circularAvatarRadius,
+            backgroundImage: CachedNetworkImageProvider(image),
+          ),
         ),
       ),
       title: Text(title),

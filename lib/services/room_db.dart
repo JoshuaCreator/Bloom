@@ -19,7 +19,6 @@ class RoomDB {
     required String deptId,
     required File? image,
   }) async {
-    // _firestore.settings = const Settings(persistenceEnabled: false);
     _roomRef =
         _firestore.collection('departments').doc(deptId).collection('rooms');
 
@@ -37,8 +36,11 @@ class RoomDB {
         (value) {
           value.update({'id': value.id}).then(
             (_) {
+              _firestore.collection('departments').doc(deptId).update({
+                'rooms': FieldValue.arrayUnion([value.id])
+              });
               _roomRef.doc(value.id).update({
-                'rooms': [value.id]
+                'rooms': FieldValue.arrayUnion([value.id])
               });
               _roomRef
                   .doc(value.id)
@@ -122,7 +124,7 @@ class RoomDB {
             .collection('rooms')
             .doc(roomId)
             .update({
-          'participants': [userId],
+          'participants': FieldValue.arrayUnion([userId]),
         }).then((value) {
           context.pop();
           showSnackBar(context, msg: "You've joined $roomName");
@@ -198,15 +200,59 @@ class RoomDB {
     }
   }
 
+  Future edit(
+    BuildContext context, {
+    required String deptId,
+    required String roomId,
+    String? name,
+    String? desc,
+  }) async {
+    try {
+      showLoadingIndicator(context);
+      _firestore
+          .collection('departments')
+          .doc(deptId)
+          .collection('rooms')
+          .doc(roomId)
+          .update({'name': name, 'desc': desc}).then((value) {
+        context.pop();
+        context.pop();
+        showSnackBar(
+          context,
+          msg: 'Room info updated successfully',
+        );
+      }).catchError((e) {
+        context.pop();
+        context.pop();
+        showSnackBar(
+          context,
+          msg: 'Oops! Unable to update Room info. \n Try again',
+        );
+      });
+    } catch (e) {
+      showSnackBar(context, msg: "An error occurred: $e");
+    }
+  }
+
   Future delete(
     BuildContext context, {
     required String roomId,
     required String roomName,
+    required String deptId,
   }) async {
     _firestore.settings = const Settings(persistenceEnabled: false);
     try {
       showLoadingIndicator(context, label: 'Deleting...');
-      _firestore.collection('rooms').doc(roomId).delete().then((value) {
+      _firestore
+          .collection('departments')
+          .doc(deptId)
+          .collection('rooms')
+          .doc(roomId)
+          .delete()
+          .then((value) {
+        _firestore.collection('departments').doc(deptId).update({
+          'rooms': FieldValue.arrayRemove([roomId])
+        });
         context.pop();
         context.pop();
         context.pop();

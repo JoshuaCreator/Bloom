@@ -1,4 +1,5 @@
 import 'package:basic_board/models/message.dart';
+import 'package:basic_board/services/image_helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,25 +11,43 @@ import '../views/dialogues/snack_bar.dart';
 class MessageDB {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late CollectionReference _messageRef;
+  final ImageHelper imageHelper = ImageHelper();
 
   Future send(
     Message message,
     BuildContext context, {
     required CollectionReference ref,
+    required String? filePath,
+    required String deptId,
+    required String roomId,
   }) async {
-    _firestore.settings = const Settings(persistenceEnabled: false);
     try {
       await ref.add({
         'message': message.message,
-        // 'senderName': message.senderName,
         'senderId': message.senderId,
         'image': message.image,
         'time': message.time
-      }).then(
-        (value) {
-          value.update({'id': value.id});
-        },
-      ).catchError((e) {
+      }).then((value) async {
+        String downloadUrl = '';
+        value.update({'id': value.id});
+        filePath == null
+            ? null
+            : downloadUrl = await imageHelper.uploadImage(
+                context,
+                imagePath: filePath,
+                docRef: _firestore
+                    .collection('departments')
+                    .doc(deptId)
+                    .collection('rooms')
+                    .doc(roomId)
+                    .collection('messages')
+                    .doc(value.id),
+                storagePath:
+                    'departments/$deptId/rooms/$roomId/messages/${value.id}.png',
+                msg: 'File uploaded and sent',
+              );
+        value.update({'image': downloadUrl});
+      }).catchError((e) {
         context.pop();
         showSnackBar(
           context,
@@ -45,15 +64,14 @@ class MessageDB {
     BuildContext context, {
     required CollectionReference ref,
   }) async {
-    FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: false);
     try {
       await ref.add({
         'reply': reply.message,
         'replySenderId': reply.replySenderId,
-        // 'replySenderName': reply.replySenderName,
         'toMessageId': reply.toMessageId,
         'toSenderId': reply.toSenderId,
-        'time': reply.time
+        'time': reply.time,
+        'likes': [],
       }).then(
         (value) {
           value.update({'id': value.id});
@@ -74,12 +92,14 @@ class MessageDB {
   Future edit(
     BuildContext context, {
     required String roomId,
+    required String deptId,
     required String messageId,
     required String newMessage,
   }) async {
-    _firestore.settings = const Settings(persistenceEnabled: false);
     try {
       _firestore
+          .collection('departments')
+          .doc(deptId)
           .collection('rooms')
           .doc(roomId)
           .collection('messages')

@@ -67,6 +67,7 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                     textInputAction: TextInputAction.next,
                     controller: _nameController,
                     borderless: true,
+                    autofocus: true,
                   ),
                 ),
               ],

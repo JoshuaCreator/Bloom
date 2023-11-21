@@ -1,4 +1,5 @@
 import 'package:basic_board/models/dept.dart';
+import 'package:basic_board/services/dept_db.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/screens/dept_screen.dart';
 import 'package:basic_board/views/widgets/show_more_text.dart';
@@ -16,18 +17,27 @@ class DeptInfoScreen extends ConsumerStatefulWidget {
 class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
   @override
   Widget build(BuildContext context) {
-    // final firestore = ref.watch(firestoreProvider);
     final dept = ref.watch(deptDataProvider(widget.deptData.id!));
-    final room = ref.watch(roomProvider(widget.deptData.id!));
+    final room = ref.watch(deptRoomsProvider(widget.deptData.id!));
     final auth = ref.watch(authStateProvider).value;
+    final nameController = TextEditingController(text: dept.value?['name']);
+    final descController = TextEditingController(text: dept.value?['desc']);
     return Scaffold(
       appBar: AppBar(
-          // title: const Text('Dept info'),
-          ),
+        actions: auth?.uid == widget.deptData.creatorId && dept.value != null
+            ? [
+                buildPopupMenu(
+                  context,
+                  nameController: nameController,
+                  descController: descController,
+                ),
+              ]
+            : null,
+      ),
       body: dept.when(
         data: (data) {
-          String dateTime =
-              DateFormat('dd MMM yyy').format(data?['createdAt'].toDate());
+          String dateTime = DateFormat('dd MMM yyy')
+              .format(data?['createdAt'].toDate() ?? DateTime.now());
           return ListView(
             shrinkWrap: true,
             children: [
@@ -37,7 +47,7 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
                   height30,
                   Text.rich(
                     TextSpan(
-                      text: '${data?['name']}\n',
+                      text: '${data?['name'] ?? ''}\n',
                       children: [
                         TextSpan(
                           text: 'Created $dateTime',
@@ -52,12 +62,12 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
                     style: TextStyle(fontSize: twenty),
                   ),
                   height30,
-                  const Seperator(),
+                  const Separator(),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: ten),
-                    child: AppShowMoreText(text: data?['desc']),
+                    child: AppShowMoreText(text: data?['desc'] ?? ''),
                   ),
-                  const Seperator(),
+                  const Separator(),
                   Padding(
                     padding: EdgeInsets.only(left: ten),
                     child: Row(
@@ -67,14 +77,17 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
                           'Rooms (${data?['rooms'].length ?? 0})',
                           style: TextConfig.intro,
                         ),
-                        IconButton(
-                          onPressed: () {
-                            context.push(
-                              '${DeptScreen.id}/${HomeScreen.id}/${CreateRoomScreen.id}/${widget.deptData.id!}',
-                            );
-                          },
-                          icon: const Icon(Icons.add),
-                          tooltip: 'Add Room',
+                        Visibility(
+                          visible: auth?.uid == widget.deptData.creatorId,
+                          child: IconButton(
+                            onPressed: () {
+                              context.push(
+                                '${DeptScreen.id}/${HomeScreen.id}/${CreateRoomScreen.id}/${widget.deptData.id!}',
+                              );
+                            },
+                            icon: const Icon(Icons.add),
+                            tooltip: 'Add Room',
+                          ),
                         ),
                       ],
                     ),
@@ -100,12 +113,15 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
                         createdAt: timeStamp,
                         participants: room.value?[index]['participants'],
                       );
+
                       final bool isParticipant =
                           roomData.participants.contains(auth?.uid);
                       return RoomTile(
-                        id: roomData.id!,
+                        roomData: roomData,
                         image: roomData.image,
                         name: roomData.name,
+                        subtitle:
+                            'Participants (${roomData.participants.length})',
                         trailing: isParticipant
                             ? AppTextButton(
                                 label: 'Leave',
@@ -147,17 +163,62 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
             ],
           );
         },
-        error: (error, stackTrace) {
-          return const Center(
-            child: Text('Unable to retrieve Department Info'),
-          );
-        },
+        error: (error, stackTrace) => Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('An error occurred. Tap to refresh'),
+              IconButton(
+                onPressed: () => ref.refresh(deptsProvider),
+                icon: const Icon(Icons.refresh),
+              ),
+            ],
+          ),
+        ),
         loading: () {
-          return const Center(
-            child: LoadingIndicator(label: 'Please wait...'),
-          );
+          return const Center(child: LoadingIndicator(label: 'Please wait...'));
         },
       ),
+    );
+  }
+
+  AppPopupMenu buildPopupMenu(
+    BuildContext context, {
+    required TextEditingController nameController,
+    required TextEditingController descController,
+  }) {
+    return AppPopupMenu(
+      items: [
+        AppPopupMenu.buildPopupMenuItem(
+          context,
+          label: 'Edit Dept info',
+          onTap: () => infoEditDialogue(
+            context,
+            nameController: nameController,
+            aboutController: descController,
+            onSaved: () {
+              if (nameController.text.trim().isEmpty) return;
+              DeptDB().edit(
+                context,
+                deptId: widget.deptData.id!,
+                name: nameController.text.trim(),
+                desc: descController.text.trim(),
+              );
+            },
+          ),
+        ),
+        AppPopupMenu.buildPopupMenuItem(
+          context,
+          label: 'Delete dept',
+          onTap: () {
+            deleteDepartmentDialogue(
+              context,
+              deptName: widget.deptData.name,
+              deptId: widget.deptData.id!,
+            );
+          },
+        ),
+      ],
     );
   }
 }
