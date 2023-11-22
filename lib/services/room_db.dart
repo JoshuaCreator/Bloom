@@ -16,11 +16,11 @@ class RoomDB {
     Room room,
     BuildContext context, {
     required String userId,
-    required String deptId,
+    required String wrkspcId,
     required File? image,
   }) async {
     _roomRef =
-        _firestore.collection('departments').doc(deptId).collection('rooms');
+        _firestore.collection('workspaces').doc(wrkspcId).collection('rooms');
 
     try {
       showLoadingIndicator(context, label: 'Creating...');
@@ -36,7 +36,7 @@ class RoomDB {
         (value) {
           value.update({'id': value.id}).then(
             (_) {
-              _firestore.collection('departments').doc(deptId).update({
+              _firestore.collection('workspaces').doc(wrkspcId).update({
                 'rooms': FieldValue.arrayUnion([value.id])
               });
               _roomRef.doc(value.id).update({
@@ -50,7 +50,7 @@ class RoomDB {
                 'id': userId,
                 'joined': DateTime.now(),
               }).then((_) async {
-                final path = 'rooms/${room.name}/${image?.path}';
+                final path = 'rooms/${room.id}/${value.id}';
                 await _roomRef.doc(value.id).update({
                   'image': await uploadImageGetUrl(
                     context,
@@ -100,7 +100,7 @@ class RoomDB {
 
   Future join(
     BuildContext context, {
-    required String deptId,
+    required String wrkspcId,
     required String roomId,
     required String userId,
     required String roomName,
@@ -108,8 +108,8 @@ class RoomDB {
     try {
       showLoadingIndicator(context, label: 'Joining...');
       _firestore
-          .collection('departments')
-          .doc(deptId)
+          .collection('workspaces')
+          .doc(wrkspcId)
           .collection('rooms')
           .doc(roomId)
           .collection('participants')
@@ -119,8 +119,8 @@ class RoomDB {
         'joined': DateTime.now(),
       }).then((value) {
         _firestore
-            .collection('departments')
-            .doc(deptId)
+            .collection('workspaces')
+            .doc(wrkspcId)
             .collection('rooms')
             .doc(roomId)
             .update({
@@ -154,15 +154,15 @@ class RoomDB {
   Future leave(
     BuildContext context, {
     required String roomId,
-    required String deptId,
+    required String wrkspcId,
     required String userId,
     required String roomName,
   }) async {
     try {
       showLoadingIndicator(context, label: 'Exiting...');
       _firestore
-          .collection('departments')
-          .doc(deptId)
+          .collection('workspaces')
+          .doc(wrkspcId)
           .collection('rooms')
           .doc(roomId)
           .collection('participants')
@@ -170,8 +170,8 @@ class RoomDB {
           .delete()
           .then((value) {
         _firestore
-            .collection('departments')
-            .doc(deptId)
+            .collection('workspaces')
+            .doc(wrkspcId)
             .collection('rooms')
             .doc(roomId)
             .update({
@@ -202,7 +202,7 @@ class RoomDB {
 
   Future edit(
     BuildContext context, {
-    required String deptId,
+    required String wrkspcId,
     required String roomId,
     String? name,
     String? desc,
@@ -210,8 +210,8 @@ class RoomDB {
     try {
       showLoadingIndicator(context);
       _firestore
-          .collection('departments')
-          .doc(deptId)
+          .collection('workspaces')
+          .doc(wrkspcId)
           .collection('rooms')
           .doc(roomId)
           .update({'name': name, 'desc': desc}).then((value) {
@@ -238,19 +238,19 @@ class RoomDB {
     BuildContext context, {
     required String roomId,
     required String roomName,
-    required String deptId,
+    required String wrkspcId,
   }) async {
     _firestore.settings = const Settings(persistenceEnabled: false);
     try {
       showLoadingIndicator(context, label: 'Deleting...');
       _firestore
-          .collection('departments')
-          .doc(deptId)
+          .collection('workspaces')
+          .doc(wrkspcId)
           .collection('rooms')
           .doc(roomId)
           .delete()
           .then((value) {
-        _firestore.collection('departments').doc(deptId).update({
+        _firestore.collection('workspaces').doc(wrkspcId).update({
           'rooms': FieldValue.arrayRemove([roomId])
         });
         context.pop();

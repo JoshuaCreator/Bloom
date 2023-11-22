@@ -1,5 +1,5 @@
 import 'package:basic_board/models/user.dart';
-import 'package:basic_board/views/screens/dept_screen.dart';
+import 'package:basic_board/views/screens/workspace_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +36,7 @@ class Auth {
         if (!_auth.currentUser!.emailVerified) {
           context.go(VerifyEmailScreen.id);
         } else {
-          context.go('${DeptScreen.id}/${HomeScreen.id}');
+          context.go('${WorkspaceScreen.id}/${HomeScreen.id}');
         }
       });
     } on FirebaseAuthException catch (e) {

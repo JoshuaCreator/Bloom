@@ -9,12 +9,12 @@ class ReplyTile extends ConsumerStatefulWidget {
     super.key,
     required this.reply,
     required this.replyRef,
-    required this.deptId,
+    required this.wrkspcId,
   });
 
   final Reply reply;
   final DocumentReference replyRef;
-  final String deptId;
+  final String wrkspcId;
 
   @override
   ConsumerState<ReplyTile> createState() => _ConsumerReplyTileState();
@@ -58,7 +58,7 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
                             onInfoIconPressed: widget.reply.isMe!
                                 ? null
                                 : () => context.push(
-                                      '${DeptScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.deptId}/${RoomInfoScreen.id}/${widget.deptId}/${UserScreen.id}/${widget.reply.replySenderId}',
+                                      '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.wrkspcId}/${RoomInfoScreen.id}/${widget.wrkspcId}/${UserScreen.id}/${widget.reply.replySenderId}',
                                     ),
                           ),
                         ),
@@ -139,30 +139,6 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
                   ),
                   widget.reply.isMe!
                       ? buildReactionIconButton(
-                          icon: Icons.delete_outline,
-                          tooltip: 'Delete reply',
-                          onPressed: () => showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              content: const Text('Delete reply?'),
-                              actions: [
-                                AppTextButton(
-                                  label: 'Delete',
-                                  onPressed: () => widget.replyRef
-                                      .delete()
-                                      .then((value) => context.pop()),
-                                ),
-                                AppTextButton(
-                                  label: 'Cancel',
-                                  onPressed: () => context.pop(),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      : const SizedBox(),
-                  widget.reply.isMe!
-                      ? buildReactionIconButton(
                           icon: Icons.edit_outlined,
                           tooltip: 'Edit reply',
                           onPressed: () => messageEditDialogue(
@@ -183,6 +159,32 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
                                 },
                               );
                             },
+                          ),
+                        )
+                      : const SizedBox(),
+                  widget.reply.isMe!
+                      ? buildReactionIconButton(
+                          icon: Icons.delete_outline,
+                          tooltip: 'Delete reply',
+                          onPressed: () => showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              content: const Text('Delete reply?'),
+                              actions: [
+                                AppTextButton(
+                                  label: 'Delete',
+                                  onPressed: () {
+                                    context.pop();
+                                    widget.replyRef.delete();
+                                    showSnackBar(context, msg: 'Reply deleted');
+                                  },
+                                ),
+                                AppTextButton(
+                                  label: 'Cancel',
+                                  onPressed: () => context.pop(),
+                                ),
+                              ],
+                            ),
                           ),
                         )
                       : const SizedBox(),

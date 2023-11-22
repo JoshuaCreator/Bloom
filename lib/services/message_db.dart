@@ -1,4 +1,5 @@
 import 'package:basic_board/models/message.dart';
+import 'package:basic_board/services/file_helper.dart';
 import 'package:basic_board/services/image_helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -12,13 +13,13 @@ class MessageDB {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late CollectionReference _messageRef;
   final ImageHelper imageHelper = ImageHelper();
+  final FileHelper fileHelper = FileHelper();
 
   Future send(
     Message message,
     BuildContext context, {
     required CollectionReference ref,
-    required String? filePath,
-    required String deptId,
+    required String wrkspcId,
     required String roomId,
   }) async {
     try {
@@ -26,27 +27,35 @@ class MessageDB {
         'message': message.message,
         'senderId': message.senderId,
         'image': message.image,
+        'file': message.file,
         'time': message.time
       }).then((value) async {
-        String downloadUrl = '';
+        final docRef = _firestore
+            .collection('workspaces')
+            .doc(wrkspcId)
+            .collection('rooms')
+            .doc(roomId)
+            .collection('messages')
+            .doc(value.id);
         value.update({'id': value.id});
-        filePath == null
-            ? null
-            : downloadUrl = await imageHelper.uploadImage(
+        message.image == null
+            ? message.file != null
+                ? await fileHelper.uploadFile(
+                    context,
+                    filePath: message.file!,
+                    docRef: docRef,
+                    storagePath:
+                        'workspaces/$wrkspcId/rooms/$roomId/messages/${value.id + DateTime.now().toString() + message.file!}',
+                  )
+                : null
+            : await imageHelper.uploadImage(
                 context,
-                imagePath: filePath,
-                docRef: _firestore
-                    .collection('departments')
-                    .doc(deptId)
-                    .collection('rooms')
-                    .doc(roomId)
-                    .collection('messages')
-                    .doc(value.id),
+                imagePath: message.image!,
+                docRef: docRef,
                 storagePath:
-                    'departments/$deptId/rooms/$roomId/messages/${value.id}.png',
+                    'workspaces/$wrkspcId/rooms/$roomId/messages/${value.id + DateTime.now().toString()}.png',
                 msg: 'File uploaded and sent',
               );
-        value.update({'image': downloadUrl});
       }).catchError((e) {
         context.pop();
         showSnackBar(
@@ -92,14 +101,14 @@ class MessageDB {
   Future edit(
     BuildContext context, {
     required String roomId,
-    required String deptId,
+    required String wrkspcId,
     required String messageId,
     required String newMessage,
   }) async {
     try {
       _firestore
-          .collection('departments')
-          .doc(deptId)
+          .collection('workspaces')
+          .doc(wrkspcId)
           .collection('rooms')
           .doc(roomId)
           .collection('messages')

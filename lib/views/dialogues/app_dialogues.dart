@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../configs/consts.dart';
-import '../../services/dept_db.dart';
+import '../../services/workspace_db.dart';
 import '../../services/room_db.dart';
 import '../widgets/app_text_buttons.dart';
 import 'loading_indicator_build.dart';
@@ -111,7 +111,7 @@ leaveRoomDialogue(
   required String roomName,
   required String userId,
   required String roomId,
-  required String deptId,
+  required String wrkspcId,
 }) {
   showDialog(
     context: context,
@@ -130,7 +130,7 @@ leaveRoomDialogue(
               //? Leave Room
               RoomDB().leave(
                 context,
-                deptId: deptId,
+                wrkspcId: wrkspcId,
                 roomId: roomId,
                 userId: userId,
                 roomName: roomName,
@@ -153,7 +153,7 @@ deleteRoomDialogue(
   BuildContext context, {
   required String roomId,
   required String roomName,
-  required String deptId,
+  required String wrkspcId,
 }) {
   showDialog(
     context: context,
@@ -176,7 +176,7 @@ deleteRoomDialogue(
                 context,
                 roomId: roomId,
                 roomName: roomName,
-                deptId: deptId,
+                wrkspcId: wrkspcId,
               );
             },
           ),
@@ -222,17 +222,17 @@ deleteAccountDialogue(BuildContext context) {
   );
 }
 
-deleteDepartmentDialogue(
+deleteWorkspaceDialogue(
   BuildContext context, {
-  required String deptName,
-  required String deptId,
+  required String wrkspcName,
+  required String wrkspcId,
 }) {
   showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
         content: Text(
-          'You are about to delete $deptName. All Rooms will be deleted and participants removed. This cannot be reversed.',
+          'You are about to delete $wrkspcName. All Rooms will be deleted and participants removed. This cannot be reversed.',
         ),
         actionsAlignment: MainAxisAlignment.spaceBetween,
         shape: RoundedRectangleBorder(borderRadius: defaultBorderRadius),
@@ -241,7 +241,11 @@ deleteDepartmentDialogue(
           AppTextButton(
             label: 'Delete',
             onPressed: () {
-              DeptDB().delete(context, deptName: deptName, deptId: deptId);
+              WorkspaceDB().delete(
+                context,
+                wrkspcName: wrkspcName,
+                wrkspcId: wrkspcId,
+              );
             },
           ),
           AppTextButton(

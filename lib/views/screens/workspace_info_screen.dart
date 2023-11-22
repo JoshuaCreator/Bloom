@@ -1,30 +1,30 @@
-import 'package:basic_board/models/dept.dart';
-import 'package:basic_board/services/dept_db.dart';
+import 'package:basic_board/services/workspace_db.dart';
 import 'package:basic_board/utils/imports.dart';
-import 'package:basic_board/views/screens/dept_screen.dart';
 import 'package:basic_board/views/widgets/show_more_text.dart';
 import 'package:intl/intl.dart';
 
-class DeptInfoScreen extends ConsumerStatefulWidget {
-  static String id = 'dept-info';
-  const DeptInfoScreen({super.key, required this.deptData});
-  final Department deptData;
+class WorkspaceInfoScreen extends ConsumerStatefulWidget {
+  static String id = 'workspace-info';
+  const WorkspaceInfoScreen({super.key, required this.workspace});
+  final Workspace workspace;
 
   @override
-  ConsumerState<DeptInfoScreen> createState() => _ConsumerDeptInfoScreenState();
+  ConsumerState<WorkspaceInfoScreen> createState() =>
+      _ConsumerWorkspaceInfoScreenState();
 }
 
-class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
+class _ConsumerWorkspaceInfoScreenState
+    extends ConsumerState<WorkspaceInfoScreen> {
   @override
   Widget build(BuildContext context) {
-    final dept = ref.watch(deptDataProvider(widget.deptData.id!));
-    final room = ref.watch(deptRoomsProvider(widget.deptData.id!));
+    final wrkspc = ref.watch(wrkspcDataProvider(widget.workspace.id!));
+    final room = ref.watch(wrkspcRoomsProvider(widget.workspace.id!));
     final auth = ref.watch(authStateProvider).value;
-    final nameController = TextEditingController(text: dept.value?['name']);
-    final descController = TextEditingController(text: dept.value?['desc']);
+    final nameController = TextEditingController(text: wrkspc.value?['name']);
+    final descController = TextEditingController(text: wrkspc.value?['desc']);
     return Scaffold(
       appBar: AppBar(
-        actions: auth?.uid == widget.deptData.creatorId && dept.value != null
+        actions: auth?.uid == widget.workspace.creatorId && wrkspc.value != null
             ? [
                 buildPopupMenu(
                   context,
@@ -34,7 +34,7 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
               ]
             : null,
       ),
-      body: dept.when(
+      body: wrkspc.when(
         data: (data) {
           String dateTime = DateFormat('dd MMM yyy')
               .format(data?['createdAt'].toDate() ?? DateTime.now());
@@ -74,15 +74,17 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Rooms (${data?['rooms'].length ?? 0})',
+                          data?['rooms'] == null
+                              ? 'Rooms (0)'
+                              : 'Rooms (${data?['rooms'].length})',
                           style: TextConfig.intro,
                         ),
                         Visibility(
-                          visible: auth?.uid == widget.deptData.creatorId,
+                          visible: auth?.uid == widget.workspace.creatorId,
                           child: IconButton(
                             onPressed: () {
                               context.push(
-                                '${DeptScreen.id}/${HomeScreen.id}/${CreateRoomScreen.id}/${widget.deptData.id!}',
+                                '${WorkspaceScreen.id}/${HomeScreen.id}/${WorkspaceInfoScreen.id}/${CreateRoomScreen.id}/${widget.workspace.id!}',
                               );
                             },
                             icon: const Icon(Icons.add),
@@ -105,21 +107,19 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
                       final Room roomData = Room(
                         id: room.value![index]['id'],
                         creatorId: room.value?[index]['creatorId'],
-                        name: room.value?[index]['name'],
-                        desc: room.value?[index]['desc'],
+                        name: room.value?[index]['name'] ?? '',
+                        desc: room.value?[index]['desc'] ?? '',
                         private: room.value?[index]['private'],
-                        image: room.value?[index]['image'] ??
-                            'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg',
+                        image: room.value?[index]['image'] ?? defaultRoomImg,
                         createdAt: timeStamp,
                         participants: room.value?[index]['participants'],
                       );
 
                       final bool isParticipant =
                           roomData.participants.contains(auth?.uid);
+
                       return RoomTile(
                         roomData: roomData,
-                        image: roomData.image,
-                        name: roomData.name,
                         subtitle:
                             'Participants (${roomData.participants.length})',
                         trailing: isParticipant
@@ -130,7 +130,7 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
                                   //? Leave Room
                                   leaveRoomDialogue(
                                     context,
-                                    deptId: widget.deptData.id!,
+                                    wrkspcId: widget.workspace.id!,
                                     roomId: roomData.id!,
                                     userId: auth!.uid,
                                     roomName: roomData.name,
@@ -144,7 +144,7 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
                                   //? Join Room
                                   RoomDB().join(
                                     context,
-                                    deptId: widget.deptData.id!,
+                                    wrkspcId: widget.workspace.id!,
                                     roomId: roomData.id!,
                                     userId: auth!.uid,
                                     roomName: roomData.name,
@@ -152,7 +152,7 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
                                 },
                               ),
                         onTap: () => context.push(
-                          '${DeptScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.deptData.id!}/${RoomInfoScreen.id}/${widget.deptData.id!}',
+                          '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.workspace.id!}/${RoomInfoScreen.id}/${widget.workspace.id!}',
                           extra: roomData,
                         ),
                       );
@@ -169,7 +169,7 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
             children: [
               const Text('An error occurred. Tap to refresh'),
               IconButton(
-                onPressed: () => ref.refresh(deptsProvider),
+                onPressed: () => ref.refresh(wrkspcsProvider),
                 icon: const Icon(Icons.refresh),
               ),
             ],
@@ -191,16 +191,16 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
       items: [
         AppPopupMenu.buildPopupMenuItem(
           context,
-          label: 'Edit Dept info',
+          label: 'Edit Workspace info',
           onTap: () => infoEditDialogue(
             context,
             nameController: nameController,
             aboutController: descController,
             onSaved: () {
               if (nameController.text.trim().isEmpty) return;
-              DeptDB().edit(
+              WorkspaceDB().edit(
                 context,
-                deptId: widget.deptData.id!,
+                wrkspcId: widget.workspace.id!,
                 name: nameController.text.trim(),
                 desc: descController.text.trim(),
               );
@@ -209,12 +209,12 @@ class _ConsumerDeptInfoScreenState extends ConsumerState<DeptInfoScreen> {
         ),
         AppPopupMenu.buildPopupMenuItem(
           context,
-          label: 'Delete dept',
+          label: 'Delete Workspace',
           onTap: () {
-            deleteDepartmentDialogue(
+            deleteWorkspaceDialogue(
               context,
-              deptName: widget.deptData.name,
-              deptId: widget.deptData.id!,
+              wrkspcName: widget.workspace.name,
+              wrkspcId: widget.workspace.id!,
             );
           },
         ),

@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../configs/consts.dart';
-import '../screens/dept_screen.dart';
+import '../screens/workspace_screen.dart';
 import '../screens/profile_screen.dart';
-import '../screens/home_screen.dart';
 import '../screens/settings_screen.dart';
 
 class ProfileTile extends StatelessWidget {
@@ -25,47 +24,42 @@ class ProfileTile extends StatelessWidget {
         InkWell(
           onTap: () {
             context.push(
-              '${DeptScreen.id}/${HomeScreen.id}/${SettingsScreen.id}/${ProfileScreen.id}',
+              '${WorkspaceScreen.id}/${SettingsScreen.id}/${ProfileScreen.id}',
             );
           },
           child: Ink(
             padding: EdgeInsets.fromLTRB(ten, twenty, ten, twenty),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                Hero(
+                  tag: 'user-profile',
+                  child: CircleAvatar(
+                      radius: thirty,
+                      backgroundImage: CachedNetworkImageProvider(
+                        user.value?['image'] ?? '',
+                      )),
+                ),
+                SizedBox(width: ten),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Hero(
-                      tag: 'user-profile',
-                      child: CircleAvatar(
-                          radius: thirty,
-                          backgroundImage: CachedNetworkImageProvider(
-                            user.value?['image'] ?? '',
-                          )),
+                    SizedBox(
+                      width: size * 5,
+                      child: Text(
+                        user.value?['name'] ?? '',
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 20.0),
+                      ),
                     ),
-                    SizedBox(width: ten),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: size * 5,
-                          child: Text(
-                            user.value?['name'] ?? '',
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 20.0),
-                          ),
-                        ),
-                        Text(
-                          email ?? '',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 14.0,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      email ?? '',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                   ],
                 ),

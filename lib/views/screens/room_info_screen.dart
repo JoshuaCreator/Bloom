@@ -11,9 +11,10 @@ import '../widgets/user_tile.dart';
 
 class RoomInfoScreen extends ConsumerStatefulWidget {
   static String id = 'room-info';
-  const RoomInfoScreen({super.key, required this.room, required this.depmtId});
+  const RoomInfoScreen(
+      {super.key, required this.room, required this.wrkspaceId});
   final Room room;
-  final String depmtId;
+  final String wrkspaceId;
 
   @override
   ConsumerState<RoomInfoScreen> createState() => _ConsumerRoomInfoScreenState();
@@ -28,13 +29,13 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
     final auth = ref.watch(authStateProvider).value!;
     final creator = ref.watch(anyUserProvider(widget.room.creatorId));
     final room = ref.watch(roomProvider(firestore
-        .collection('departments')
-        .doc(widget.depmtId)
+        .collection('workspaces')
+        .doc(widget.wrkspaceId)
         .collection('rooms')
         .doc(widget.room.id)));
     final participants = ref.watch(participantsProvider(firestore
-        .collection('departments')
-        .doc(widget.depmtId)
+        .collection('workspaces')
+        .doc(widget.wrkspaceId)
         .collection('rooms')
         .doc(widget.room.id)
         .collection('participants')));
@@ -66,7 +67,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                     onTap: () => showDialog(
                       context: context,
                       builder: (context) => ImageViewer(
-                        image: room.value?['image'],
+                        image: room.value?['image'] ?? defaultRoomImg,
                       ),
                     ),
                     child: Hero(
@@ -128,7 +129,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                         onTap: me
                             ? null
                             : () => context.push(
-                                  '${DeptScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.depmtId}/${RoomInfoScreen.id}/${widget.depmtId}/${UserScreen.id}/${data[index]['id']}',
+                                  '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.wrkspaceId}/${RoomInfoScreen.id}/${widget.wrkspaceId}/${UserScreen.id}/${data[index]['id']}',
                                 ),
                       );
                     },
@@ -183,8 +184,8 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                     context,
                     imagePath: croppedImg,
                     docRef: firestore
-                        .collection('departments')
-                        .doc(widget.depmtId)
+                        .collection('workspaces')
+                        .doc(widget.wrkspaceId)
                         .collection('rooms')
                         .doc(widget.room.id),
                     storagePath: 'rooms/${widget.room.name}.png',
@@ -209,8 +210,8 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                     context,
                     imagePath: croppedImg,
                     docRef: firestore
-                        .collection('departments')
-                        .doc(widget.depmtId)
+                        .collection('workspaces')
+                        .doc(widget.wrkspaceId)
                         .collection('rooms')
                         .doc(widget.room.id),
                     storagePath: 'rooms/${widget.room.name}.png',
@@ -232,7 +233,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
             if (nameController.text.trim().isEmpty) return;
             RoomDB().edit(
               context,
-              deptId: widget.depmtId,
+              wrkspcId: widget.wrkspaceId,
               roomId: widget.room.id!,
               name: nameController.text.trim(),
               desc: aboutController.text.trim(),
@@ -248,7 +249,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                 //? Leave Room
                 leaveRoomDialogue(
                   context,
-                  deptId: widget.depmtId,
+                  wrkspcId: widget.wrkspaceId,
                   roomName: widget.room.name,
                   userId: userId,
                   roomId: widget.room.id!,
@@ -262,7 +263,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                 //? Join Room
                 RoomDB().join(
                   context,
-                  deptId: widget.depmtId,
+                  wrkspcId: widget.wrkspaceId,
                   roomId: widget.room.id!,
                   userId: userId,
                   roomName: widget.room.name,
@@ -277,7 +278,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                 deleteRoomDialogue(context,
                     roomId: widget.room.id!,
                     roomName: widget.room.name,
-                    deptId: widget.depmtId);
+                    wrkspcId: widget.wrkspaceId);
               },
             )
           : AppPopupMenu.buildPopupMenuItem(

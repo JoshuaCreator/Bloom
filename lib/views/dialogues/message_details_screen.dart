@@ -6,13 +6,13 @@ class MessageDetailsScreen extends ConsumerStatefulWidget {
   const MessageDetailsScreen({
     super.key,
     required this.message,
-    required this.deptId,
+    required this.wrkspcId,
     required this.room,
     required this.repliesRef,
     required this.messageRef,
   });
   final Message message;
-  final String deptId;
+  final String wrkspcId;
   final Room room;
   final CollectionReference repliesRef, messageRef;
 
@@ -93,7 +93,7 @@ class _ConsumerMessageDetailsScreenState
                     return ReplyTile(
                       reply: reply,
                       replyRef: widget.repliesRef.doc(data[index].id),
-                      deptId: widget.deptId,
+                      wrkspcId: widget.wrkspcId,
                     );
                   },
                 ),
@@ -185,7 +185,7 @@ class ReactionTile extends StatelessWidget {
                           MessageDB().edit(
                             context,
                             roomId: widget.room.id!,
-                            deptId: widget.deptId,
+                            wrkspcId: widget.wrkspcId,
                             messageId: widget.message.id!,
                             newMessage: messageController.text.trim(),
                           );

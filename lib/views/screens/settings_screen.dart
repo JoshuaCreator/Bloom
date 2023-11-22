@@ -9,9 +9,10 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider);
     final auth = ref.watch(authStateProvider).value;
-    final email = auth?.email;
+    final user = ref.watch(anyUserProvider(auth!.uid));
+    final firestore = ref.watch(firestoreProvider);
+    final email = auth.email;
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: Column(
@@ -22,11 +23,24 @@ class SettingsScreen extends ConsumerWidget {
                 ProfileTile(user: user, email: email),
                 const Separator(),
                 SettingTile(
+                  title: user.value?['active'] == true
+                      ? "You're currently Active"
+                      : "You're currently Away",
+                  leading: user.value?['active'] == true
+                      ? Icons.person_pin_circle_outlined
+                      : Icons.person_off_outlined,
+                  onTap: () {
+                    firestore.collection('users').doc(auth.uid).update({
+                      'active': user.value?['active'] == true ? false : true,
+                    });
+                  },
+                ),
+                SettingTile(
                   title: 'Account',
                   leading: Icons.account_circle_outlined,
                   onTap: () {
                     context.push(
-                      '${DeptScreen.id}/${HomeScreen.id}/${SettingsScreen.id}/${AccountScreen.id}',
+                      '${WorkspaceScreen.id}/${SettingsScreen.id}/${AccountScreen.id}',
                     );
                   },
                 ),
@@ -36,7 +50,7 @@ class SettingsScreen extends ConsumerWidget {
                   leading: Icons.light_mode_outlined,
                   onTap: () {
                     context.push(
-                      '${DeptScreen.id}/${HomeScreen.id}/${SettingsScreen.id}/${ThemeSelectorScreen.id}',
+                      '${WorkspaceScreen.id}/${SettingsScreen.id}/${ThemeSelectorScreen.id}',
                     );
                   },
                 ),

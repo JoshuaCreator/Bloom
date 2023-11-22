@@ -1,12 +1,9 @@
-import 'package:basic_board/models/dept.dart';
-import 'package:basic_board/views/screens/dept_screen.dart';
-
 import '../../utils/imports.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   static String id = 'home';
-  const HomeScreen({super.key, this.dept});
-  final Department? dept;
+  const HomeScreen({super.key, this.workspace});
+  final Workspace? workspace;
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -21,34 +18,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final room = ref.watch(deptRoomsProvider(widget.dept!.id!));
+    final room = ref.watch(wrkspcRoomsProvider(widget.workspace!.id!));
     final auth = ref.watch(authStateProvider).value;
     final firestore = ref.watch(firestoreProvider);
 
     return RefreshIndicator(
       onRefresh: () => ref.refresh(
-        deptRoomsProvider(widget.dept!.id!).future,
+        wrkspcRoomsProvider(widget.workspace!.id!).future,
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.dept!.name),
+          title: Text(widget.workspace!.name),
           actions: [
             IconButton(
               onPressed: () => context.push(
-                '${DeptScreen.id}/${HomeScreen.id}/${DeptInfoScreen.id}',
-                extra: widget.dept,
+                '${WorkspaceScreen.id}/${HomeScreen.id}/${WorkspaceInfoScreen.id}',
+                extra: widget.workspace,
               ),
               icon: const Icon(Icons.info_outline),
-              tooltip: 'Department info',
+              tooltip: 'Workspace info',
             ),
           ],
         ),
         body: room.when(
           data: (data) => data.isEmpty
-              ? const Center(
-                  child: Text(
-                    'There are no Rooms available in this Department yet.\n Contact your supervisor',
-                    textAlign: TextAlign.center,
+              ? Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(twenty),
+                    child: const Text(
+                      'You have not joined any Rooms in this Workspace yet',
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 )
               : Column(
@@ -90,8 +90,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           );
                           final lastMessage = ref.watch(
                             lastMessageProvider(firestore
-                                .collection('departments')
-                                .doc(widget.dept?.id)
+                                .collection('workspaces')
+                                .doc(widget.workspace?.id)
                                 .collection('rooms')
                                 .doc(roomData.id)
                                 .collection('messages')
@@ -124,13 +124,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: RoomTile(
                               showInfoIcon: true,
                               roomData: roomData,
-                              image: roomData.image!,
-                              name: roomData.name,
                               subtitle: subtitle,
-                              deptId: widget.dept?.id,
+                              wrkspcId: widget.workspace?.id,
                               onTap: () {
                                 context.push(
-                                  '${DeptScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.dept!.id}',
+                                  '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.workspace!.id}',
                                   extra: roomData,
                                 );
                               },
@@ -141,27 +139,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ],
                 ),
-          error: (error, stackTrace) => Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('An error occurred. Tap to refresh'),
-                IconButton(
-                  onPressed: () => ref.refresh(deptsProvider),
-                  icon: const Icon(Icons.refresh),
-                ),
-              ],
-            ),
+          error: (error, stackTrace) => const Center(
+            child: Text('An error occurred'),
           ),
           loading: () => const LoadingIndicator(),
         ),
-        // floatingActionButton: FloatingActionButton(
-        //   onPressed: () => context.push(
-        //     '${DeptScreen.id}/${HomeScreen.id}/${DeptInfoScreen.id}',
-        //     extra: widget.dept,
-        //   ),
-        //   child: const Icon(Icons.info_outline),
-        // ),
       ),
     );
   }

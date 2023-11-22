@@ -50,10 +50,7 @@ class ImageHelper {
     await docRef.update({'image': downloadUrl}).then((_) {
       // context.pop();
       if (context.mounted) {
-        showSnackBar(
-          context,
-          msg: msg ?? 'Room image updated successfully',
-        );
+        showSnackBar(context, msg: msg ?? 'Image uploaded');
       }
     });
     return downloadUrl;

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:basic_board/views/screens/dept_screen.dart';
+import 'package:basic_board/views/screens/workspace_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -54,7 +54,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   child: const Text('Verified'),
                   onPressed: () {
                     if (auth.currentUser!.emailVerified) {
-                      context.go('${DeptScreen.id}/${HomeScreen.id}');
+                      context.go('${WorkspaceScreen.id}/${HomeScreen.id}');
                     } else {
                       return;
                     }

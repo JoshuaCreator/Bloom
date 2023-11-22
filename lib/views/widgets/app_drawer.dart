@@ -1,9 +1,6 @@
-import 'package:basic_board/models/dept.dart';
 import 'package:basic_board/utils/imports.dart';
-import 'package:basic_board/views/screens/create_dept_screen.dart';
+import 'package:basic_board/views/widgets/workspace_tile.dart';
 import 'package:intl/intl.dart';
-
-import 'dept_tile.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({
@@ -11,7 +8,7 @@ class AppDrawer extends ConsumerWidget {
   });
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final depts = ref.watch(deptsProvider);
+    final workspaces = ref.watch(wrkspcsProvider);
     return Drawer(
       width: double.infinity,
       child: Column(
@@ -22,17 +19,17 @@ class AppDrawer extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Departments',
+                  'Workspaces',
                   style: TextStyle(fontSize: twenty + five),
                 ),
                 AppTextButton(
                   label: 'Create',
                   onPressed: () {
                     context.pop();
-                    context.push('${HomeScreen.id}/${CreateDeptScreen.id}');
+                    context
+                        .push('${HomeScreen.id}/${CreateWorkspaceScreen.id}');
                   },
                 ),
-              
               ],
             ),
           ),
@@ -41,11 +38,11 @@ class AppDrawer extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Expanded(
-                  child: depts.when(
+                  child: workspaces.when(
                     data: (data) => data.isEmpty
                         ? const Center(
                             child: Text(
-                              "You haven't been added to any Departments yet.\n Contact your supervisor.",
+                              "You haven't been added to any Workspaces yet.\n Contact your supervisor.",
                               textAlign: TextAlign.center,
                             ),
                           )
@@ -53,7 +50,7 @@ class AppDrawer extends ConsumerWidget {
                             padding: EdgeInsets.only(top: ten),
                             itemCount: data.length,
                             itemBuilder: (context, index) {
-                              final Department dept = Department(
+                              final Workspace workspace = Workspace(
                                 id: data[index].id,
                                 name: data[index]['name'],
                                 desc: data[index]['desc'],
@@ -61,7 +58,7 @@ class AppDrawer extends ConsumerWidget {
                                 createdAt: data[index]['createdAt'].toDate(),
                               );
                               String dateTime = DateFormat('dd MMM hh:mm a')
-                                  .format(dept.createdAt);
+                                  .format(workspace.createdAt);
 
                               // bool visible = roomData.private;
                               // return Visibility(
@@ -72,15 +69,15 @@ class AppDrawer extends ConsumerWidget {
                               //     image: roomData.image ?? '',
                               //   ),
                               // );
-                              return DepartmentTile(
-                                id: dept.id!,
-                                title: dept.name,
+                              return WorkspaceTile(
+                                id: workspace.id!,
+                                title: workspace.name,
                                 subtitle: 'Created $dateTime',
                                 onTap: () {
                                   context.pop();
                                   context.go(
                                     HomeScreen.id,
-                                    extra: dept,
+                                    extra: workspace,
                                   );
                                 },
                               );
@@ -128,9 +125,7 @@ class AppDrawer extends ConsumerWidget {
                 // )
               ],
             ),
-          
           )
-        
         ],
       ),
     );

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/views/dialogues/bottom_sheets.dart';
+import 'package:basic_board/views/widgets/app_circle_avatar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import '../dialogues/loading_indicator_build.dart';
@@ -34,7 +35,7 @@ class _ConsumerProfileScreenState extends ConsumerState<ProfileScreen> {
       appBar: AppBar(title: const Text('Profile')),
       body: ListView(
         padding: EdgeInsets.only(
-          top: size * 2,
+          top: ten,
           bottom: ten,
           left: ten,
           right: ten,
@@ -95,27 +96,21 @@ class _ConsumerProfileScreenState extends ConsumerState<ProfileScreen> {
                 }
               },
             ),
-            child: Column(
-              children: [
-                Hero(
-                  tag: 'user-profile',
-                  child: fileImage == null
-                      ? CircleAvatar(
-                          radius: size * 2,
-                          backgroundImage: user.value!['image'] == null
-                              ? const CachedNetworkImageProvider('')
-                              : CachedNetworkImageProvider(
-                                  user.value!['image'],
-                                ),
-                        )
-                      : CircleAvatar(
-                          radius: size * 2,
-                          backgroundImage: FileImage(File(fileImage!)),
-                        ),
-                ),
-                height5,
-                const Text('Tap to edit', textAlign: TextAlign.center),
-              ],
+            child: Hero(
+              tag: 'user-profile',
+              child: fileImage == null
+                  ? AppCircleAvatar(
+                      image: user.value?['image'] == null
+                          ? null
+                          : CachedNetworkImageProvider(
+                              user.value!['image'],
+                            ),
+                      userId: user.value?['id'],
+                    )
+                  : AppCircleAvatar(
+                      image: FileImage(File(fileImage!)),
+                      userId: user.value?['id'],
+                    ),
             ),
           ),
           height40,

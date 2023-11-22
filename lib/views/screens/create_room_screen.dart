@@ -10,8 +10,8 @@ import 'package:image_picker/image_picker.dart';
 
 class CreateRoomScreen extends ConsumerStatefulWidget {
   static String id = 'create-room';
-  const CreateRoomScreen({super.key, required this.deptId});
-  final String deptId;
+  const CreateRoomScreen({super.key, required this.wrkspcId});
+  final String wrkspcId;
 
   @override
   ConsumerState<CreateRoomScreen> createState() =>
@@ -63,7 +63,7 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                 SizedBox(width: ten),
                 Expanded(
                   child: AppTextField(
-                    hintText: 'Room name (required)',
+                    hintText: 'Name (required)',
                     textInputAction: TextInputAction.next,
                     controller: _nameController,
                     borderless: true,
@@ -74,7 +74,7 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
             ),
             height20,
             AppTextField(
-              hintText: "Room description",
+              hintText: "Description",
               maxLines: 5,
               controller: _descController,
               borderless: true,
@@ -104,7 +104,7 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                 RoomDB().create(
                   room,
                   context,
-                  deptId: widget.deptId,
+                  wrkspcId: widget.wrkspcId,
                   userId: user?['id'],
                   image: image,
                 );

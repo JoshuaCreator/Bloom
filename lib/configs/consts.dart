@@ -31,3 +31,6 @@ BorderRadius yourBorderRadius = BorderRadius.only(
   bottomLeft: Radius.circular(twenty),
   bottomRight: Radius.circular(twenty),
 );
+
+const String defaultRoomImg =
+    'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg';

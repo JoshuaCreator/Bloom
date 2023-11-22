@@ -1,40 +1,32 @@
-import 'package:basic_board/models/dept.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
-import 'package:basic_board/views/screens/dept_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import '../utils/imports.dart';
 
-class DeptDB {
+class WorkspaceDB {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  late CollectionReference _deptRef;
+  late CollectionReference _workspaceRef;
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseStorage storageRef = FirebaseStorage.instance;
 
   Future<void> create(BuildContext context,
-      {required Department dept, required String userId}) async {
-    _deptRef = _firestore.collection('departments');
+      {required Workspace wrkspc, required String userId}) async {
+    _workspaceRef = _firestore.collection('workspaces');
 
     try {
       showLoadingIndicator(context, label: 'Creating...');
-      await _deptRef.add({
-        'name': dept.name,
-        'desc': dept.desc,
-        'participants': dept.participants,
-        'creatorId': dept.creatorId,
-        'createdAt': dept.createdAt,
+      await _workspaceRef.add({
+        'name': wrkspc.name,
+        'desc': wrkspc.desc,
+        'participants': wrkspc.participants,
+        'creatorId': wrkspc.creatorId,
+        'createdAt': wrkspc.createdAt,
       }).then((value) {
-        _deptRef.doc(value.id).update({
-          'id': value.id,
-          'Departments': [value.id]
-        }).then((_) {
+        _workspaceRef.doc(value.id).update({'id': value.id}).then((_) {
           context.pop();
           context.pop();
-          // context.push(
-          //   '${DeptScreen.id}/${HomeScreen.id}/${CreateRoomScreen.id}/${value.id}',
-          // );
-          showSnackBar(context, msg: '${dept.name} has been created');
+          showSnackBar(context, msg: '${wrkspc.name} has been created');
         });
       }).catchError((e) {
         context.pop();
@@ -53,28 +45,28 @@ class DeptDB {
 
   Future edit(
     BuildContext context, {
-    required String deptId,
+    required String wrkspcId,
     String? name,
     String? desc,
   }) async {
     try {
       showLoadingIndicator(context);
       _firestore
-          .collection('departments')
-          .doc(deptId)
+          .collection('workspaces')
+          .doc(wrkspcId)
           .update({'name': name, 'desc': desc}).then((value) {
         context.pop();
         context.pop();
         showSnackBar(
           context,
-          msg: 'Department info updated successfully',
+          msg: 'Workspace info updated successfully',
         );
       }).catchError((e) {
         context.pop();
         context.pop();
         showSnackBar(
           context,
-          msg: 'Oops! Unable to update Department info. \n Try again',
+          msg: 'Oops! Unable to update Workspace info. \n Try again',
         );
       });
     } catch (e) {
@@ -84,23 +76,23 @@ class DeptDB {
 
   Future delete(
     BuildContext context, {
-    required String deptName,
-    required String deptId,
+    required String wrkspcName,
+    required String wrkspcId,
   }) async {
     try {
       showLoadingIndicator(context, label: 'Deleting...');
-      _firestore.collection('departments').doc(deptId).delete().then((value) {
-        context.go(DeptScreen.id);
+      _firestore.collection('workspaces').doc(wrkspcId).delete().then((value) {
+        context.go(WorkspaceScreen.id);
         showSnackBar(
           context,
-          msg: "$deptName deleted",
+          msg: "$wrkspcName deleted",
         );
       }).catchError((e) {
         context.pop();
         context.pop();
         showSnackBar(
           context,
-          msg: "Unable to delete $deptName",
+          msg: "Unable to delete $wrkspcName",
         );
       }).timeout(
         const Duration(seconds: 20),

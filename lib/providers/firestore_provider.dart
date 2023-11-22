@@ -33,36 +33,36 @@ final roomProvider = StreamProvider.family(
   },
 );
 
-//? *************** Get Rooms Of A Dept ***************//
-final deptRoomsProvider = StreamProvider.family(
-  (ref, String deptId) {
+//? *************** Get Rooms Of A Workspace ***************//
+final wrkspcRoomsProvider = StreamProvider.family(
+  (ref, String workspaceId) {
     final firestore = ref.watch(firestoreProvider);
 
     final collectionRef = firestore
-        .collection('departments')
-        .doc(deptId)
+        .collection('workspaces')
+        .doc(workspaceId)
         .collection('rooms')
         .orderBy('createdAt', descending: true);
     return collectionRef.snapshots().map((data) => data.docs);
   },
 );
 
-//? *************** Get Departments ***************//
-final deptsProvider = StreamProvider((ref) {
+//? *************** Get Workspaces ***************//
+final wrkspcsProvider = StreamProvider((ref) {
   final firestore = ref.watch(firestoreProvider);
-  final collectionRef = firestore.collection('departments');
+  final collectionRef = firestore.collection('workspaces');
   return collectionRef
       .orderBy('createdAt')
       .snapshots()
       .map((value) => value.docs);
 });
 
-//? *************** Get Individial Departments *****************//
-final deptDataProvider = StreamProvider.family((ref, String deptId) {
+//? *************** Get Individial Workspaces *****************//
+final wrkspcDataProvider = StreamProvider.family((ref, String wrkspcId) {
   final firestore = ref.watch(firestoreProvider);
-  final userRef = firestore.collection('departments');
+  final userRef = firestore.collection('workspaces');
 
-  return userRef.doc(deptId).snapshots().map((value) => value.data());
+  return userRef.doc(wrkspcId).snapshots().map((value) => value.data());
 });
 
 //? *************** Get Participants ******************//

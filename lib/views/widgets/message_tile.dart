@@ -9,13 +9,13 @@ class MessageTile extends ConsumerStatefulWidget {
     required this.messageRef,
     required this.repliesRef,
     this.onTap,
-    required this.deptId,
+    required this.wrkspcId,
   });
   final Message message;
   final CollectionReference<Object?> messageRef;
   final CollectionReference repliesRef;
   final void Function()? onTap;
-  final String deptId;
+  final String wrkspcId;
 
   @override
   ConsumerState<MessageTile> createState() => _ConsumerMessageTileState();
@@ -62,7 +62,7 @@ class _ConsumerMessageTileState extends ConsumerState<MessageTile> {
                         onInfoIconPressed: widget.message.isMe!
                             ? null
                             : () => context.push(
-                                  '${DeptScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.deptId}/${RoomInfoScreen.id}/${widget.deptId}/${UserScreen.id}/${widget.message.senderId}',
+                                  '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.wrkspcId}/${RoomInfoScreen.id}/${widget.wrkspcId}/${UserScreen.id}/${widget.message.senderId}',
                                 ),
                       ),
                     ),
@@ -131,8 +131,8 @@ class _ConsumerMessageTileState extends ConsumerState<MessageTile> {
                       ),
                       widget.message.message.isEmpty
                           ? const SizedBox()
-                          : SizedBox(
-                              width: size * 7,
+                          : Container(
+                              constraints: BoxConstraints(maxWidth: size * 7),
                               child: Text.rich(
                                 maxLines: 5,
                                 overflow: TextOverflow.ellipsis,

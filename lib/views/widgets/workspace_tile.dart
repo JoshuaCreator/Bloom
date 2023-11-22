@@ -1,7 +1,7 @@
 import '../../utils/imports.dart';
 
-class DepartmentTile extends StatelessWidget {
-  const DepartmentTile({
+class WorkspaceTile extends StatelessWidget {
+  const WorkspaceTile({
     super.key,
     required this.id,
     required this.title,

@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:basic_board/services/image_helper.dart';
-import 'package:basic_board/views/screens/dept_screen.dart';
+import 'package:basic_board/views/screens/workspace_screen.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../utils/imports.dart';
@@ -11,10 +11,10 @@ class RoomChatScreen extends ConsumerStatefulWidget {
   const RoomChatScreen({
     super.key,
     required this.room,
-    required this.deptId,
+    required this.wrkspc,
   });
   final Room room;
-  final String deptId;
+  final String wrkspc;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _RoomScreenState();
@@ -32,15 +32,15 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
     final firestore = ref.watch(firestoreProvider);
 
     final collectionRef = firestore
-        .collection('departments')
-        .doc(widget.deptId)
+        .collection('workspaces')
+        .doc(widget.wrkspc)
         .collection('rooms')
         .doc(widget.room.id)
         .collection('messages');
 
     final messages = ref.watch(messagesProvider(firestore
-        .collection('departments')
-        .doc(widget.deptId)
+        .collection('workspaces')
+        .doc(widget.wrkspc)
         .collection('rooms')
         .doc(widget.room.id)
         .collection('messages')
@@ -59,14 +59,14 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
             reverse: true,
             itemCount: data.length,
             itemBuilder: (context, index) {
-              final user = ref
-                  .watch(anyUserProvider(messages.value?[index]['senderId']));
+              final user = ref.watch(
+                  anyUserProvider(messages.value?[index]['senderId'] ?? ''));
               bool isMe = user.value?['id'] == auth?.uid;
 
               final pending = data[index].metadata.hasPendingWrites;
               final Message message = Message(
                 id: data[index].id,
-                senderId: data[index]['senderId'] ?? '',
+                senderId: data[index]['senderId'] ?? 'random_string',
                 isMe: isMe,
                 message: data[index]['message'] ?? '',
                 image: data[index]['image'] ?? '',
@@ -88,7 +88,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                         message: message,
                         repliesRef: repliesRef,
                         messageRef: collectionRef,
-                        deptId: widget.deptId,
+                        wrkspcId: widget.wrkspc,
                       );
                     },
                   );
@@ -96,7 +96,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                 messageRef: collectionRef,
                 repliesRef: repliesRef,
                 message: message,
-                deptId: widget.deptId,
+                wrkspcId: widget.wrkspc,
               );
             },
           );
@@ -129,7 +129,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
           padding: EdgeInsets.only(right: ten),
           child: GestureDetector(
             onTap: () => context.push(
-              '${DeptScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.deptId}/${RoomInfoScreen.id}/${widget.deptId}',
+              '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.wrkspc}/${RoomInfoScreen.id}/${widget.wrkspc}',
               extra: widget.room,
             ),
             child: Hero(
@@ -180,106 +180,93 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                     ),
                   ),
           ),
-          Visibility(
-            visible: showUploadButtons,
-            child: Flexible(
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      // UploadTile(text: 'Image'),
-                      // SizedBox(width: ten),
-                      // UploadTile(text: 'Video'),
-                      // SizedBox(width: ten),
-                      // UploadTile(text: 'Document'),
+          // Visibility(
+          //   visible: showUploadButtons,
+          //   child: Flexible(
+          //     child: Column(
+          //       children: [
+          //         Row(
+          //           mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //           children: [
+          //             // UploadTile(text: 'Image'),
+          //             // SizedBox(width: ten),
+          //             // UploadTile(text: 'Video'),
+          //             // SizedBox(width: ten),
+          //             // UploadTile(text: 'Document'),
+          //             IconButton(
+          //               onPressed: () async {
+          //                 String imagePath = await imageHelper.pickImage(
+          //                   context,
+          //                   source: ImageSource.gallery,
+          //                 );
+          //                 if (context.mounted) {
+          //                   String croppedImg = await imageHelper
+          //                       .cropImage(context, path: imagePath);
+          //                   if (context.mounted) {
+          //                     context.pop();
+          //                     setState(() {
+          //                       showUploadButtons = false;
+          //                       fileImage = croppedImg;
+          //                     });
+          //                   }
+          //                 }
+          //               },
+          //               icon: const Icon(Icons.image_rounded),
+          //               tooltip: 'Upload an image file',
+          //             ),
+          //             // IconButton(
+          //             //   onPressed: () {},
+          //             //   icon: const Icon(Icons.video_file_rounded),
+          //             //   tooltip: 'Upload a video file',
+          //             // ),
+          //             IconButton(
+          //               onPressed: () {},
+          //               icon: const Icon(Icons.upload_file_rounded),
+          //               tooltip: 'Upload a document',
+          //             ),
+          //           ],
+          //         ),
+          //         height10,
+          //       ],
+          //     ),
+          //   ),
+          // ),
 
-                      IconButton(
-                        onPressed: () async {
-                          String imagePath = await imageHelper.pickImage(
-                            context,
-                            source: ImageSource.gallery,
-                          );
-                          // if (context.mounted) {
-                          //   showModalBottomSheet(
-                          //     context: context,
-                          //     useSafeArea: true,
-                          //     isScrollControlled: true,
-                          //     builder: (context) {
-                          //       return Column(
-                          //       );
-                          //     },
-                          //   );
-                          // }
-                          if (context.mounted) {
-                            String croppedImg = await imageHelper
-                                .cropImage(context, path: imagePath);
-                            if (context.mounted) {
-                              context.pop();
-                              setState(() {
-                                showUploadButtons = false;
-                                fileImage = croppedImg;
-                              });
-                            }
-                          }
-                        },
-                        icon: const Icon(Icons.image_rounded),
-                        tooltip: 'Upload an image file',
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.video_file_rounded),
-                        tooltip: 'Upload a video file',
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.upload_file_rounded),
-                        tooltip: 'Upload a document',
-                      ),
-                    ],
-                  ),
-                  height10,
-                ],
-              ),
-            ),
-          ),
           Form(
             key: _key,
             child: Expanded(
               child: MessageTextField(
                 hintText: 'Type a message',
                 textController: _messageController,
-                onPrefixPressed: () => setState(() {
-                  showUploadButtons
-                      ? showUploadButtons = false
-                      : showUploadButtons = true;
-                  // if (showUploadButtons) {
-                  //   Timer(const Duration(seconds: 10), () {
-                  //     setState(() {
-                  //       showUploadButtons = false;
-                  //     });
-                  //   });
-                  // } else {
-                  //   showUploadButtons = true;
-                  //   Timer(const Duration(seconds: 10), () {
-                  //     setState(() {
-                  //       showUploadButtons = false;
-                  //     });
-                  //   });
-                  // }
-                }),
+                onPrefixPressed: () async {
+                  String imagePath = await imageHelper.pickImage(
+                    context,
+                    source: ImageSource.gallery,
+                  );
+                  if (context.mounted) {
+                    String croppedImg =
+                        await imageHelper.cropImage(context, path: imagePath);
+                    if (context.mounted) {
+                      context.pop();
+                      setState(() {
+                        showUploadButtons = false;
+                        fileImage = croppedImg;
+                      });
+                    }
+                  }
+                },
                 onSuffixPressed: () {
                   if (_messageController.text.trim().isEmpty &&
                       fileImage!.isEmpty) return;
 
                   MessageDB().send(
                     ref: collectionRef,
-                    deptId: widget.deptId,
+                    wrkspcId: widget.wrkspc,
                     roomId: widget.room.id!,
-                    filePath: fileImage,
                     Message(
                       senderId: senderId!,
                       message: _messageController.text.trim(),
+                      image: fileImage,
                       time: DateTime.now(),
                     ),
                     context,
