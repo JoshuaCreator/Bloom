@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:basic_board/views/screens/home_screen.dart';
 import 'package:basic_board/views/screens/verify_email_screen.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:basic_board/views/dialogues/snack_bar.dart';
@@ -36,29 +35,23 @@ class Auth {
         if (!_auth.currentUser!.emailVerified) {
           context.go(VerifyEmailScreen.id);
         } else {
-          context.go('${WorkspaceScreen.id}/${HomeScreen.id}');
+          context.go(WorkspaceScreen.id);
         }
       });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         if (context.mounted) {
           showSnackBar(context, msg: 'This email address is not recognised');
-        }
-        if (context.mounted) {
           context.pop();
         }
       } else if (e.code == 'wrong-password') {
         if (context.mounted) {
           showSnackBar(context, msg: 'The Password you entered is incorrect');
-        }
-        if (context.mounted) {
           context.pop();
         }
       } else {
         if (context.mounted) {
           showSnackBar(context, msg: '${e.message}');
-        }
-        if (context.mounted) {
           context.pop();
         }
       }

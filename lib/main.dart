@@ -13,8 +13,6 @@ import 'providers/theme_provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // FirebaseFirestore.instance.settings =
-  //     const Settings(persistenceEnabled: false);
   runApp(
     ProviderScope(
       overrides: [
@@ -33,8 +31,6 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Sizes().init(context);
-    // final n = MediaQuery.of(context).platformBrightness;
-    // print(n);
     return MaterialApp.router(
       title: "Joshua's Chat app",
       themeMode: ref.watch(themeSelectorProvider),
