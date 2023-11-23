@@ -67,7 +67,7 @@ linkAlertDialogue(
   );
 }
 
-deleteAlertDialogue(BuildContext context,
+deleteMessageAlertDialogue(BuildContext context,
     {required String msgId, required msgRef}) {
   showDialog(
     context: context,

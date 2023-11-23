@@ -1,3 +1,4 @@
+import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:basic_board/views/screens/user_screen.dart';
@@ -121,7 +122,15 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
                     tooltip: widget.reply.likes!.contains(auth.uid)
                         ? 'Revoke like'
                         : 'Like',
-                    onPressed: () {
+                    onPressed: () async {
+                      bool isConnected = await isOnline();
+                      if (!isConnected) {
+                        if (context.mounted) {
+                          showSnackBar(context,
+                              msg: "You're currently offline");
+                        }
+                        return;
+                      }
                       widget.reply.likes!.contains(auth.uid)
                           ? setState(() {
                               widget.replyRef.update({

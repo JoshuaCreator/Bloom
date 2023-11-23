@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:basic_board/services/image_helper.dart';
-import 'package:basic_board/views/screens/workspace_screen.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../utils/imports.dart';
@@ -72,6 +71,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                 image: data[index]['image'] ?? '',
                 time: (data[index]['time']).toDate(),
                 pending: pending,
+                likes: data[index]['likes'],
               );
               final repliesRef =
                   collectionRef.doc(message.id).collection('replies');
@@ -82,6 +82,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                     context: context,
                     isScrollControlled: true,
                     useSafeArea: true,
+                    useRootNavigator: true,
                     builder: (context) {
                       return MessageDetailsScreen(
                         room: widget.room,
@@ -93,7 +94,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                     },
                   );
                 },
-                messageRef: collectionRef,
+                messagesRef: collectionRef,
                 repliesRef: repliesRef,
                 message: message,
                 wrkspcId: widget.wrkspc,
@@ -180,58 +181,6 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                     ),
                   ),
           ),
-          // Visibility(
-          //   visible: showUploadButtons,
-          //   child: Flexible(
-          //     child: Column(
-          //       children: [
-          //         Row(
-          //           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          //           children: [
-          //             // UploadTile(text: 'Image'),
-          //             // SizedBox(width: ten),
-          //             // UploadTile(text: 'Video'),
-          //             // SizedBox(width: ten),
-          //             // UploadTile(text: 'Document'),
-          //             IconButton(
-          //               onPressed: () async {
-          //                 String imagePath = await imageHelper.pickImage(
-          //                   context,
-          //                   source: ImageSource.gallery,
-          //                 );
-          //                 if (context.mounted) {
-          //                   String croppedImg = await imageHelper
-          //                       .cropImage(context, path: imagePath);
-          //                   if (context.mounted) {
-          //                     context.pop();
-          //                     setState(() {
-          //                       showUploadButtons = false;
-          //                       fileImage = croppedImg;
-          //                     });
-          //                   }
-          //                 }
-          //               },
-          //               icon: const Icon(Icons.image_rounded),
-          //               tooltip: 'Upload an image file',
-          //             ),
-          //             // IconButton(
-          //             //   onPressed: () {},
-          //             //   icon: const Icon(Icons.video_file_rounded),
-          //             //   tooltip: 'Upload a video file',
-          //             // ),
-          //             IconButton(
-          //               onPressed: () {},
-          //               icon: const Icon(Icons.upload_file_rounded),
-          //               tooltip: 'Upload a document',
-          //             ),
-          //           ],
-          //         ),
-          //         height10,
-          //       ],
-          //     ),
-          //   ),
-          // ),
-
           Form(
             key: _key,
             child: Expanded(
@@ -268,6 +217,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                       message: _messageController.text.trim(),
                       image: fileImage,
                       time: DateTime.now(),
+                      likes: [],
                     ),
                     context,
                   );
@@ -284,28 +234,5 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
         ],
       ),
     ];
-  }
-}
-
-class UploadTile extends StatelessWidget {
-  const UploadTile({super.key, required this.text});
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {},
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: twenty),
-          decoration: BoxDecoration(
-            color: Colors.red,
-            borderRadius: defaultBorderRadius,
-            border: Border.all(),
-          ),
-          child: Center(child: Text(text)),
-        ),
-      ),
-    );
   }
 }

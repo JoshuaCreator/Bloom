@@ -21,9 +21,12 @@ class UserScreen extends ConsumerWidget {
               context: context,
               builder: (context) => ImageViewer(image: userImg),
             ),
-            child: AppCircleAvatar(
-              image: CachedNetworkImageProvider(userImg),
-              userId: user.value?['id'],
+            child: Hero(
+              tag: 'user-display-img',
+              child: AppCircleAvatar(
+                image: CachedNetworkImageProvider(userImg),
+                userId: user.value?['id'],
+              ),
             ),
           ),
           height10,

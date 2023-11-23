@@ -1,11 +1,9 @@
 import 'dart:io';
+import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/dialogues/bottom_sheets.dart';
-import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:basic_board/views/widgets/app_button.dart';
 import 'package:basic_board/views/widgets/app_text_field.dart';
-import 'package:flutter/services.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreateRoomScreen extends ConsumerStatefulWidget {
@@ -23,6 +21,7 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
   File? image;
+  final ImageHelper imageHelper = ImageHelper();
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +40,28 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                 GestureDetector(
                   onTap: () => imagePickerDialogue(
                     context,
-                    onStorageTapped: () => _pickImage(ImageSource.gallery),
-                    onCameraTapped: () => _pickImage(ImageSource.camera),
+                    onStorageTapped: () => imageHelper
+                        .pickImage(context, source: ImageSource.gallery)
+                        .then((value) =>
+                            imageHelper.cropImage(context, path: value))
+                        .then((value) {
+                      setState(
+                        () => image = File(value),
+                      );
+                      context.pop();
+                      context.pop();
+                    }),
+                    onCameraTapped: () => imageHelper
+                        .pickImage(context, source: ImageSource.camera)
+                        .then((value) =>
+                            imageHelper.cropImage(context, path: value))
+                        .then((value) {
+                      setState(
+                        () => image = File(value),
+                      );
+                      context.pop();
+                      context.pop();
+                    }),
                   ),
                   child: image != null
                       ? CircleAvatar(
@@ -116,34 +135,6 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     );
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    context.pop();
-    showLoadingIndicator(context);
-    try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: source);
-      await _cropImage(image);
-      if (context.mounted && image == null) context.pop();
-    } on PlatformException catch (e) {
-      if (context.mounted) {
-        context.pop();
-        showSnackBar(context, msg: 'An error occurred: $e');
-      }
-    }
-  }
-
-  Future<void> _cropImage(XFile? image) async {
-    final ImageCropper cropper = ImageCropper();
-    if (image != null) {
-      final CroppedFile? croppedImg =
-          await cropper.cropImage(sourcePath: image.path, compressQuality: 10);
-      final File temporaryImage = File(croppedImg!.path);
-      setState(() {
-        this.image = temporaryImage;
-      });
-      if (context.mounted) context.pop();
-    }
-  }
 }
 
 class PrivacySwitch extends StatelessWidget {
@@ -162,20 +153,3 @@ class PrivacySwitch extends StatelessWidget {
     );
   }
 }
-
-// Future<void> _uploadImage(
-//   BuildContext context, {
-//   required String roomName,
-//   required File? image,
-// }) async {
-//   final path = 'rooms/$roomName/${image?.path}';
-//   try {
-//     final storageRef = FirebaseStorage.instance.ref().child(path);
-//     final uploadTask = storageRef.putFile(image!);
-
-//     final snapshot = await uploadTask.whenComplete(() {});
-//     final downloadUrl = await snapshot.ref.getDownloadURL();
-//   } on FirebaseException catch (e) {
-//     if (context.mounted) showSnackBar(context, msg: 'An error occurred: $e');
-//   }
-// }

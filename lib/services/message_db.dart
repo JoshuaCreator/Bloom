@@ -28,7 +28,8 @@ class MessageDB {
         'senderId': message.senderId,
         'image': message.image,
         'file': message.file,
-        'time': message.time
+        'time': message.time,
+        'likes': [],
       }).then((value) async {
         final docRef = _firestore
             .collection('workspaces')
@@ -105,6 +106,7 @@ class MessageDB {
     required String messageId,
     required String newMessage,
   }) async {
+    showLoadingIndicator(context, label: 'Updating...');
     try {
       _firestore
           .collection('workspaces')
@@ -116,6 +118,7 @@ class MessageDB {
           .update({
         'message': newMessage,
       }).then((value) {
+        context.pop();
         context.pop();
         showSnackBar(
           context,

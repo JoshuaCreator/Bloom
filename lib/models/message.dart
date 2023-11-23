@@ -3,6 +3,7 @@ class Message {
   final String? id, image, file;
   final DateTime time;
   final bool? pending, isMe;
+  final List? likes;
 
   const Message({
     this.id,
@@ -13,5 +14,6 @@ class Message {
     required this.time,
     this.pending,
     this.isMe = false,
+    this.likes,
   });
 }

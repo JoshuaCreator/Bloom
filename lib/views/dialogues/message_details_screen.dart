@@ -1,3 +1,5 @@
+import 'package:basic_board/services/connection_state.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../utils/imports.dart';
@@ -31,6 +33,14 @@ class _ConsumerMessageDetailsScreenState
     final user = ref.watch(anyUserProvider(widget.message.senderId));
     final auth = ref.watch(authStateProvider).value!;
     final firestore = ref.watch(firestoreProvider);
+    final msg = ref.watch(messageProvider(firestore
+        .collection('workspaces')
+        .doc(widget.wrkspcId)
+        .collection('rooms')
+        .doc(widget.room.id)
+        .collection('messages')
+        .doc(widget.message.id!)));
+    final msgRef = widget.messageRef.doc(widget.message.id!);
     final replies = ref.watch(repliesProvider(widget.repliesRef));
     final bool me = auth.uid == widget.message.senderId;
 
@@ -43,6 +53,16 @@ class _ConsumerMessageDetailsScreenState
           onPressed: () => context.pop(),
           icon: const Icon(Icons.keyboard_arrow_down),
         ),
+        actions: [
+          IconButton(
+            onPressed: () => Clipboard.setData(
+              ClipboardData(text: widget.message.image!),
+            ).then(
+              (value) => showSnackBar(context, msg: 'Copied to clipboard'),
+            ),
+            icon: const Icon(Icons.copy),
+          )
+        ],
       ),
       body: replies.when(
         data: (data) {
@@ -52,11 +72,39 @@ class _ConsumerMessageDetailsScreenState
                 MsgTile(
                   widget: widget,
                   user: user,
+                  msg: msg,
                   firestore: firestore,
                   date: dateTime,
                   me: me,
                 ),
-                ReactionTile(me: me, widget: widget),
+                ReactionTile(
+                  me: me,
+                  msg: msg,
+                  widget: widget,
+                  auth: auth,
+                  onLiked: () async {
+                    bool isConnected = await isOnline();
+                    if (!isConnected) {
+                      if (context.mounted) {
+                        showSnackBar(context, msg: "You're currently offline");
+                      }
+                      return;
+                    }
+                    msg.value?['likes'].contains(auth.uid)
+                        ? setState(() {
+                            msgRef.update({
+                              'likes': FieldValue.arrayRemove([auth.uid])
+                            });
+                          })
+                        : setState(
+                            () {
+                              msgRef.update({
+                                'likes': FieldValue.arrayUnion([auth.uid])
+                              });
+                            },
+                          );
+                  },
+                ),
                 height10,
                 Row(
                   children: [
@@ -144,15 +192,21 @@ class ReactionTile extends StatelessWidget {
   const ReactionTile({
     super.key,
     required this.me,
+    required this.msg,
     required this.widget,
+    required this.auth,
+    required this.onLiked,
   });
   final bool me;
+  final AsyncValue<Map<String, dynamic>?> msg;
   final MessageDetailsScreen widget;
+  final User auth;
+  final void Function()? onLiked;
 
   @override
   Widget build(BuildContext context) {
     final messageController =
-        TextEditingController(text: widget.message.message);
+        TextEditingController(text: msg.value?['message']);
     return Column(
       children: [
         const Separator(height: 0),
@@ -161,36 +215,51 @@ class ReactionTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             ReactionButton(
-              label: 'Copy',
-              icon: Icons.copy,
-              onPressed: () => Clipboard.setData(
-                ClipboardData(text: widget.message.image!),
-              ).then(
-                (value) => showSnackBar(context, msg: 'Copied to clipboard'),
-              ),
+              label: msg.value?['likes'] == null || msg.value?['likes']!.isEmpty
+                  ? 'Like'
+                  : msg.value?['likes'].length == 1
+                      ? '1 Like'
+                      : '${msg.value?['likes'].length} Likes',
+              icon: msg.value?['likes'].contains(auth.uid) ?? true
+                  ? Icons.thumb_up
+                  : Icons.thumb_up_outlined,
+              colour: msg.value?['likes'].contains(auth.uid) ?? true
+                  ? ColourConfig.go
+                  : null,
+              onPressed: onLiked,
             ),
             me
                 ? ReactionButton(
                     label: 'Edit',
                     icon: Icons.edit_outlined,
-                    onPressed: () {
-                      messageEditDialogue(
-                        context,
-                        messageController: messageController,
-                        onSaved: () {
-                          if (widget.message.message ==
-                              messageController.text.trim()) {
-                            return;
-                          }
-                          MessageDB().edit(
-                            context,
-                            roomId: widget.room.id!,
-                            wrkspcId: widget.wrkspcId,
-                            messageId: widget.message.id!,
-                            newMessage: messageController.text.trim(),
-                          );
-                        },
-                      );
+                    onPressed: () async {
+                      bool isConnected = await isOnline();
+                      if (!isConnected) {
+                        if (context.mounted) {
+                          showSnackBar(context,
+                              msg: "You're currently offline");
+                        }
+                        return;
+                      }
+                      if (context.mounted) {
+                        messageEditDialogue(
+                          context,
+                          messageController: messageController,
+                          onSaved: () {
+                            if (widget.message.message ==
+                                messageController.text.trim()) {
+                              return;
+                            }
+                            MessageDB().edit(
+                              context,
+                              roomId: widget.room.id!,
+                              wrkspcId: widget.wrkspcId,
+                              messageId: widget.message.id!,
+                              newMessage: messageController.text.trim(),
+                            );
+                          },
+                        );
+                      }
                     },
                   )
                 : const SizedBox(),
@@ -198,7 +267,7 @@ class ReactionTile extends StatelessWidget {
               label: me ? 'Delete' : 'Reply privately',
               icon: me ? Icons.delete_forever_outlined : Icons.reply,
               onPressed: me
-                  ? () => deleteAlertDialogue(
+                  ? () => deleteMessageAlertDialogue(
                         context,
                         msgId: widget.message.id!,
                         msgRef: widget.messageRef,
@@ -222,6 +291,7 @@ class MsgTile extends StatelessWidget {
     required this.widget,
     required this.firestore,
     required this.user,
+    required this.msg,
     required this.date,
     required this.me,
   });
@@ -229,6 +299,7 @@ class MsgTile extends StatelessWidget {
   final MessageDetailsScreen widget;
   final FirebaseFirestore firestore;
   final AsyncValue<Map<String, dynamic>?> user;
+  final AsyncValue<Map<String, dynamic>?> msg;
   final String date;
   final bool me;
 
@@ -291,7 +362,7 @@ class MsgTile extends StatelessWidget {
                   TextSpan(
                     children: extractText(
                       context,
-                      widget.message.message,
+                      msg.value?['message'],
                     ),
                   ),
                 ),
@@ -309,10 +380,12 @@ class ReactionButton extends StatelessWidget {
     super.key,
     required this.label,
     required this.icon,
+    this.colour,
     this.onPressed,
   });
   final String label;
   final IconData icon;
+  final Color? colour;
   final void Function()? onPressed;
 
   @override
@@ -322,7 +395,7 @@ class ReactionButton extends StatelessWidget {
         IconButton(
           padding: EdgeInsets.all(ten),
           onPressed: onPressed,
-          icon: Icon(icon),
+          icon: Icon(icon, color: colour),
         ),
         Text(label, style: TextConfig.sub),
       ],

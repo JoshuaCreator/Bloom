@@ -6,13 +6,13 @@ class MessageTile extends ConsumerStatefulWidget {
   const MessageTile({
     super.key,
     required this.message,
-    required this.messageRef,
+    required this.messagesRef,
     required this.repliesRef,
     this.onTap,
     required this.wrkspcId,
   });
   final Message message;
-  final CollectionReference<Object?> messageRef;
+  final CollectionReference<Map<String, dynamic>> messagesRef;
   final CollectionReference repliesRef;
   final void Function()? onTap;
   final String wrkspcId;
@@ -86,7 +86,9 @@ class _ConsumerMessageTileState extends ConsumerState<MessageTile> {
                           Container(
                             constraints: BoxConstraints(maxWidth: size * 3.5),
                             child: Text(
-                              widget.message.isMe! ? '' : user.value?['name'],
+                              widget.message.isMe!
+                                  ? ''
+                                  : user.value?['name'] ?? '',
                               overflow: TextOverflow.ellipsis,
                               style: TextConfig.intro,
                             ),

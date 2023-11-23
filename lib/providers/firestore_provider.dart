@@ -92,11 +92,24 @@ final repliesCountProvider =
   return collectionRef.snapshots().map((data) => data.docs);
 });
 
+//? *************** Get Number Of Likes ******************//
+final likesCountProvider = StreamProvider.family(
+    (ref, DocumentReference<Map<String, dynamic>> likesRef) {
+  return likesRef.snapshots().map((doc) => doc.data()?['likes']);
+});
+
 //? *************** Get Last Message ******************//
 final lastMessageProvider =
     StreamProvider.family((ref, Query<Map<String, dynamic>> lastMessageRef) {
   final collectionRef = lastMessageRef;
   return collectionRef.snapshots().map((data) => data.docs);
+});
+
+//? *************** Get Single Message ******************//
+final messageProvider = StreamProvider.family(
+    (ref, DocumentReference<Map<String, dynamic>> messageRef) {
+  final docRef = messageRef;
+  return docRef.snapshots().map((data) => data.data());
 });
 
 //? *************** Get All Messages ******************//
