@@ -95,69 +95,82 @@ class _ConsumerWorkspaceInfoScreenState
                     ),
                   ),
                   height10,
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: room.value?.length,
-                    itemBuilder: (context, index) {
-                      DateTime timeStamp =
-                          (room.value?[index]['createdAt']) == null
-                              ? DateTime.now()
-                              : (room.value?[index]['createdAt']).toDate();
-                      final Room roomData = Room(
-                        id: room.value![index]['id'],
-                        creatorId: room.value?[index]['creatorId'],
-                        name: room.value?[index]['name'] ?? '',
-                        desc: room.value?[index]['desc'] ?? '',
-                        private: room.value?[index]['private'],
-                        image: room.value?[index]['image'] ?? defaultRoomImg,
-                        createdAt: timeStamp,
-                        participants: room.value?[index]['participants'],
-                      );
+                  data?['rooms'] == null || data?['rooms']!.isEmpty
+                      ? Center(
+                          heightFactor: twenty,
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: twenty),
+                            child: const Text(
+                              'There are no Rooms in this Workspace yet',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: room.value?.length,
+                          itemBuilder: (context, index) {
+                            DateTime timeStamp = (room.value?[index]
+                                        ['createdAt']) ==
+                                    null
+                                ? DateTime.now()
+                                : (room.value?[index]['createdAt']).toDate();
+                            final Room roomData = Room(
+                              id: room.value![index]['id'],
+                              creatorId: room.value?[index]['creatorId'],
+                              name: room.value?[index]['name'] ?? '',
+                              desc: room.value?[index]['desc'] ?? '',
+                              private: room.value?[index]['private'],
+                              image:
+                                  room.value?[index]['image'] ?? defaultRoomImg,
+                              createdAt: timeStamp,
+                              participants: room.value?[index]['participants'],
+                            );
 
-                      final bool isParticipant =
-                          roomData.participants.contains(auth?.uid);
+                            final bool isParticipant =
+                                roomData.participants.contains(auth?.uid);
 
-                      return RoomTile(
-                        roomData: roomData,
-                        subtitle:
-                            'Participants (${roomData.participants.length})',
-                        trailing: isParticipant
-                            ? AppTextButton(
-                                label: 'Leave',
-                                colour: ColourConfig.danger,
-                                onPressed: () {
-                                  //? Leave Room
-                                  leaveRoomDialogue(
-                                    context,
-                                    wrkspcId: widget.workspace.id!,
-                                    roomId: roomData.id!,
-                                    userId: auth!.uid,
-                                    roomName: roomData.name,
-                                  );
-                                },
-                              )
-                            : AppTextButton(
-                                label: 'Join',
-                                colour: ColourConfig.go,
-                                onPressed: () {
-                                  //? Join Room
-                                  RoomDB().join(
-                                    context,
-                                    wrkspcId: widget.workspace.id!,
-                                    roomId: roomData.id!,
-                                    userId: auth!.uid,
-                                    roomName: roomData.name,
-                                  );
-                                },
+                            return RoomTile(
+                              roomData: roomData,
+                              subtitle:
+                                  'Participants (${roomData.participants.length})',
+                              trailing: isParticipant
+                                  ? AppTextButton(
+                                      label: 'Leave',
+                                      colour: ColourConfig.danger,
+                                      onPressed: () {
+                                        //? Leave Room
+                                        leaveRoomDialogue(
+                                          context,
+                                          wrkspcId: widget.workspace.id!,
+                                          roomId: roomData.id!,
+                                          userId: auth!.uid,
+                                          roomName: roomData.name,
+                                        );
+                                      },
+                                    )
+                                  : AppTextButton(
+                                      label: 'Join',
+                                      colour: ColourConfig.go,
+                                      onPressed: () {
+                                        //? Join Room
+                                        RoomDB().join(
+                                          context,
+                                          wrkspcId: widget.workspace.id!,
+                                          roomId: roomData.id!,
+                                          userId: auth!.uid,
+                                          roomName: roomData.name,
+                                        );
+                                      },
+                                    ),
+                              onTap: () => context.push(
+                                '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.workspace.id!}/${RoomInfoScreen.id}/${widget.workspace.id!}',
+                                extra: roomData,
                               ),
-                        onTap: () => context.push(
-                          '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.workspace.id!}/${RoomInfoScreen.id}/${widget.workspace.id!}',
-                          extra: roomData,
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
                 ],
               ),
             ],

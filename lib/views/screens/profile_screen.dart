@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/views/dialogues/bottom_sheets.dart';
 import 'package:basic_board/views/widgets/app_circle_avatar.dart';
@@ -186,43 +187,52 @@ class _ConsumerProfileScreenState extends ConsumerState<ProfileScreen> {
     required AsyncValue<Map<String, dynamic>?> user,
     required FirebaseFirestore firestore,
     required User auth,
-  }) {
-    userInfoEditDialogue(
-      context,
-      nameController: nameController,
-      aboutController: aboutController,
-      phoneController: phoneController,
-      autofocusName: autofocusName,
-      autofocusAbout: autofocusAbout,
-      autofocusPhone: autofocusPhone,
-      onSaved: () {
-        showLoadingIndicator(context, label: 'Saving...');
-        if (nameController.text.trim() == user.value?['name']) {
-          context.pop();
-          context.pop();
-          return;
-        }
+  }) async {
+    bool isConnected = await isOnline();
+    if (!isConnected) {
+      if (context.mounted) {
+        showSnackBar(context, msg: "You're currently offline");
+      }
+      return;
+    }
+    if (context.mounted) {
+      userInfoEditDialogue(
+        context,
+        nameController: nameController,
+        aboutController: aboutController,
+        phoneController: phoneController,
+        autofocusName: autofocusName,
+        autofocusAbout: autofocusAbout,
+        autofocusPhone: autofocusPhone,
+        onSaved: () {
+          showLoadingIndicator(context, label: 'Saving...');
+          if (nameController.text.trim() == user.value?['name']) {
+            context.pop();
+            context.pop();
+            return;
+          }
 
-        firestore.collection('users').doc(auth.uid).update({
-          'name': nameController.text.trim(),
-          'phone': phoneController.text.trim(),
-          'about': aboutController.text.trim(),
-        }).then((value) {
-          context.pop();
-          context.pop();
-          showSnackBar(
-            context,
-            msg: 'Info saved',
-          );
-        }).catchError((e) {
-          context.pop();
-          showSnackBar(
-            context,
-            msg: 'Oops! Unable to save. \n Try again',
-          );
-        });
-      },
-    );
+          firestore.collection('users').doc(auth.uid).update({
+            'name': nameController.text.trim(),
+            'phone': phoneController.text.trim(),
+            'about': aboutController.text.trim(),
+          }).then((value) {
+            context.pop();
+            context.pop();
+            showSnackBar(
+              context,
+              msg: 'Info saved',
+            );
+          }).catchError((e) {
+            context.pop();
+            showSnackBar(
+              context,
+              msg: 'Oops! Unable to save. \n Try again',
+            );
+          });
+        },
+      );
+    }
   }
 }
 

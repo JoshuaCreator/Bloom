@@ -1,3 +1,4 @@
+import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -13,9 +14,19 @@ class WorkspaceDB {
   Future<void> create(BuildContext context,
       {required Workspace wrkspc, required String userId}) async {
     _workspaceRef = _firestore.collection('workspaces');
+    _firestore.settings = const Settings(persistenceEnabled: false);
+
+    bool isConnected = await isOnline();
+    if (!isConnected) {
+      if (context.mounted) {
+        context.pop();
+        showSnackBar(context, msg: "You're currently offline");
+      }
+      return;
+    }
 
     try {
-      showLoadingIndicator(context, label: 'Creating...');
+      if (context.mounted) showLoadingIndicator(context, label: 'Creating...');
       await _workspaceRef.add({
         'name': wrkspc.name,
         'desc': wrkspc.desc,
@@ -49,8 +60,18 @@ class WorkspaceDB {
     String? name,
     String? desc,
   }) async {
+    _firestore.settings = const Settings(persistenceEnabled: false);
+
+    bool isConnected = await isOnline();
+    if (!isConnected) {
+      if (context.mounted) {
+        context.pop();
+        showSnackBar(context, msg: "You're currently offline");
+      }
+      return;
+    }
     try {
-      showLoadingIndicator(context);
+      if (context.mounted) showLoadingIndicator(context);
       _firestore
           .collection('workspaces')
           .doc(wrkspcId)
@@ -79,8 +100,18 @@ class WorkspaceDB {
     required String wrkspcName,
     required String wrkspcId,
   }) async {
+    _firestore.settings = const Settings(persistenceEnabled: false);
+
+    bool isConnected = await isOnline();
+    if (!isConnected) {
+      if (context.mounted) {
+        context.pop();
+        showSnackBar(context, msg: "You're currently offline");
+      }
+      return;
+    }
     try {
-      showLoadingIndicator(context, label: 'Deleting...');
+      if (context.mounted) showLoadingIndicator(context, label: 'Deleting...');
       _firestore.collection('workspaces').doc(wrkspcId).delete().then((value) {
         context.go(WorkspaceScreen.id);
         showSnackBar(

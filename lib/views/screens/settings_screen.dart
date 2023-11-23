@@ -1,3 +1,4 @@
+import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/views/widgets/settings_tile.dart';
 import 'package:basic_board/views/widgets/profile_tile.dart';
 import '../../services/auth.dart';
@@ -29,7 +30,14 @@ class SettingsScreen extends ConsumerWidget {
                   leading: user.value?['active'] == true
                       ? Icons.person_pin_circle_outlined
                       : Icons.person_off_outlined,
-                  onTap: () {
+                  onTap: () async {
+                    bool isConnected = await isOnline();
+                    if (!isConnected) {
+                      if (context.mounted) {
+                        showSnackBar(context, msg: "You're offline");
+                      }
+                      return;
+                    }
                     firestore.collection('users').doc(auth.uid).update({
                       'active': user.value?['active'] == true ? false : true,
                     });

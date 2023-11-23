@@ -2,7 +2,7 @@ export 'package:basic_board/views/dialogues/popup_menu.dart';
 export 'package:basic_board/views/screens/room_chat_screen.dart';
 export 'package:basic_board/views/dialogues/loading_indicator.dart';
 export 'package:basic_board/views/screens/search_screen.dart';
-export 'package:basic_board/models/dept.dart';
+export 'package:basic_board/models/workspace.dart';
 export 'package:basic_board/views/screens/create_workspace_screen.dart';
 export 'package:basic_board/views/screens/workspace_info_screen.dart';
 export 'package:basic_board/views/screens/workspace_screen.dart';

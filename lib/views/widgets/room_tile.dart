@@ -24,7 +24,9 @@ class RoomTile extends ConsumerWidget {
         onTap: () => showDialog(
           context: context,
           builder: (context) => ImageViewer(
-            image: roomData.image!,
+            image: roomData.image!.isEmpty || roomData.image == null
+                ? defaultRoomImg
+                : roomData.image!,
             onInfoIconPressed: showInfoIcon
                 ? () => context.push(
                       '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${roomData.id}/${RoomInfoScreen.id}/$wrkspcId',
@@ -36,7 +38,9 @@ class RoomTile extends ConsumerWidget {
         child: CircleAvatar(
           radius: circularAvatarRadius,
           backgroundImage: CachedNetworkImageProvider(
-            roomData.image!,
+            roomData.image!.isEmpty || roomData.image == null
+                ? defaultRoomImg
+                : roomData.image!,
           ),
         ),
       ),

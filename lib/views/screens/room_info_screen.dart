@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:basic_board/views/screens/user_screen.dart';
@@ -67,7 +68,10 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                     onTap: () => showDialog(
                       context: context,
                       builder: (context) => ImageViewer(
-                        image: room.value?['image'] ?? defaultRoomImg,
+                        image: room.value?['image']!.isEmpty ||
+                                room.value?['image'] == null
+                            ? defaultRoomImg
+                            : room.value?['image'],
                       ),
                     ),
                     child: Hero(
@@ -76,7 +80,10 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                           ? CircleAvatar(
                               radius: size * 2,
                               backgroundImage: CachedNetworkImageProvider(
-                                widget.room.image!,
+                                widget.room.image!.isEmpty ||
+                                        widget.room.image == null
+                                    ? defaultRoomImg
+                                    : widget.room.image!,
                               ),
                             )
                           : CircleAvatar(
@@ -160,66 +167,75 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
       AppPopupMenu.buildPopupMenuItem(
         context,
         label: 'Change display picture',
-        onTap: () {
-          imagePickerDialogue(
-            context,
-            onStorageTapped: () async {
-              String imagePath = await imageHelper.pickImage(
-                context,
-                source: ImageSource.gallery,
-              );
-              if (context.mounted) {
-                String croppedImg =
-                    await imageHelper.cropImage(context, path: imagePath);
+        onTap: () async {
+          bool isConnected = await isOnline();
+          if (!isConnected) {
+            if (context.mounted) {
+              showSnackBar(context, msg: "You're currently offline");
+            }
+            return;
+          }
+          if (context.mounted) {
+            imagePickerDialogue(
+              context,
+              onStorageTapped: () async {
+                String imagePath = await imageHelper.pickImage(
+                  context,
+                  source: ImageSource.gallery,
+                );
                 if (context.mounted) {
-                  context.pop();
-                  context.pop();
-                  showLoadingIndicator(context, label: 'Saving');
+                  String croppedImg =
+                      await imageHelper.cropImage(context, path: imagePath);
+                  if (context.mounted) {
+                    context.pop();
+                    context.pop();
+                    showLoadingIndicator(context, label: 'Saving');
+                  }
+                  if (context.mounted) {
+                    setState(() {
+                      fileImage = croppedImg;
+                    });
+                    await imageHelper.uploadImage(
+                      context,
+                      imagePath: croppedImg,
+                      docRef: firestore
+                          .collection('workspaces')
+                          .doc(widget.wrkspaceId)
+                          .collection('rooms')
+                          .doc(widget.room.id),
+                      storagePath: 'rooms/${widget.room.name}.png',
+                    );
+                    if (context.mounted) context.pop();
+                  }
                 }
+              },
+              onCameraTapped: () async {
+                String imagePath = await imageHelper.pickImage(
+                  context,
+                  source: ImageSource.camera,
+                );
                 if (context.mounted) {
-                  setState(() {
-                    fileImage = croppedImg;
-                  });
-                  await imageHelper.uploadImage(
-                    context,
-                    imagePath: croppedImg,
-                    docRef: firestore
-                        .collection('workspaces')
-                        .doc(widget.wrkspaceId)
-                        .collection('rooms')
-                        .doc(widget.room.id),
-                    storagePath: 'rooms/${widget.room.name}.png',
-                  );
-                  if (context.mounted) context.pop();
+                  String croppedImg =
+                      await imageHelper.cropImage(context, path: imagePath);
+                  if (context.mounted) {
+                    setState(() {
+                      fileImage = croppedImg;
+                    });
+                    await imageHelper.uploadImage(
+                      context,
+                      imagePath: croppedImg,
+                      docRef: firestore
+                          .collection('workspaces')
+                          .doc(widget.wrkspaceId)
+                          .collection('rooms')
+                          .doc(widget.room.id),
+                      storagePath: 'rooms/${widget.room.name}.png',
+                    );
+                  }
                 }
-              }
-            },
-            onCameraTapped: () async {
-              String imagePath = await imageHelper.pickImage(
-                context,
-                source: ImageSource.camera,
-              );
-              if (context.mounted) {
-                String croppedImg =
-                    await imageHelper.cropImage(context, path: imagePath);
-                if (context.mounted) {
-                  setState(() {
-                    fileImage = croppedImg;
-                  });
-                  await imageHelper.uploadImage(
-                    context,
-                    imagePath: croppedImg,
-                    docRef: firestore
-                        .collection('workspaces')
-                        .doc(widget.wrkspaceId)
-                        .collection('rooms')
-                        .doc(widget.room.id),
-                    storagePath: 'rooms/${widget.room.name}.png',
-                  );
-                }
-              }
-            },
-          );
+              },
+            );
+          }
         },
       ),
       AppPopupMenu.buildPopupMenuItem(
@@ -275,10 +291,12 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
               context,
               label: 'Delete Room',
               onTap: () {
-                deleteRoomDialogue(context,
-                    roomId: widget.room.id!,
-                    roomName: widget.room.name,
-                    wrkspcId: widget.wrkspaceId);
+                deleteRoomDialogue(
+                  context,
+                  roomId: widget.room.id!,
+                  roomName: widget.room.name,
+                  wrkspcId: widget.wrkspaceId,
+                );
               },
             )
           : AppPopupMenu.buildPopupMenuItem(

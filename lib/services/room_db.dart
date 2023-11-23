@@ -1,8 +1,7 @@
 import 'dart:io';
-
+import 'connection_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
 import '../views/dialogues/loading_indicator_build.dart';
 import '../utils/imports.dart';
 
@@ -21,9 +20,17 @@ class RoomDB {
   }) async {
     _roomRef =
         _firestore.collection('workspaces').doc(wrkspcId).collection('rooms');
+    bool isConnected = await isOnline();
+
+    if (!isConnected) {
+      if (context.mounted) {
+        showSnackBar(context, msg: "You're currently offline");
+      }
+      return;
+    }
 
     try {
-      showLoadingIndicator(context, label: 'Creating...');
+      if (context.mounted) showLoadingIndicator(context, label: 'Creating...');
       await _roomRef.add({
         'name': room.name,
         'desc': room.desc,
@@ -39,9 +46,6 @@ class RoomDB {
               _firestore.collection('workspaces').doc(wrkspcId).update({
                 'rooms': FieldValue.arrayUnion([value.id])
               });
-              _roomRef.doc(value.id).update({
-                'rooms': FieldValue.arrayUnion([value.id])
-              });
               _roomRef
                   .doc(value.id)
                   .collection('participants')
@@ -50,7 +54,7 @@ class RoomDB {
                 'id': userId,
                 'joined': DateTime.now(),
               }).then((_) async {
-                final path = 'rooms/${room.id}/${value.id}';
+                final path = 'rooms/${room.id}/${value.id}.png';
                 await _roomRef.doc(value.id).update({
                   'image': await uploadImageGetUrl(
                     context,
@@ -105,8 +109,15 @@ class RoomDB {
     required String userId,
     required String roomName,
   }) async {
+    bool isConnected = await isOnline();
+    if (!isConnected) {
+      if (context.mounted) {
+        showSnackBar(context, msg: "You're currently offline");
+      }
+      return;
+    }
     try {
-      showLoadingIndicator(context, label: 'Joining...');
+      if (context.mounted) showLoadingIndicator(context, label: 'Joining...');
       _firestore
           .collection('workspaces')
           .doc(wrkspcId)
@@ -144,10 +155,12 @@ class RoomDB {
         );
       });
     } catch (e) {
-      showSnackBar(
-        context,
-        msg: "An error occurred: $e",
-      );
+      if (context.mounted) {
+        showSnackBar(
+          context,
+          msg: "An error occurred: $e",
+        );
+      }
     }
   }
 
@@ -158,8 +171,17 @@ class RoomDB {
     required String userId,
     required String roomName,
   }) async {
+    bool isConnected = await isOnline();
+
+    if (!isConnected) {
+      if (context.mounted) {
+        context.pop();
+        showSnackBar(context, msg: "You're currently offline");
+      }
+      return;
+    }
     try {
-      showLoadingIndicator(context, label: 'Exiting...');
+      if (context.mounted) showLoadingIndicator(context, label: 'Exiting...');
       _firestore
           .collection('workspaces')
           .doc(wrkspcId)
@@ -196,7 +218,7 @@ class RoomDB {
         );
       });
     } catch (e) {
-      showSnackBar(context, msg: "An error occurred: $e");
+      if (context.mounted) showSnackBar(context, msg: "An error occurred: $e");
     }
   }
 
@@ -207,8 +229,17 @@ class RoomDB {
     String? name,
     String? desc,
   }) async {
+    bool isConnected = await isOnline();
+
+    if (!isConnected) {
+      if (context.mounted) {
+        context.pop();
+        showSnackBar(context, msg: "You're currently offline");
+      }
+      return;
+    }
     try {
-      showLoadingIndicator(context);
+      if (context.mounted) showLoadingIndicator(context);
       _firestore
           .collection('workspaces')
           .doc(wrkspcId)
@@ -230,7 +261,7 @@ class RoomDB {
         );
       });
     } catch (e) {
-      showSnackBar(context, msg: "An error occurred: $e");
+      if (context.mounted) showSnackBar(context, msg: "An error occurred: $e");
     }
   }
 
@@ -240,19 +271,26 @@ class RoomDB {
     required String roomName,
     required String wrkspcId,
   }) async {
-    _firestore.settings = const Settings(persistenceEnabled: false);
+    bool isConnected = await isOnline();
+
+    if (!isConnected) {
+      if (context.mounted) {
+        context.pop();
+        showSnackBar(context, msg: "You're currently offline");
+      }
+      return;
+    }
     try {
-      showLoadingIndicator(context, label: 'Deleting...');
-      _firestore
-          .collection('workspaces')
-          .doc(wrkspcId)
-          .collection('rooms')
-          .doc(roomId)
-          .delete()
-          .then((value) {
-        _firestore.collection('workspaces').doc(wrkspcId).update({
-          'rooms': FieldValue.arrayRemove([roomId])
-        });
+      if (context.mounted) showLoadingIndicator(context, label: 'Deleting...');
+      _firestore.collection('workspaces').doc(wrkspcId).update({
+        'rooms': FieldValue.arrayRemove([roomId])
+      }).then((value) {
+        _firestore
+            .collection('workspaces')
+            .doc(wrkspcId)
+            .collection('rooms')
+            .doc(roomId)
+            .delete();
         context.pop();
         context.pop();
         context.pop();
@@ -279,10 +317,12 @@ class RoomDB {
         },
       );
     } catch (e) {
-      showSnackBar(
-        context,
-        msg: "An error occurred: $e",
-      );
+      if (context.mounted) {
+        showSnackBar(
+          context,
+          msg: "An error occurred: $e",
+        );
+      }
     }
   }
 }
