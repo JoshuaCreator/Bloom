@@ -47,14 +47,24 @@ final wrkspcRoomsProvider = StreamProvider.family(
   },
 );
 
-//? *************** Get Workspaces ***************//
-final wrkspcsProvider = StreamProvider((ref) {
+//? *************** Get All Workspaces ***************//
+final allWorkspacesProvider = StreamProvider((ref) {
   final firestore = ref.watch(firestoreProvider);
   final collectionRef = firestore.collection('workspaces');
   return collectionRef
       .orderBy('createdAt')
       .snapshots()
       .map((value) => value.docs);
+});
+
+//? *************** Get Workspaces ***************//
+final workspaceProvider = StreamProvider.family((ref, String id) {
+  final firestore = ref.watch(firestoreProvider);
+  final collectionRef = firestore.collection('workspaces');
+  return collectionRef
+      .doc(id)
+      .snapshots()
+      .map((doc) => doc.data());
 });
 
 //? *************** Get Individial Workspaces *****************//

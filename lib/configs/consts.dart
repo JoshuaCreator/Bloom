@@ -34,3 +34,9 @@ BorderRadius yourBorderRadius = BorderRadius.only(
 
 const String defaultRoomImg =
     'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg';
+
+const String defaultWorkspaceImg =
+    'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg';
+
+const String defaultUserImg =
+    'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg';

@@ -115,32 +115,46 @@ class _ConsumerMessageTileState extends ConsumerState<MessageTile> {
                             widget.message.image!.isNotEmpty,
                         child: widget.message.image != null &&
                                 widget.message.image!.isNotEmpty
-                            ? Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: defaultBorderRadius,
-                                    child: CachedNetworkImage(
-                                      imageUrl: widget.message.image ?? '',
-                                      fit: BoxFit.contain,
-                                      height: size * 4,
-                                    ),
+                            ? ClipRRect(
+                                borderRadius: defaultBorderRadius,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxHeight: size * 4,
+                                    maxWidth: size * 6,
                                   ),
-                                  height5,
-                                ],
+                                  child: CachedNetworkImage(
+                                    imageUrl: widget.message.image!.isEmpty ||
+                                            widget.message.image == null
+                                        ? defaultRoomImg
+                                        : widget.message.image!,
+                                    errorWidget: (context, url, error) => Icon(
+                                      Icons.image,
+                                      size: size * 3,
+                                    ),
+                                    progressIndicatorBuilder:
+                                        (context, url, progress) {
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          value: progress.progress,
+                                        ),
+                                      );
+                                    },
+                                    alignment: widget.message.isMe!
+                                        ? Alignment.centerRight
+                                        : Alignment.centerLeft,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
                               )
                             : const SizedBox(),
                       ),
                       widget.message.message.isEmpty
                           ? const SizedBox()
-                          : Container(
+                          : ConstrainedBox(
                               constraints: BoxConstraints(maxWidth: size * 7),
                               child: Text.rich(
                                 maxLines: 5,
                                 overflow: TextOverflow.ellipsis,
-                                textAlign: widget.message.isMe!
-                                    ? TextAlign.right
-                                    : TextAlign.left,
                                 TextSpan(
                                   children: extractText(
                                       context, widget.message.message),

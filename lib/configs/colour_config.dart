@@ -28,4 +28,12 @@ class ColourConfig {
   static Color danger = Colors.red;
 
   static Color go = Colors.green;
+
+  static Color dull = Colors.grey;
+
+  static Color holy = Colors.white;
+
+  static Color evil = Colors.black;
+
+  static Color empty = Colors.transparent;
 }

@@ -126,8 +126,7 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
                       bool isConnected = await isOnline();
                       if (!isConnected) {
                         if (context.mounted) {
-                          showSnackBar(context,
-                              msg: "You're currently offline");
+                          showSnackBar(context, msg: "You're offline");
                         }
                         return;
                       }

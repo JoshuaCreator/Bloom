@@ -191,7 +191,7 @@ class _ConsumerProfileScreenState extends ConsumerState<ProfileScreen> {
     bool isConnected = await isOnline();
     if (!isConnected) {
       if (context.mounted) {
-        showSnackBar(context, msg: "You're currently offline");
+        showSnackBar(context, msg: "You're offline");
       }
       return;
     }

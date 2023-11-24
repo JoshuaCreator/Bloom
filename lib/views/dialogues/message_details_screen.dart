@@ -55,11 +55,18 @@ class _ConsumerMessageDetailsScreenState
         ),
         actions: [
           IconButton(
-            onPressed: () => Clipboard.setData(
-              ClipboardData(text: widget.message.image!),
-            ).then(
-              (value) => showSnackBar(context, msg: 'Copied to clipboard'),
-            ),
+            onPressed: () {
+              if (msg.value?['message'] == null ||
+                  msg.value?['message']!.isEmpty) {
+                showSnackBar(context, msg: "There's nothing to copy");
+                return;
+              }
+              Clipboard.setData(
+                ClipboardData(text: msg.value?['message']),
+              ).then(
+                (value) => showSnackBar(context, msg: 'Copied to clipboard'),
+              );
+            },
             icon: const Icon(Icons.copy),
           )
         ],
@@ -86,7 +93,7 @@ class _ConsumerMessageDetailsScreenState
                     bool isConnected = await isOnline();
                     if (!isConnected) {
                       if (context.mounted) {
-                        showSnackBar(context, msg: "You're currently offline");
+                        showSnackBar(context, msg: "You're offline");
                       }
                       return;
                     }
@@ -236,8 +243,7 @@ class ReactionTile extends StatelessWidget {
                       bool isConnected = await isOnline();
                       if (!isConnected) {
                         if (context.mounted) {
-                          showSnackBar(context,
-                              msg: "You're currently offline");
+                          showSnackBar(context, msg: "You're offline");
                         }
                         return;
                       }
@@ -343,17 +349,19 @@ class MsgTile extends StatelessWidget {
                       widget.message.image!.isNotEmpty,
                   child: widget.message.image != null &&
                           widget.message.image!.isNotEmpty
-                      ? Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: defaultBorderRadius,
-                              child: CachedNetworkImage(
-                                imageUrl: widget.message.image!,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            height5,
-                          ],
+                      ? ClipRRect(
+                          borderRadius: defaultBorderRadius,
+                          child: CachedNetworkImage(
+                            imageUrl: widget.message.image!,
+                            progressIndicatorBuilder: (context, url, progress) {
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: progress.progress,
+                                ),
+                              );
+                            },
+                            fit: BoxFit.contain,
+                          ),
                         )
                       : const SizedBox(),
                 ),
@@ -362,7 +370,7 @@ class MsgTile extends StatelessWidget {
                   TextSpan(
                     children: extractText(
                       context,
-                      msg.value?['message'],
+                      msg.value?['message'] ?? '',
                     ),
                   ),
                 ),

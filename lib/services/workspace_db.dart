@@ -1,4 +1,5 @@
 import 'package:basic_board/services/connection_state.dart';
+import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -10,9 +11,14 @@ class WorkspaceDB {
   late CollectionReference _workspaceRef;
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseStorage storageRef = FirebaseStorage.instance;
+  final ImageHelper imageHelper = ImageHelper();
 
-  Future<void> create(BuildContext context,
-      {required Workspace wrkspc, required String userId}) async {
+  Future<void> create(
+    BuildContext context, {
+    required Workspace wrkspc,
+    required String userId,
+    required String imagePath,
+  }) async {
     _workspaceRef = _firestore.collection('workspaces');
     _firestore.settings = const Settings(persistenceEnabled: false);
 
@@ -20,7 +26,7 @@ class WorkspaceDB {
     if (!isConnected) {
       if (context.mounted) {
         context.pop();
-        showSnackBar(context, msg: "You're currently offline");
+        showSnackBar(context, msg: "You're offline");
       }
       return;
     }
@@ -33,8 +39,18 @@ class WorkspaceDB {
         'participants': wrkspc.participants,
         'creatorId': wrkspc.creatorId,
         'createdAt': wrkspc.createdAt,
-      }).then((value) {
-        _workspaceRef.doc(value.id).update({'id': value.id}).then((_) {
+      }).then((value) async {
+        final String path = 'workspaces/${value.id}.png';
+
+        _workspaceRef.doc(value.id).update({
+          'id': value.id,
+          'image': await imageHelper.uploadImage(
+            context,
+            imagePath: imagePath,
+            docRef: _workspaceRef.doc(value.id),
+            storagePath: path,
+          )
+        }).then((_) {
           context.pop();
           context.pop();
           showSnackBar(context, msg: '${wrkspc.name} has been created');
@@ -66,7 +82,7 @@ class WorkspaceDB {
     if (!isConnected) {
       if (context.mounted) {
         context.pop();
-        showSnackBar(context, msg: "You're currently offline");
+        showSnackBar(context, msg: "You're offline");
       }
       return;
     }
@@ -106,7 +122,7 @@ class WorkspaceDB {
     if (!isConnected) {
       if (context.mounted) {
         context.pop();
-        showSnackBar(context, msg: "You're currently offline");
+        showSnackBar(context, msg: "You're offline");
       }
       return;
     }

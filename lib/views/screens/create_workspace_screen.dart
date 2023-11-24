@@ -1,5 +1,10 @@
+import 'dart:io';
+
+import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/services/workspace_db.dart';
 import 'package:basic_board/utils/imports.dart';
+import 'package:basic_board/views/dialogues/bottom_sheets.dart';
+import 'package:image_picker/image_picker.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_text_field.dart';
 
@@ -22,9 +27,12 @@ class _ConsumerCreateWorkspaceScreenState
 
   bool visible = true;
 
+  final ImageHelper imageHelper = ImageHelper();
+
+  File? image;
+
   @override
   Widget build(BuildContext context) {
-    // final firestore = ref.watch(firestoreProvider);
     final user = ref.watch(authStateProvider).value;
     final auth = ref.watch(authStateProvider);
     return Scaffold(
@@ -32,6 +40,53 @@ class _ConsumerCreateWorkspaceScreenState
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // GestureDetector(
+            //   onTap: () => imagePickerDialogue(
+            //     context,
+            //     onStorageTapped: () => imageHelper
+            //         .pickImage(context, source: ImageSource.gallery)
+            //         .then(
+            //             (value) => imageHelper.cropImage(context, path: value))
+            //         .then((value) {
+            //       setState(
+            //         () => image = File(value),
+            //       );
+            //       context.pop();
+            //       context.pop();
+            //     }),
+            //     onCameraTapped: () => imageHelper
+            //         .pickImage(context, source: ImageSource.camera)
+            //         .then(
+            //             (value) => imageHelper.cropImage(context, path: value))
+            //         .then((value) {
+            //       setState(
+            //         () => image = File(value),
+            //       );
+            //       context.pop();
+            //       context.pop();
+            //     }),
+            //   ),
+            //   child: Container(
+            //     height: size * 4.5,
+            //     width: double.infinity,
+            //     margin: EdgeInsets.symmetric(horizontal: ten),
+            //     decoration: BoxDecoration(
+            //       color: ColourConfig.dull,
+            //       borderRadius: defaultBorderRadius,
+            //       image: image == null
+            //           ? null
+            //           : DecorationImage(
+            //               image: FileImage(image!),
+            //               fit: BoxFit.cover,
+            //             ),
+            //     ),
+            //     child: Center(
+            //         child: Icon(
+            //       Icons.image,
+            //       size: size,
+            //     )),
+            //   ),
+            // ),
             Form(
               key: formKey,
               autovalidateMode: AutovalidateMode.always,
@@ -41,13 +96,69 @@ class _ConsumerCreateWorkspaceScreenState
                   padding: EdgeInsets.all(ten),
                   child: Column(
                     children: [
-                      SizedBox(width: ten),
-                      AppTextField(
-                        hintText: 'Name (required)',
-                        textInputAction: TextInputAction.next,
-                        controller: _nameController,
-                        autofocus: true,
-                        borderless: true,
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () => imagePickerDialogue(
+                              context,
+                              onStorageTapped: () => imageHelper
+                                  .pickImage(context,
+                                      source: ImageSource.gallery)
+                                  .then((value) => imageHelper
+                                      .cropImage(context, path: value))
+                                  .then((value) {
+                                setState(
+                                  () => image = File(value),
+                                );
+                                context.pop();
+                                context.pop();
+                              }),
+                              onCameraTapped: () => imageHelper
+                                  .pickImage(context,
+                                      source: ImageSource.camera)
+                                  .then((value) => imageHelper
+                                      .cropImage(context, path: value))
+                                  .then((value) {
+                                setState(
+                                  () => image = File(value),
+                                );
+                                context.pop();
+                                context.pop();
+                              }),
+                            ),
+                            child: Container(
+                              width: size * 2,
+                              height: size * 2,
+                              decoration: BoxDecoration(
+                                color: ColourConfig.dull,
+                                borderRadius: defaultBorderRadius,
+                                image: image == null
+                                    ? null
+                                    : DecorationImage(
+                                        image: FileImage(image!),
+                                        fit: BoxFit.cover,
+                                      ),
+                              ),
+                              child: image == null
+                                  ? Center(
+                                      child: Icon(
+                                      Icons.image,
+                                      size: size,
+                                    ))
+                                  : null,
+                            ),
+                          ),
+                          SizedBox(width: ten),
+                          Expanded(
+                            child: AppTextField(
+                              hintText: 'Name (required)',
+                              textInputAction: TextInputAction.next,
+                              controller: _nameController,
+                              autofocus: true,
+                              borderless: true,
+                            ),
+                          ),
+                        ],
                       ),
                       height20,
                       AppTextField(
@@ -74,6 +185,7 @@ class _ConsumerCreateWorkspaceScreenState
                             context,
                             wrkspc: wrkspc,
                             userId: user.uid,
+                            imagePath: image!.path,
                           );
                         },
                       ),

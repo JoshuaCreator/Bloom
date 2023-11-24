@@ -8,15 +8,15 @@ class WorkspaceScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final depts = ref.watch(wrkspcsProvider);
+    final workspaces = ref.watch(allWorkspacesProvider);
     return RefreshIndicator(
-      onRefresh: () => ref.refresh(wrkspcsProvider.future),
+      onRefresh: () => ref.refresh(allWorkspacesProvider.future),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Workspaces'),
           actions: [buildPopupMenu(context)],
         ),
-        body: depts.when(
+        body: workspaces.when(
           data: (data) => data.isEmpty
               ? const Center(
                   child: Text(
@@ -28,24 +28,29 @@ class WorkspaceScreen extends ConsumerWidget {
                   padding: EdgeInsets.only(top: ten),
                   itemCount: data.length,
                   itemBuilder: (context, index) {
-                    final Workspace dept = Workspace(
+                    final Workspace wrkspc = Workspace(
                       id: data[index].id,
                       name: data[index]['name'],
                       desc: data[index]['desc'],
+                      image: data[index]['image'] == null ||
+                              data[index]['image']!.isEmpty
+                          ? defaultWorkspaceImg
+                          : data[index]['image'],
                       creatorId: data[index]['creatorId'],
                       participants: data[index]['participants'],
                       createdAt: data[index]['createdAt'].toDate(),
                     );
                     String dateTime =
-                        DateFormat('dd MMM hh:mm a').format(dept.createdAt);
+                        DateFormat('dd MMM hh:mm a').format(wrkspc.createdAt);
                     return WorkspaceTile(
-                      id: dept.id!,
-                      title: dept.name,
+                      id: wrkspc.id!,
+                      title: wrkspc.name,
                       subtitle: 'Created $dateTime',
+                      image: wrkspc.image!,
                       onTap: () {
                         context.go(
                           '${WorkspaceScreen.id}/${HomeScreen.id}',
-                          extra: dept,
+                          extra: wrkspc,
                         );
                       },
                     );

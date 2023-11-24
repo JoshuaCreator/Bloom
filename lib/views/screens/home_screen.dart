@@ -82,8 +82,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             name: room.value?[index]['name'],
                             desc: room.value?[index]['desc'],
                             private: room.value?[index]['private'],
-                            image: room.value?[index]['image'] ??
-                                'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg',
+                            image: room.value?[index]['image'] == null ||
+                                    room.value?[index]['image']!.isEmpty
+                                ? defaultRoomImg
+                                : room.value?[index]['image'],
                             createdAt:
                                 (room.value?[index]['createdAt']).toDate(),
                             participants: room.value?[index]['participants'],

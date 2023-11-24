@@ -1,6 +1,6 @@
 class Workspace {
   final String name;
-  final String? id, desc, creatorId;
+  final String? id, desc, image, creatorId;
   final List? participants;
   final List? rooms;
   final DateTime createdAt;
@@ -9,6 +9,7 @@ class Workspace {
     this.id,
     required this.name,
     this.desc,
+    this.image,
     this.creatorId,
     this.participants,
     this.rooms,
