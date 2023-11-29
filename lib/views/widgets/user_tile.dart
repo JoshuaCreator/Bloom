@@ -8,13 +8,14 @@ class UserTile extends StatelessWidget {
   const UserTile({
     super.key,
     required this.title,
-    this.subtitle,
     required this.image,
+    required this.tag,
+    this.subtitle,
     this.trailing,
     this.onTap,
   });
 
-  final String title, image;
+  final String title, image, tag;
   final String? subtitle;
   final Widget? trailing;
   final void Function()? onTap;
@@ -29,7 +30,7 @@ class UserTile extends StatelessWidget {
           builder: (context) => ImageViewer(image: image),
         ),
         child: Hero(
-          tag: 'user-display-img',
+          tag: tag,
           child: CircleAvatar(
             radius: circularAvatarRadius,
             backgroundImage: CachedNetworkImageProvider(image),
@@ -40,7 +41,7 @@ class UserTile extends StatelessWidget {
       subtitle: subtitle == null || subtitle!.isEmpty
           ? null
           : Text(
-              subtitle!,
+              subtitle ?? '',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

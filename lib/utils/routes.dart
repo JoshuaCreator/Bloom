@@ -54,9 +54,10 @@ GoRouter goRouter = GoRouter(
                   ),
                   routes: [
                     GoRoute(
-                      path: '${UserScreen.id}/:userId',
+                      path: '${UserScreen.id}/:userId/:tag',
                       builder: (context, state) => UserScreen(
                         userId: state.pathParameters['userId']!,
+                        tag: state.pathParameters['tag']!,
                       ),
                     ),
                   ],

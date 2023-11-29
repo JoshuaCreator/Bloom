@@ -135,10 +135,11 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                             ? '${anyUser?['name']} (You)'
                             : '${anyUser?['name']}',
                         image: anyUser?['image'] ?? '',
+                        tag: anyUser?['id'],
                         onTap: me
                             ? null
                             : () => context.push(
-                                  '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspaceId}/${RoomInfoScreen.id}/${widget.wrkspaceId}/${UserScreen.id}/${data[index]['id']}',
+                                  '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspaceId}/${RoomInfoScreen.id}/${widget.wrkspaceId}/${UserScreen.id}/${data[index]['id']}/tag-from-room-info-screen',
                                 ),
                       );
                     },
