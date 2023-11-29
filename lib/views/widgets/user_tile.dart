@@ -8,12 +8,14 @@ class UserTile extends StatelessWidget {
   const UserTile({
     super.key,
     required this.title,
+    this.subtitle,
     required this.image,
     this.trailing,
     this.onTap,
   });
 
   final String title, image;
+  final String? subtitle;
   final Widget? trailing;
   final void Function()? onTap;
 
@@ -35,6 +37,13 @@ class UserTile extends StatelessWidget {
         ),
       ),
       title: Text(title),
+      subtitle: subtitle == null || subtitle!.isEmpty
+          ? null
+          : Text(
+              subtitle!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
       contentPadding: EdgeInsets.symmetric(
         horizontal: ten,
         vertical: five,

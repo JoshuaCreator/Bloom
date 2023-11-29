@@ -1,14 +1,16 @@
 import 'dart:io';
+import 'package:basic_board/providers/room/room_data_providers.dart';
+import 'package:basic_board/providers/users_providers.dart';
 import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:basic_board/views/screens/user_screen.dart';
 import 'package:basic_board/views/widgets/image_viewer.dart';
 import 'package:basic_board/views/widgets/show_more_text.dart';
-import '../../utils/imports.dart';
+import '../../../utils/imports.dart';
 import 'package:image_picker/image_picker.dart';
-import '../dialogues/bottom_sheets.dart';
-import '../widgets/user_tile.dart';
+import '../../dialogues/bottom_sheets.dart';
+import '../../widgets/user_tile.dart';
 
 class RoomInfoScreen extends ConsumerStatefulWidget {
   static String id = 'room-info';
@@ -136,7 +138,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                         onTap: me
                             ? null
                             : () => context.push(
-                                  '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.wrkspaceId}/${RoomInfoScreen.id}/${widget.wrkspaceId}/${UserScreen.id}/${data[index]['id']}',
+                                  '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspaceId}/${RoomInfoScreen.id}/${widget.wrkspaceId}/${UserScreen.id}/${data[index]['id']}',
                                 ),
                       );
                     },

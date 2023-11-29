@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../configs/consts.dart';
-import '../screens/workspace_screen.dart';
+import '../screens/workspace/workspace_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/settings_screen.dart';
 

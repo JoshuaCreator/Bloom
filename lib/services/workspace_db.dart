@@ -17,10 +17,9 @@ class WorkspaceDB {
     BuildContext context, {
     required Workspace wrkspc,
     required String userId,
-    required String imagePath,
+    required String? imagePath,
   }) async {
     _workspaceRef = _firestore.collection('workspaces');
-    _firestore.settings = const Settings(persistenceEnabled: false);
 
     bool isConnected = await isOnline();
     if (!isConnected) {
@@ -36,25 +35,38 @@ class WorkspaceDB {
       await _workspaceRef.add({
         'name': wrkspc.name,
         'desc': wrkspc.desc,
-        'participants': wrkspc.participants,
+        'image': imagePath,
+        // 'participants': FieldValue.arrayUnion([wrkspc.participants]),
         'creatorId': wrkspc.creatorId,
         'createdAt': wrkspc.createdAt,
-      }).then((value) async {
-        final String path = 'workspaces/${value.id}.png';
-
-        _workspaceRef.doc(value.id).update({
-          'id': value.id,
-          'image': await imageHelper.uploadImage(
-            context,
-            imagePath: imagePath,
-            docRef: _workspaceRef.doc(value.id),
-            storagePath: path,
-          )
+        'private': wrkspc.private,
+      }).then((doc) async {
+        final String path = 'workspaces/${doc.id}.png';
+        _workspaceRef.doc(doc.id).update({
+          'id': doc.id,
+          'participants': FieldValue.arrayUnion([userId]),
+        }).then((_) {
+          _workspaceRef
+              .doc(doc.id)
+              .collection('participants')
+              .doc(userId)
+              .set({'id': userId, 'joined': DateTime.now()});
         }).then((_) {
           context.pop();
           context.pop();
           showSnackBar(context, msg: '${wrkspc.name} has been created');
         });
+        imagePath == null || imagePath.isEmpty
+            ? null
+            : await imageHelper
+                .uploadImage(
+                  context,
+                  imagePath: imagePath,
+                  docRef: _workspaceRef.doc(doc.id),
+                  storagePath: path,
+                )
+                .then((downloadUrl) =>
+                    _workspaceRef.doc(doc.id).update({'image': downloadUrl}));
       }).catchError((e) {
         context.pop();
         showSnackBar(context, msg: 'An error occurred: $e');
@@ -67,6 +79,40 @@ class WorkspaceDB {
       );
     } catch (e) {
       if (context.mounted) showSnackBar(context, msg: 'An error occurred: $e');
+    }
+  }
+
+  Future join(
+    BuildContext context, {
+    required Workspace workspace,
+    required String userId,
+  }) async {
+    final isConnected = await isOnline();
+    if (!isConnected) {
+      if (context.mounted) {
+        showSnackBar(context, msg: "You joined ${workspace.name}");
+      }
+      return;
+    }
+    _workspaceRef = _firestore.collection('workspaces');
+    try {
+      if (context.mounted) showLoadingIndicator(context, label: 'Joining...');
+      _workspaceRef.doc(workspace.id).update({
+        'participants': FieldValue.arrayUnion([userId])
+      });
+      _workspaceRef
+          .doc(workspace.id)
+          .collection('participants')
+          .doc(userId)
+          .update({'id': userId, 'joined': DateTime.now()});
+      if (context.mounted) {
+        context.pop();
+        showSnackBar(context, msg: 'You joined ${workspace.name}');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showSnackBar(context, msg: 'An error occurred: $e');
+      }
     }
   }
 
@@ -94,10 +140,7 @@ class WorkspaceDB {
           .update({'name': name, 'desc': desc}).then((value) {
         context.pop();
         context.pop();
-        showSnackBar(
-          context,
-          msg: 'Workspace info updated successfully',
-        );
+        showSnackBar(context, msg: 'Workspace info updated successfully');
       }).catchError((e) {
         context.pop();
         context.pop();
@@ -107,7 +150,7 @@ class WorkspaceDB {
         );
       });
     } catch (e) {
-      showSnackBar(context, msg: "An error occurred: $e");
+      if (context.mounted) showSnackBar(context, msg: "An error occurred: $e");
     }
   }
 
@@ -153,10 +196,12 @@ class WorkspaceDB {
         },
       );
     } catch (e) {
-      showSnackBar(
-        context,
-        msg: "An error occurred: $e",
-      );
+      if (context.mounted) {
+        showSnackBar(
+          context,
+          msg: "An error occurred: $e",
+        );
+      }
     }
   }
 }

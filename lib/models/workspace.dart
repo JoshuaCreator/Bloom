@@ -4,6 +4,7 @@ class Workspace {
   final List? participants;
   final List? rooms;
   final DateTime createdAt;
+  final bool private;
 
   Workspace({
     this.id,
@@ -14,5 +15,6 @@ class Workspace {
     this.participants,
     this.rooms,
     required this.createdAt,
+    required this.private,
   });
 }

@@ -1,3 +1,5 @@
+import 'package:basic_board/providers/room/message_data_providers.dart';
+import 'package:basic_board/providers/users_providers.dart';
 import 'package:basic_board/services/connection_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
@@ -167,7 +169,7 @@ class _ConsumerMessageDetailsScreenState
         Form(
           key: _key,
           child: MessageTextField(
-            onSuffixPressed: () {
+            onSend: () {
               if (_replyTextController.text.trim().isEmpty) return;
               MessageDB().reply(
                 ref: widget.repliesRef,

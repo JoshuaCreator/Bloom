@@ -9,13 +9,13 @@ class MessageTextField extends StatelessWidget {
     required this.textController,
     this.hasPrefix = true,
     this.onPrefixPressed,
-    this.onSuffixPressed,
+    this.onSend,
   });
   final String hintText;
   final TextEditingController textController;
   final bool hasPrefix;
   final void Function()? onPrefixPressed;
-  final void Function()? onSuffixPressed;
+  final void Function()? onSend;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class MessageTextField extends StatelessWidget {
               )
             : null,
         suffixIcon: IconButton(
-          onPressed: onSuffixPressed,
+          onPressed: onSend,
           icon: const Icon(Icons.send_rounded),
           tooltip: 'Send',
         ),

@@ -29,7 +29,7 @@ class RoomTile extends ConsumerWidget {
                 : roomData.image!,
             onInfoIconPressed: showInfoIcon
                 ? () => context.push(
-                      '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${roomData.id}/${RoomInfoScreen.id}/$wrkspcId',
+                      '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${roomData.id}/${RoomInfoScreen.id}/$wrkspcId',
                       extra: roomData,
                     )
                 : null,

@@ -1,4 +1,5 @@
 import 'package:basic_board/views/screens/user_screen.dart';
+import 'package:basic_board/views/screens/workspace/workspace_settings_screen.dart';
 
 import '../views/screens/verify_email_screen.dart';
 import '../utils/imports.dart';
@@ -33,14 +34,14 @@ GoRouter goRouter = GoRouter(
           ],
         ),
         GoRoute(
-          path: HomeScreen.id,
-          builder: (context, state) => HomeScreen(
+          path: RoomChatsScreen.id,
+          builder: (context, state) => RoomChatsScreen(
             workspace: state.extra as Workspace,
           ),
           routes: [
             GoRoute(
-              path: '${RoomChatScreen.id}/:wrkspc',
-              builder: (context, state) => RoomChatScreen(
+              path: '${RoomMsgScreen.id}/:wrkspc',
+              builder: (context, state) => RoomMsgScreen(
                 room: state.extra as Room,
                 wrkspc: state.pathParameters['wrkspc']!,
               ),
@@ -68,6 +69,12 @@ GoRouter goRouter = GoRouter(
                 workspace: state.extra as Workspace,
               ),
               routes: [
+                GoRoute(
+                  path: WorkspaceSettingsScreen.id,
+                  builder: (context, state) => WorkspaceSettingsScreen(
+                    wrkspc: state.extra as Workspace,
+                  ),
+                ),
                 GoRoute(
                   path: '${CreateRoomScreen.id}/:wrkspc',
                   builder: (context, state) => CreateRoomScreen(

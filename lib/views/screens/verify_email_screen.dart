@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:basic_board/views/screens/workspace_screen.dart';
+import 'package:basic_board/views/screens/room/room_chats_screen.dart';
+import 'package:basic_board/views/screens/workspace/workspace_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:basic_board/configs/consts.dart';
 import 'package:basic_board/services/auth.dart';
-import 'package:basic_board/views/screens/home_screen.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
   static String id = '/verify-email';
@@ -54,7 +54,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   child: const Text('Verified'),
                   onPressed: () {
                     if (auth.currentUser!.emailVerified) {
-                      context.go('${WorkspaceScreen.id}/${HomeScreen.id}');
+                      context.go('${WorkspaceScreen.id}/${RoomChatsScreen.id}');
                     } else {
                       return;
                     }

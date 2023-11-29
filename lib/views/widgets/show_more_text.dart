@@ -6,10 +6,12 @@ class AppShowMoreText extends StatelessWidget {
     super.key,
     required this.text,
     this.textAlign,
+    this.trimLines = 3,
   });
 
   final String text;
   final TextAlign? textAlign;
+  final int trimLines;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +29,7 @@ class AppShowMoreText extends StatelessWidget {
           color: Colors.amber,
         ),
         trimMode: TrimMode.Line,
-        trimLines: 3,
+        trimLines: trimLines,
         trimExpandedText: '\t\tless',
         trimCollapsedText: 'more',
       ),

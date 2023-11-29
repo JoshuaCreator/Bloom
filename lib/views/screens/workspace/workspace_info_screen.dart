@@ -1,8 +1,16 @@
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:basic_board/providers/room/room_data_providers.dart';
+import 'package:basic_board/providers/workspace_providers.dart';
+import 'package:basic_board/services/connection_state.dart';
+import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/services/workspace_db.dart';
 import 'package:basic_board/utils/imports.dart';
+import 'package:basic_board/views/dialogues/bottom_sheets.dart';
+import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:basic_board/views/widgets/show_more_text.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class WorkspaceInfoScreen extends ConsumerStatefulWidget {
@@ -17,39 +25,23 @@ class WorkspaceInfoScreen extends ConsumerStatefulWidget {
 
 class _ConsumerWorkspaceInfoScreenState
     extends ConsumerState<WorkspaceInfoScreen> {
+  ImageHelper imageHelper = ImageHelper();
+  String? image;
   @override
   Widget build(BuildContext context) {
+    final firestore = ref.watch(firestoreProvider);
+    final auth = ref.watch(authStateProvider).value;
     final wrkspc = ref.watch(wrkspcDataProvider(widget.workspace.id!));
     final room = ref.watch(wrkspcRoomsProvider(widget.workspace.id!));
-    final auth = ref.watch(authStateProvider).value;
     final nameController = TextEditingController(text: wrkspc.value?['name']);
     final descController = TextEditingController(text: wrkspc.value?['desc']);
     final Brightness brightness = MediaQuery.of(context).platformBrightness;
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      // appBar: AppBar(
-      //   surfaceTintColor: ColourConfig.empty,
-      //   backgroundColor: ColourConfig.empty,
-      //   shadowColor: ColourConfig.empty,
-      //   scrolledUnderElevation: 0.0,
-      //   elevation: 0.0,
-      //   actions: auth?.uid == widget.workspace.creatorId && wrkspc.value != null
-      //       ? [
-      //           buildPopupMenu(
-      //             context,
-      //             nameController: nameController,
-      //             descController: descController,
-      //           ),
-      //         ]
-      //       : null,
-      // ),
-
       body: wrkspc.when(
         data: (data) {
           String dateTime = DateFormat('dd MMM yyy')
               .format(data?['createdAt'].toDate() ?? DateTime.now());
           return CustomScrollView(
-            // shrinkWrap: true,
             slivers: [
               SliverAppBar(
                 actions: auth?.uid == widget.workspace.creatorId &&
@@ -59,6 +51,7 @@ class _ConsumerWorkspaceInfoScreenState
                           context,
                           nameController: nameController,
                           descController: descController,
+                          firestore: firestore,
                         ),
                       ]
                     : null,
@@ -69,9 +62,10 @@ class _ConsumerWorkspaceInfoScreenState
                       Container(
                         decoration: BoxDecoration(
                           image: DecorationImage(
-                            image: CachedNetworkImageProvider(
-                              widget.workspace.image!,
-                            ),
+                            image: image != null
+                                ? FileImage(File(image!))
+                                : CachedNetworkImageProvider(
+                                    widget.workspace.image!) as ImageProvider,
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -137,7 +131,7 @@ class _ConsumerWorkspaceInfoScreenState
                             child: IconButton(
                               onPressed: () {
                                 context.push(
-                                  '${WorkspaceScreen.id}/${HomeScreen.id}/${WorkspaceInfoScreen.id}/${CreateRoomScreen.id}/${widget.workspace.id!}',
+                                  '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${WorkspaceInfoScreen.id}/${CreateRoomScreen.id}/${widget.workspace.id!}',
                                 );
                               },
                               icon: const Icon(Icons.add),
@@ -175,15 +169,16 @@ class _ConsumerWorkspaceInfoScreenState
                                   ? DateTime.now()
                                   : (room.value?[index]['createdAt']).toDate();
                           final Room roomData = Room(
-                            id: room.value![index]['id'],
-                            creatorId: room.value?[index]['creatorId'],
+                            id: room.value?[index]['id'] ?? '',
+                            creatorId: room.value?[index]['creatorId'] ?? '',
                             name: room.value?[index]['name'] ?? '',
                             desc: room.value?[index]['desc'] ?? '',
-                            private: room.value?[index]['private'],
+                            private: room.value?[index]['private'] ?? true,
                             image:
                                 room.value?[index]['image'] ?? defaultRoomImg,
                             createdAt: timeStamp,
-                            participants: room.value?[index]['participants'],
+                            participants:
+                                room.value?[index]['participants'] ?? [],
                           );
 
                           final bool isParticipant =
@@ -223,7 +218,7 @@ class _ConsumerWorkspaceInfoScreenState
                                     },
                                   ),
                             onTap: () => context.push(
-                              '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.workspace.id!}/${RoomInfoScreen.id}/${widget.workspace.id!}',
+                              '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.workspace.id!}/${RoomInfoScreen.id}/${widget.workspace.id!}',
                               extra: roomData,
                             ),
                           );
@@ -233,17 +228,8 @@ class _ConsumerWorkspaceInfoScreenState
             ],
           );
         },
-        error: (error, stackTrace) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('An error occurred. Tap to refresh'),
-              IconButton(
-                onPressed: () => ref.refresh(allWorkspacesProvider),
-                icon: const Icon(Icons.refresh),
-              ),
-            ],
-          ),
+        error: (error, stackTrace) => const Center(
+          child: Text('An error occurred. Tap to refresh'),
         ),
         loading: () {
           return const Center(child: LoadingIndicator(label: 'Please wait...'));
@@ -256,36 +242,144 @@ class _ConsumerWorkspaceInfoScreenState
     BuildContext context, {
     required TextEditingController nameController,
     required TextEditingController descController,
+    required FirebaseFirestore firestore,
   }) {
     return AppPopupMenu(
       items: [
+        // AppPopupMenu.buildPopupMenuItem(
+        //   context,
+        //   label: 'Settings',
+        //   onTap: () {
+        //     context.push(
+        //       '${WorkspaceScreen.id}/${ChatsScreen.id}/${WorkspaceInfoScreen.id}/${WorkspaceSettingsScreen.id}',
+        //       extra: widget.workspace,
+        //     );
+        //   },
+        // ),
+
+        AppPopupMenu.buildPopupMenuItem(
+          context,
+          label: 'Change display image',
+          onTap: () async {
+            bool isConnected = await isOnline();
+            if (!isConnected) {
+              if (context.mounted) {
+                showSnackBar(context, msg: "You're offline");
+              }
+              return;
+            }
+            if (context.mounted) {
+              imagePickerDialogue(
+                context,
+                onStorageTapped: () async {
+                  context.pop();
+                  String imagePath = await imageHelper.pickImage(
+                    context,
+                    source: ImageSource.gallery,
+                  );
+                  if (context.mounted) {
+                    String croppedImg =
+                        await imageHelper.cropImage(context, path: imagePath);
+                    if (context.mounted) {
+                      context.pop();
+                      showLoadingIndicator(context, label: 'Saving...');
+                    }
+                    if (context.mounted) {
+                      setState(() {
+                        image = croppedImg;
+                      });
+                      await imageHelper.uploadImage(
+                        context,
+                        imagePath: croppedImg,
+                        docRef: firestore
+                            .collection('workspaces')
+                            .doc(widget.workspace.id!),
+                        storagePath: 'workspaces/${widget.workspace.id!}.png',
+                      );
+                      if (context.mounted) context.pop();
+                    }
+                  }
+                },
+                onCameraTapped: () async {
+                  context.pop();
+                  String imagePath = await imageHelper.pickImage(
+                    context,
+                    source: ImageSource.camera,
+                  );
+                  if (context.mounted) {
+                    String croppedImg =
+                        await imageHelper.cropImage(context, path: imagePath);
+                    if (context.mounted) {
+                      context.pop();
+                      showLoadingIndicator(context, label: 'Saving...');
+                    }
+                    if (context.mounted) {
+                      setState(() {
+                        image = croppedImg;
+                      });
+                      await imageHelper.uploadImage(
+                        context,
+                        imagePath: croppedImg,
+                        docRef: firestore
+                            .collection('workspaces')
+                            .doc(widget.workspace.id!),
+                        storagePath: 'workspaces/${widget.workspace.id!}.png',
+                      );
+                      if (context.mounted) context.pop();
+                    }
+                  }
+                },
+              );
+            }
+          },
+        ),
         AppPopupMenu.buildPopupMenuItem(
           context,
           label: 'Edit Workspace info',
-          onTap: () => infoEditDialogue(
-            context,
-            nameController: nameController,
-            aboutController: descController,
-            onSaved: () {
-              if (nameController.text.trim().isEmpty) return;
-              WorkspaceDB().edit(
+          onTap: () async {
+            bool isConnected = await isOnline();
+            if (!isConnected) {
+              if (context.mounted) {
+                showSnackBar(context, msg: "You're offline");
+              }
+              return;
+            }
+            if (context.mounted) {
+              infoEditDialogue(
                 context,
-                wrkspcId: widget.workspace.id!,
-                name: nameController.text.trim(),
-                desc: descController.text.trim(),
+                nameController: nameController,
+                aboutController: descController,
+                onSaved: () {
+                  if (nameController.text.trim().isEmpty) return;
+                  WorkspaceDB().edit(
+                    context,
+                    wrkspcId: widget.workspace.id!,
+                    name: nameController.text.trim(),
+                    desc: descController.text.trim(),
+                  );
+                },
               );
-            },
-          ),
+            }
+          },
         ),
         AppPopupMenu.buildPopupMenuItem(
           context,
           label: 'Delete Workspace',
-          onTap: () {
-            deleteWorkspaceDialogue(
-              context,
-              wrkspcName: widget.workspace.name,
-              wrkspcId: widget.workspace.id!,
-            );
+          onTap: () async {
+            bool isConnected = await isOnline();
+            if (!isConnected) {
+              if (context.mounted) {
+                showSnackBar(context, msg: "You're offline");
+              }
+              return;
+            }
+            if (context.mounted) {
+              deleteWorkspaceDialogue(
+                context,
+                wrkspcName: widget.workspace.name,
+                wrkspcId: widget.workspace.id!,
+              );
+            }
           },
         ),
       ],

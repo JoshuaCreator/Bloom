@@ -1,3 +1,4 @@
+import 'package:basic_board/providers/users_providers.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/widgets/app_circle_avatar.dart';
 import 'package:basic_board/views/widgets/image_viewer.dart';
@@ -37,7 +38,9 @@ class UserScreen extends ConsumerWidget {
           ),
           const Separator(),
           AppShowMoreText(text: user.value?['about'] ?? ''),
-          const Separator(),
+          user.value?['about'] == null || user.value?['about']!.isEmpty
+              ? const SizedBox()
+              : const Separator(),
         ],
       ),
     );

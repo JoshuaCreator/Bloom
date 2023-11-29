@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:basic_board/providers/users_providers.dart';
 import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/dialogues/bottom_sheets.dart';
 import 'package:basic_board/views/widgets/app_button.dart';
 import 'package:basic_board/views/widgets/app_text_field.dart';
+import 'package:basic_board/views/widgets/privacy_tile.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreateRoomScreen extends ConsumerStatefulWidget {
@@ -18,6 +20,7 @@ class CreateRoomScreen extends ConsumerStatefulWidget {
 
 class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
   bool value = false;
+  String privacyText = 'Public (Anyone can join)';
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
   File? image;
@@ -101,10 +104,19 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
             height20,
             PrivacySwitch(
               value: value,
+              text: privacyText,
               onChanged: (newValue) {
-                setState(() {
-                  value = newValue;
-                });
+                if (value) {
+                  setState(() {
+                    value = false;
+                    privacyText = 'Public (Anyone can join)';
+                  });
+                } else {
+                  setState(() {
+                    value = true;
+                    privacyText = 'Private (Invite only)';
+                  });
+                }
               },
             ),
             height30,
@@ -119,7 +131,10 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                   createdAt: DateTime.now(),
                   participants: [auth.uid],
                 );
-                if (_nameController.text.trim().isEmpty) return;
+                if (_nameController.text.trim().isEmpty) {
+                  showSnackBar(context, msg: 'The name field is required');
+                  return;
+                }
                 RoomDB().create(
                   room,
                   context,
@@ -132,24 +147,6 @@ class _ConsumerCreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
           ],
         ),
       ),
-    );
-  }
-
-}
-
-class PrivacySwitch extends StatelessWidget {
-  const PrivacySwitch({super.key, required this.value, this.onChanged});
-  final bool value;
-  final void Function(bool)? onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text('Make this Room private?', style: TextStyle(fontSize: 16.0)),
-        Switch(value: value, onChanged: onChanged),
-      ],
     );
   }
 }

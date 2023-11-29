@@ -1,3 +1,4 @@
+import 'package:basic_board/providers/users_providers.dart';
 import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/views/widgets/settings_tile.dart';
 import 'package:basic_board/views/widgets/profile_tile.dart';

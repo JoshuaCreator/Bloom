@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:basic_board/providers/users_providers.dart';
 import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/views/dialogues/bottom_sheets.dart';
@@ -101,10 +102,11 @@ class _ConsumerProfileScreenState extends ConsumerState<ProfileScreen> {
               tag: 'user-profile',
               child: fileImage == null
                   ? AppCircleAvatar(
-                      image: user.value?['image'] == null
+                      image: user.value?['image'] == null ||
+                              user.value?['image']!.isEmpty
                           ? null
                           : CachedNetworkImageProvider(
-                              user.value!['image'],
+                              user.value!['image'] ?? '',
                             ),
                       userId: user.value?['id'],
                     )

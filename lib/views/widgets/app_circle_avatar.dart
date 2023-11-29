@@ -1,3 +1,5 @@
+import 'package:basic_board/providers/users_providers.dart';
+
 import '../../utils/imports.dart';
 
 class AppCircleAvatar extends ConsumerWidget {

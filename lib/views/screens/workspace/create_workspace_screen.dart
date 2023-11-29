@@ -4,9 +4,10 @@ import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/services/workspace_db.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/dialogues/bottom_sheets.dart';
+import 'package:basic_board/views/widgets/privacy_tile.dart';
 import 'package:image_picker/image_picker.dart';
-import '../widgets/app_button.dart';
-import '../widgets/app_text_field.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/app_text_field.dart';
 
 class CreateWorkspaceScreen extends ConsumerStatefulWidget {
   static String id = 'create-workspace';
@@ -19,6 +20,10 @@ class CreateWorkspaceScreen extends ConsumerStatefulWidget {
 
 class _ConsumerCreateWorkspaceScreenState
     extends ConsumerState<CreateWorkspaceScreen> {
+  bool value = false;
+
+  String privacyText = 'Public (Anyone can join)';
+
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
@@ -169,10 +174,32 @@ class _ConsumerCreateWorkspaceScreenState
                         validate: false,
                       ),
                       height30,
+                      PrivacySwitch(
+                        value: value,
+                        text: privacyText,
+                        onChanged: (newValue) {
+                          if (value) {
+                            setState(() {
+                              value = false;
+                              privacyText = 'Public (Anyone can join)';
+                            });
+                          } else {
+                            setState(() {
+                              value = true;
+                              privacyText = 'Private (Invite only)';
+                            });
+                          }
+                        },
+                      ),
+                      height30,
                       AppButton(
                         label: 'Create',
                         onTap: () {
-                          if (_nameController.text.trim().isEmpty) return;
+                          if (_nameController.text.trim().isEmpty) {
+                            showSnackBar(context,
+                                msg: 'The name field is required');
+                            return;
+                          }
                           final Workspace wrkspc = Workspace(
                             id: 'id',
                             name: _nameController.text.trim(),
@@ -180,12 +207,13 @@ class _ConsumerCreateWorkspaceScreenState
                             participants: [auth.value?.uid],
                             creatorId: user!.uid,
                             createdAt: DateTime.now(),
+                            private: value,
                           );
                           WorkspaceDB().create(
                             context,
                             wrkspc: wrkspc,
                             userId: user.uid,
-                            imagePath: image!.path,
+                            imagePath: image?.path ?? '',
                           );
                         },
                       ),

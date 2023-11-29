@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../configs/consts.dart';
 
-class AppButton extends ConsumerWidget {
+class AppButton extends StatelessWidget {
   const AppButton({super.key, required this.label, this.onTap});
   final String label;
   final void Function()? onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return InkWell(
       splashColor: Colors.purple.shade50.withOpacity(0.5),
       highlightColor: Colors.purple.shade50.withOpacity(0.5),
@@ -38,13 +36,13 @@ class AppButton extends ConsumerWidget {
   }
 }
 
-class AppOutlinedButton extends ConsumerWidget {
+class AppOutlinedButton extends StatelessWidget {
   const AppOutlinedButton({super.key, required this.label, this.onTap});
   final String label;
   final void Function()? onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return InkWell(
       splashColor: Colors.purple.shade50.withOpacity(0.5),
       highlightColor: Colors.purple.shade50.withOpacity(0.5),

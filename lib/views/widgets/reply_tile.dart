@@ -1,3 +1,4 @@
+import 'package:basic_board/providers/users_providers.dart';
 import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
@@ -59,7 +60,7 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
                             onInfoIconPressed: widget.reply.isMe!
                                 ? null
                                 : () => context.push(
-                                      '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.wrkspcId}/${RoomInfoScreen.id}/${widget.wrkspcId}/${UserScreen.id}/${widget.reply.replySenderId}',
+                                      '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspcId}/${RoomInfoScreen.id}/${widget.wrkspcId}/${UserScreen.id}/${widget.reply.replySenderId}',
                                     ),
                           ),
                         ),

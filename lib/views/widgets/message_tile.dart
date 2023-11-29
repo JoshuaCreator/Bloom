@@ -1,3 +1,6 @@
+import 'package:basic_board/providers/room/message_data_providers.dart';
+import 'package:basic_board/providers/users_providers.dart';
+
 import '../../utils/imports.dart';
 import '../screens/user_screen.dart';
 import 'image_viewer.dart';
@@ -62,7 +65,7 @@ class _ConsumerMessageTileState extends ConsumerState<MessageTile> {
                         onInfoIconPressed: widget.message.isMe!
                             ? null
                             : () => context.push(
-                                  '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.wrkspcId}/${RoomInfoScreen.id}/${widget.wrkspcId}/${UserScreen.id}/${widget.message.senderId}',
+                                  '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspcId}/${RoomInfoScreen.id}/${widget.wrkspcId}/${UserScreen.id}/${widget.message.senderId}',
                                 ),
                       ),
                     ),

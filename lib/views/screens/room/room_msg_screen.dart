@@ -1,13 +1,15 @@
 import 'dart:io';
+import 'package:basic_board/providers/room/message_data_providers.dart';
+import 'package:basic_board/providers/users_providers.dart';
 import 'package:basic_board/services/image_helper.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../utils/imports.dart';
-import '../dialogues/message_details_screen.dart';
+import '../../../utils/imports.dart';
+import '../../dialogues/message_details_screen.dart';
 
-class RoomChatScreen extends ConsumerStatefulWidget {
+class RoomMsgScreen extends ConsumerStatefulWidget {
   static String id = 'room-chat';
-  const RoomChatScreen({
+  const RoomMsgScreen({
     super.key,
     required this.room,
     required this.wrkspc,
@@ -19,7 +21,7 @@ class RoomChatScreen extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _RoomScreenState();
 }
 
-class _RoomScreenState extends ConsumerState<RoomChatScreen> {
+class _RoomScreenState extends ConsumerState<RoomMsgScreen> {
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
   final _messageController = TextEditingController();
   bool showUploadButtons = false;
@@ -130,7 +132,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
           padding: EdgeInsets.only(right: ten),
           child: GestureDetector(
             onTap: () => context.push(
-              '${WorkspaceScreen.id}/${HomeScreen.id}/${RoomChatScreen.id}/${widget.wrkspc}/${RoomInfoScreen.id}/${widget.wrkspc}',
+              '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspc}/${RoomInfoScreen.id}/${widget.wrkspc}',
               extra: widget.room,
             ),
             child: Hero(
@@ -204,7 +206,7 @@ class _RoomScreenState extends ConsumerState<RoomChatScreen> {
                     }
                   }
                 },
-                onSuffixPressed: () {
+                onSend: () {
                   if (_messageController.text.trim().isEmpty &&
                       fileImage!.isEmpty) return;
 
