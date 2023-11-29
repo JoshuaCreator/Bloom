@@ -21,48 +21,38 @@ class MessageTile extends ConsumerStatefulWidget {
   final String wrkspcId;
 
   @override
-  ConsumerState<MessageTile> createState() => _ConsumerMessageTileState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _MessageTileState();
 }
 
-class _ConsumerMessageTileState extends ConsumerState<MessageTile> {
+class _MessageTileState extends ConsumerState<MessageTile> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(anyUserProvider(widget.message.senderId));
     final replies = ref.watch(repliesCountProvider(widget.repliesRef));
     final repliesCount = replies.value?.length ?? 0;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: widget.message.isMe!
-          ? MainAxisAlignment.end
-          : MainAxisAlignment.start,
-      children: [
-        Padding(
-          padding:
-              EdgeInsets.only(left: five, top: five, right: five, bottom: ten),
-          child: InkWell(
-            onTap: widget.onTap,
-            borderRadius:
-                widget.message.isMe! ? myBorderRadius : yourBorderRadius,
-            child: Container(
-              padding: EdgeInsets.all(five),
-              decoration: BoxDecoration(
-                borderRadius:
-                    widget.message.isMe! ? myBorderRadius : yourBorderRadius,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                textDirection: widget.message.isMe!
-                    ? TextDirection.rtl
-                    : TextDirection.ltr,
+    return Padding(
+      padding: EdgeInsets.all(five),
+      child: InkWell(
+        onTap: widget.onTap,
+        borderRadius: defaultBorderRadius,
+        child: Padding(
+          padding: EdgeInsets.all(ten),
+          child: Column(
+            crossAxisAlignment: widget.message.me!
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
+            children: [
+              Row(
+                textDirection:
+                    widget.message.me! ? TextDirection.rtl : TextDirection.ltr,
                 children: [
                   GestureDetector(
                     onTap: () => showDialog(
                       context: context,
                       builder: (context) => ImageViewer(
                         image: user.value?['image'] ?? '',
-                        onInfoIconPressed: widget.message.isMe!
+                        onInfoIconPressed: widget.message.me!
                             ? null
                             : () => context.push(
                                   '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspcId}/${RoomInfoScreen.id}/${widget.wrkspcId}/${UserScreen.id}/${widget.message.senderId}',
@@ -76,110 +66,98 @@ class _ConsumerMessageTileState extends ConsumerState<MessageTile> {
                       ),
                     ),
                   ),
-                  SizedBox(width: five),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: widget.message.isMe!
-                        ? CrossAxisAlignment.end
-                        : CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            constraints: BoxConstraints(maxWidth: size * 3.5),
-                            child: Text(
-                              widget.message.isMe!
-                                  ? ''
-                                  : user.value?['name'] ?? '',
-                              overflow: TextOverflow.ellipsis,
-                              style: TextConfig.intro,
-                            ),
-                          ),
-                          SizedBox(width: ten),
-                          Text(
-                            timeAgo(widget.message.time),
-                            style: TextConfig.intro.copyWith(fontSize: ten),
-                          ),
-                          SizedBox(width: ten),
-                          widget.message.isMe! && widget.message.pending!
-                              ? Icon(
-                                  Icons.access_time_rounded,
-                                  color: Colors.grey,
-                                  size: size / 2.3,
-                                )
-                              : const SizedBox(),
-                          SizedBox(width: ten),
-                        ],
-                      ),
-                      height10,
-                      Visibility(
-                        visible: widget.message.image != null &&
-                            widget.message.image!.isNotEmpty,
-                        child: widget.message.image != null &&
-                                widget.message.image!.isNotEmpty
-                            ? ClipRRect(
-                                borderRadius: defaultBorderRadius,
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxHeight: size * 4,
-                                    maxWidth: size * 6,
-                                  ),
-                                  child: CachedNetworkImage(
-                                    imageUrl: widget.message.image!.isEmpty ||
-                                            widget.message.image == null
-                                        ? defaultRoomImg
-                                        : widget.message.image!,
-                                    errorWidget: (context, url, error) => Icon(
-                                      Icons.image,
-                                      size: size * 3,
-                                    ),
-                                    progressIndicatorBuilder:
-                                        (context, url, progress) {
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          value: progress.progress,
-                                        ),
-                                      );
-                                    },
-                                    alignment: widget.message.isMe!
-                                        ? Alignment.centerRight
-                                        : Alignment.centerLeft,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                              )
-                            : const SizedBox(),
-                      ),
-                      widget.message.message.isEmpty
-                          ? const SizedBox()
-                          : ConstrainedBox(
-                              constraints: BoxConstraints(maxWidth: size * 7),
-                              child: Text.rich(
-                                maxLines: 5,
-                                overflow: TextOverflow.ellipsis,
-                                TextSpan(
-                                  children: extractText(
-                                      context, widget.message.message),
-                                ),
-                              ),
-                            ),
-                      height5,
-                      Visibility(
-                        visible: repliesCount > 0,
-                        child: Text(
-                          'Replies ($repliesCount)',
-                          style: TextConfig.sub,
-                        ),
-                      )
-                    ],
+                  SizedBox(width: ten),
+                  Container(
+                    constraints: BoxConstraints(maxWidth: size * 3.5),
+                    child: Text(
+                      widget.message.me! ? '' : user.value?['name'] ?? '',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextConfig.intro,
+                    ),
                   ),
+                  SizedBox(width: ten),
+                  Text(
+                    timeAgo(widget.message.time),
+                    style: TextConfig.intro.copyWith(fontSize: ten),
+                  ),
+                  SizedBox(width: ten),
+                  widget.message.me! && widget.message.pending!
+                      ? Icon(
+                          Icons.access_time_rounded,
+                          color: Colors.grey,
+                          size: size / 2.3,
+                        )
+                      : const SizedBox(),
+                  SizedBox(width: ten),
                 ],
               ),
-            ),
+
+              Visibility(
+                visible: widget.message.image != null &&
+                    widget.message.image!.isNotEmpty,
+                child: widget.message.image != null &&
+                        widget.message.image!.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: defaultBorderRadius,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: size * 4,
+                            maxWidth: size * 6,
+                          ),
+                          child: CachedNetworkImage(
+                            imageUrl: widget.message.image!.isEmpty ||
+                                    widget.message.image == null
+                                ? defaultRoomImg
+                                : widget.message.image!,
+                            errorWidget: (context, url, error) => Icon(
+                              Icons.image,
+                              size: size * 3,
+                            ),
+                            progressIndicatorBuilder: (context, url, progress) {
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: progress.progress,
+                                ),
+                              );
+                            },
+                            alignment: widget.message.me!
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      )
+                    : const SizedBox(),
+              ),
+
+              /// If the user only sends a file with no text, a SizedBox()
+              /// takes the place of the text 👇🏽
+
+              widget.message.message.isEmpty
+                  ? const SizedBox()
+                  : ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: size * 9),
+                      child: Text.rich(
+                        maxLines: 5,
+                        overflow: TextOverflow.ellipsis,
+                        TextSpan(
+                          children:
+                              extractText(context, widget.message.message),
+                        ),
+                      ),
+                    ),
+              height5,
+              Visibility(
+                visible: repliesCount > 0,
+                child: Text(
+                  'Replies ($repliesCount)',
+                  style: TextConfig.sub,
+                ),
+              )
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

@@ -2,7 +2,7 @@ class Message {
   final String message, senderId;
   final String? id, image, file;
   final DateTime time;
-  final bool? pending, isMe;
+  final bool? pending, me;
   final List? likes;
 
   const Message({
@@ -13,7 +13,7 @@ class Message {
     this.file,
     required this.time,
     this.pending,
-    this.isMe = false,
+    this.me = false,
     this.likes,
   });
 }

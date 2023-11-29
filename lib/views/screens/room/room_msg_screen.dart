@@ -68,7 +68,7 @@ class _RoomScreenState extends ConsumerState<RoomMsgScreen> {
               final Message message = Message(
                 id: data[index].id,
                 senderId: data[index]['senderId'] ?? 'random_string',
-                isMe: isMe,
+                me: isMe,
                 message: data[index]['message'] ?? '',
                 image: data[index]['image'] ?? '',
                 time: (data[index]['time']).toDate(),
