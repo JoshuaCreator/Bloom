@@ -1,4 +1,4 @@
-import 'package:basic_board/providers/workspace_providers.dart';
+import 'package:basic_board/providers/space_providers.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/screens/space/discover_space_screen.dart';
 import 'package:basic_board/views/widgets/space_tile.dart';

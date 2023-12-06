@@ -38,8 +38,8 @@ class SpaceCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(twenty),
             boxShadow: [
               BoxShadow(
-                color: shadowColour.withOpacity(0.3),
-                blurRadius: 10.0,
+                color: shadowColour.withOpacity(0.1),
+                blurRadius: 5.0,
               ),
             ],
           ),

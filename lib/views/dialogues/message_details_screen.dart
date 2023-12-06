@@ -10,13 +10,13 @@ class MessageDetailsScreen extends ConsumerStatefulWidget {
   const MessageDetailsScreen({
     super.key,
     required this.message,
-    required this.wrkspcId,
+    required this.spaceId,
     required this.room,
     required this.repliesRef,
     required this.messageRef,
   });
   final Message message;
-  final String wrkspcId;
+  final String spaceId;
   final Room room;
   final CollectionReference repliesRef, messageRef;
 
@@ -36,8 +36,8 @@ class _ConsumerMessageDetailsScreenState
     final auth = ref.watch(authStateProvider).value!;
     final firestore = ref.watch(firestoreProvider);
     final msg = ref.watch(messageProvider(firestore
-        .collection('workspaces')
-        .doc(widget.wrkspcId)
+        .collection('spaces')
+        .doc(widget.spaceId)
         .collection('rooms')
         .doc(widget.room.id)
         .collection('messages')
@@ -150,7 +150,7 @@ class _ConsumerMessageDetailsScreenState
                     return ReplyTile(
                       reply: reply,
                       replyRef: widget.repliesRef.doc(data[index].id),
-                      wrkspcId: widget.wrkspcId,
+                      spaceId: widget.spaceId,
                     );
                   },
                 ),
@@ -261,7 +261,7 @@ class ReactionTile extends StatelessWidget {
                             MessageDB().edit(
                               context,
                               roomId: widget.room.id!,
-                              spaceId: widget.wrkspcId,
+                              spaceId: widget.spaceId,
                               messageId: widget.message.id!,
                               newMessage: messageController.text.trim(),
                             );

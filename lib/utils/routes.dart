@@ -41,16 +41,16 @@ GoRouter goRouter = GoRouter(
           ),
           routes: [
             GoRoute(
-              path: '${RoomMsgScreen.id}/:wrkspc',
+              path: '${RoomMsgScreen.id}/:spaceId',
               builder: (context, state) => RoomMsgScreen(
                 room: state.extra as Room,
-                wrkspc: state.pathParameters['wrkspc']!,
+                spaceId: state.pathParameters['spaceId']!,
               ),
               routes: [
                 GoRoute(
-                  path: '${RoomInfoScreen.id}/:wrkspace',
+                  path: '${RoomInfoScreen.id}/:spcId',
                   builder: (context, state) => RoomInfoScreen(
-                    spaceId: state.pathParameters['wrkspace']!,
+                    spcId: state.pathParameters['spcId']!,
                     room: state.extra as Room,
                   ),
                   routes: [
@@ -73,13 +73,13 @@ GoRouter goRouter = GoRouter(
                 GoRoute(
                   path: SpaceSettingsScreen.id,
                   builder: (context, state) => SpaceSettingsScreen(
-                    wrkspc: state.extra as Space,
+                    space: state.extra as Space,
                   ),
                 ),
                 GoRoute(
-                  path: '${CreateRoomScreen.id}/:wrkspc',
+                  path: '${CreateRoomScreen.id}/:spaceID',
                   builder: (context, state) => CreateRoomScreen(
-                    wrkspcId: state.pathParameters['wrkspc']!,
+                    spaceID: state.pathParameters['spaceID']!,
                   ),
                 ),
               ],

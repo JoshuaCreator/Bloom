@@ -2,10 +2,10 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:basic_board/providers/room/room_data_providers.dart';
-import 'package:basic_board/providers/workspace_providers.dart';
+import 'package:basic_board/providers/space_providers.dart';
 import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/services/image_helper.dart';
-import 'package:basic_board/services/workspace_db.dart';
+import 'package:basic_board/services/space_db.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/dialogues/bottom_sheets.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
@@ -31,7 +31,7 @@ class _ConsumerSpaceInfoScreenState extends ConsumerState<SpaceInfoScreen> {
     final firestore = ref.watch(firestoreProvider);
     final auth = ref.watch(authStateProvider).value!;
     final space = ref.watch(spaceDataProvider(widget.space.id!));
-    final room = ref.watch(wrkspcRoomsProvider(widget.space.id!));
+    final room = ref.watch(spaceRoomsProvider(widget.space.id!));
     final nameController = TextEditingController(text: space.value?['name']);
     final descController = TextEditingController(text: space.value?['desc']);
     final Brightness brightness = MediaQuery.of(context).platformBrightness;
@@ -202,7 +202,7 @@ class _ConsumerSpaceInfoScreenState extends ConsumerState<SpaceInfoScreen> {
                                           //? Leave Room
                                           leaveRoomDialogue(
                                             context,
-                                            wrkspcId: widget.space.id!,
+                                            spcId: widget.space.id!,
                                             roomId: roomData.id!,
                                             userId: auth.uid,
                                             roomName: roomData.name,
@@ -216,7 +216,7 @@ class _ConsumerSpaceInfoScreenState extends ConsumerState<SpaceInfoScreen> {
                                           //? Join Room
                                           RoomDB().join(
                                             context,
-                                            wrkspcId: widget.space.id!,
+                                            spaceId: widget.space.id!,
                                             roomId: roomData.id!,
                                             userId: auth.uid,
                                             roomName: roomData.name,
@@ -297,9 +297,9 @@ class _ConsumerSpaceInfoScreenState extends ConsumerState<SpaceInfoScreen> {
                               context,
                               imagePath: croppedImg,
                               docRef: firestore
-                                  .collection('workspaces')
+                                  .collection('spaces')
                                   .doc(widget.space.id!),
-                              storagePath: 'workspaces/${widget.space.id!}.png',
+                              storagePath: 'spaces/${widget.space.id!}.png',
                             );
                             if (context.mounted) context.pop();
                           }
@@ -326,9 +326,9 @@ class _ConsumerSpaceInfoScreenState extends ConsumerState<SpaceInfoScreen> {
                               context,
                               imagePath: croppedImg,
                               docRef: firestore
-                                  .collection('workspaces')
+                                  .collection('spaces')
                                   .doc(widget.space.id!),
-                              storagePath: 'workspaces/${widget.space.id!}.png',
+                              storagePath: 'spaces/${widget.space.id!}.png',
                             );
                             if (context.mounted) context.pop();
                           }
@@ -358,7 +358,7 @@ class _ConsumerSpaceInfoScreenState extends ConsumerState<SpaceInfoScreen> {
                         if (nameController.text.trim().isEmpty) return;
                         SpaceDB().edit(
                           context,
-                          wrkspcId: widget.space.id!,
+                          spaceId: widget.space.id!,
                           name: nameController.text.trim(),
                           desc: descController.text.trim(),
                         );

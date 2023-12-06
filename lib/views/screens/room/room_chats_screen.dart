@@ -22,7 +22,7 @@ class _RoomChatsScreenState extends ConsumerState<RoomChatsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final room = ref.watch(wrkspcRoomsProvider(widget.space!.id!));
+    final room = ref.watch(spaceRoomsProvider(widget.space!.id!));
     final auth = ref.watch(authStateProvider).value;
     final firestore = ref.watch(firestoreProvider);
 
@@ -71,7 +71,7 @@ class _RoomChatsScreenState extends ConsumerState<RoomChatsScreen> {
                   );
                   final lastMessage = ref.watch(
                     lastMessageProvider(firestore
-                        .collection('workspaces')
+                        .collection('spaces')
                         .doc(widget.space?.id)
                         .collection('rooms')
                         .doc(roomData.id)

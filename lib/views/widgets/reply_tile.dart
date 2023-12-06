@@ -11,12 +11,12 @@ class ReplyTile extends ConsumerStatefulWidget {
     super.key,
     required this.reply,
     required this.replyRef,
-    required this.wrkspcId,
+    required this.spaceId,
   });
 
   final Reply reply;
   final DocumentReference replyRef;
-  final String wrkspcId;
+  final String spaceId;
 
   @override
   ConsumerState<ReplyTile> createState() => _ConsumerReplyTileState();
@@ -60,7 +60,7 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
                             onInfoIconPressed: widget.reply.isMe!
                                 ? null
                                 : () => context.push(
-                                      '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspcId}/${RoomInfoScreen.id}/${widget.wrkspcId}/${UserScreen.id}/${widget.reply.replySenderId}',
+                                      '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spaceId}/${RoomInfoScreen.id}/${widget.spaceId}/${UserScreen.id}/${widget.reply.replySenderId}',
                                     ),
                           ),
                         ),

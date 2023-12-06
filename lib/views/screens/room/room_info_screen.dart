@@ -14,9 +14,9 @@ import '../../widgets/user_tile.dart';
 
 class RoomInfoScreen extends ConsumerStatefulWidget {
   static String id = 'room-info';
-  const RoomInfoScreen({super.key, required this.room, required this.spaceId});
+  const RoomInfoScreen({super.key, required this.room, required this.spcId});
   final Room room;
-  final String spaceId;
+  final String spcId;
 
   @override
   ConsumerState<RoomInfoScreen> createState() => _ConsumerRoomInfoScreenState();
@@ -31,13 +31,13 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
     final auth = ref.watch(authStateProvider).value!;
     final creator = ref.watch(anyUserProvider(widget.room.creatorId));
     final room = ref.watch(roomProvider(firestore
-        .collection('workspaces')
-        .doc(widget.spaceId)
+        .collection('spaces')
+        .doc(widget.spcId)
         .collection('rooms')
         .doc(widget.room.id)));
     final participants = ref.watch(participantsProvider(firestore
-        .collection('workspaces')
-        .doc(widget.spaceId)
+        .collection('spaces')
+        .doc(widget.spcId)
         .collection('rooms')
         .doc(widget.room.id)
         .collection('participants')));
@@ -137,7 +137,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                         onTap: me
                             ? null
                             : () => context.push(
-                                  '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spaceId}/${RoomInfoScreen.id}/${widget.spaceId}/${UserScreen.id}/${data[index]['id']}',
+                                  '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spcId}/${RoomInfoScreen.id}/${widget.spcId}/${UserScreen.id}/${data[index]['id']}',
                                 ),
                       );
                     },
@@ -203,8 +203,8 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                               context,
                               imagePath: croppedImg,
                               docRef: firestore
-                                  .collection('workspaces')
-                                  .doc(widget.spaceId)
+                                  .collection('spaces')
+                                  .doc(widget.spcId)
                                   .collection('rooms')
                                   .doc(widget.room.id),
                               storagePath: 'rooms/${widget.room.name}.png',
@@ -229,8 +229,8 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                               context,
                               imagePath: croppedImg,
                               docRef: firestore
-                                  .collection('workspaces')
-                                  .doc(widget.spaceId)
+                                  .collection('spaces')
+                                  .doc(widget.spcId)
                                   .collection('rooms')
                                   .doc(widget.room.id),
                               storagePath: 'rooms/${widget.room.name}.png',
@@ -253,7 +253,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                     if (nameController.text.trim().isEmpty) return;
                     RoomDB().edit(
                       context,
-                      spaceId: widget.spaceId,
+                      spaceId: widget.spcId,
                       roomId: widget.room.id!,
                       name: nameController.text.trim(),
                       desc: aboutController.text.trim(),
@@ -269,7 +269,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                         //? Leave Room
                         leaveRoomDialogue(
                           context,
-                          wrkspcId: widget.spaceId,
+                          spcId: widget.spcId,
                           roomName: widget.room.name,
                           userId: userId,
                           roomId: widget.room.id!,
@@ -283,7 +283,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                         //? Join Room
                         RoomDB().join(
                           context,
-                          wrkspcId: widget.spaceId,
+                          spaceId: widget.spcId,
                           roomId: widget.room.id!,
                           userId: userId,
                           roomName: widget.room.name,
@@ -299,7 +299,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                       onTap: () {
                         leaveRoomDialogue(
                           context,
-                          wrkspcId: widget.spaceId,
+                          spcId: widget.spcId,
                           roomName: widget.room.name,
                           userId: userId,
                           roomId: widget.room.id!,
@@ -312,7 +312,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                       onTap: () {
                         RoomDB().join(
                           context,
-                          wrkspcId: widget.spaceId,
+                          spaceId: widget.spcId,
                           roomId: widget.room.id!,
                           userId: userId,
                           roomName: widget.room.name,

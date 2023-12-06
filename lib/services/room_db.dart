@@ -15,11 +15,10 @@ class RoomDB {
     Room room,
     BuildContext context, {
     required String userId,
-    required String wrkspcId,
+    required String spaceId,
     required File? image,
   }) async {
-    _roomRef =
-        _firestore.collection('workspaces').doc(wrkspcId).collection('rooms');
+    _roomRef = _firestore.collection('spaces').doc(spaceId).collection('rooms');
     bool isConnected = await isOnline();
 
     if (!isConnected) {
@@ -43,7 +42,7 @@ class RoomDB {
         (value) {
           value.update({'id': value.id}).then(
             (_) {
-              _firestore.collection('workspaces').doc(wrkspcId).update({
+              _firestore.collection('spaces').doc(spaceId).update({
                 'rooms': FieldValue.arrayUnion([value.id])
               });
               _roomRef
@@ -102,7 +101,7 @@ class RoomDB {
 
   Future join(
     BuildContext context, {
-    required String wrkspcId,
+    required String spaceId,
     required String roomId,
     required String userId,
     required String roomName,
@@ -117,8 +116,8 @@ class RoomDB {
     try {
       if (context.mounted) showLoadingIndicator(context, label: 'Joining...');
       _firestore
-          .collection('workspaces')
-          .doc(wrkspcId)
+          .collection('spaces')
+          .doc(spaceId)
           .collection('rooms')
           .doc(roomId)
           .collection('participants')
@@ -128,8 +127,8 @@ class RoomDB {
         'joined': DateTime.now(),
       }).then((value) {
         _firestore
-            .collection('workspaces')
-            .doc(wrkspcId)
+            .collection('spaces')
+            .doc(spaceId)
             .collection('rooms')
             .doc(roomId)
             .update({
@@ -182,7 +181,7 @@ class RoomDB {
     try {
       if (context.mounted) showLoadingIndicator(context, label: 'Exiting...');
       _firestore
-          .collection('workspaces')
+          .collection('spaces')
           .doc(spaceId)
           .collection('rooms')
           .doc(roomId)
@@ -191,7 +190,7 @@ class RoomDB {
           .delete()
           .then((value) {
         _firestore
-            .collection('workspaces')
+            .collection('spaces')
             .doc(spaceId)
             .collection('rooms')
             .doc(roomId)
@@ -242,7 +241,7 @@ class RoomDB {
     try {
       if (context.mounted) showLoadingIndicator(context);
       _firestore
-          .collection('workspaces')
+          .collection('spaces')
           .doc(spaceId)
           .collection('rooms')
           .doc(roomId)
@@ -270,7 +269,7 @@ class RoomDB {
     BuildContext context, {
     required String roomId,
     required String roomName,
-    required String wrkspcId,
+    required String spaceId,
   }) async {
     bool isConnected = await isOnline();
 
@@ -283,12 +282,12 @@ class RoomDB {
     }
     try {
       if (context.mounted) showLoadingIndicator(context, label: 'Deleting...');
-      _firestore.collection('workspaces').doc(wrkspcId).update({
+      _firestore.collection('spaces').doc(spaceId).update({
         'rooms': FieldValue.arrayRemove([roomId])
       }).then((value) {
         _firestore
-            .collection('workspaces')
-            .doc(wrkspcId)
+            .collection('spaces')
+            .doc(spaceId)
             .collection('rooms')
             .doc(roomId)
             .delete();

@@ -9,11 +9,11 @@ final roomProvider = StreamProvider.family(
 );
 
 //?*************** Get Rooms Of A Space ***************//
-final wrkspcRoomsProvider = StreamProvider.family((ref, String spaceId) {
+final spaceRoomsProvider = StreamProvider.family((ref, String spaceId) {
   final firestore = ref.watch(firestoreProvider);
 
   final collectionRef = firestore
-      .collection('workspaces')
+      .collection('spaces')
       .doc(spaceId)
       .collection('rooms')
       .orderBy('createdAt', descending: true);

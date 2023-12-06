@@ -1,4 +1,4 @@
-import 'package:basic_board/providers/workspace_providers.dart';
+import 'package:basic_board/providers/space_providers.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/widgets/space_card.dart';
 
@@ -42,7 +42,7 @@ final searchResultProvider =
   final q = query.toLowerCase().trim();
   final firestore = ref.watch(firestoreProvider);
   return firestore
-      .collection('workspaces')
+      .collection('spaces')
       .where('name', isGreaterThanOrEqualTo: q, isLessThanOrEqualTo: q)
       .snapshots()
       .map((snapshot) => snapshot.docs);
@@ -58,9 +58,7 @@ class Searcher extends ConsumerWidget {
     final result = ref.watch(allSpacesProvider);
     return result.when(
       data: (data) {
-        return data.isEmpty
-            ? Center(child: Text('${query.trim()} not found'))
-            : ListView.builder(
+        return ListView.builder(
                 padding: EdgeInsets.all(ten),
                 itemCount: result.value?.length,
                 itemBuilder: (context, index) {

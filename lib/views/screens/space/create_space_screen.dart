@@ -1,7 +1,8 @@
 import 'dart:io';
 
+import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/services/image_helper.dart';
-import 'package:basic_board/services/workspace_db.dart';
+import 'package:basic_board/services/space_db.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/dialogues/bottom_sheets.dart';
 import 'package:basic_board/views/widgets/privacy_tile.dart';
@@ -18,8 +19,7 @@ class CreateSpaceScreen extends ConsumerStatefulWidget {
       _ConsumerCreateSpaceScreenState();
 }
 
-class _ConsumerCreateSpaceScreenState
-    extends ConsumerState<CreateSpaceScreen> {
+class _ConsumerCreateSpaceScreenState extends ConsumerState<CreateSpaceScreen> {
   bool value = false;
 
   String privacyText = 'Public (Anyone can join)';
@@ -45,53 +45,6 @@ class _ConsumerCreateSpaceScreenState
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // GestureDetector(
-            //   onTap: () => imagePickerDialogue(
-            //     context,
-            //     onStorageTapped: () => imageHelper
-            //         .pickImage(context, source: ImageSource.gallery)
-            //         .then(
-            //             (value) => imageHelper.cropImage(context, path: value))
-            //         .then((value) {
-            //       setState(
-            //         () => image = File(value),
-            //       );
-            //       context.pop();
-            //       context.pop();
-            //     }),
-            //     onCameraTapped: () => imageHelper
-            //         .pickImage(context, source: ImageSource.camera)
-            //         .then(
-            //             (value) => imageHelper.cropImage(context, path: value))
-            //         .then((value) {
-            //       setState(
-            //         () => image = File(value),
-            //       );
-            //       context.pop();
-            //       context.pop();
-            //     }),
-            //   ),
-            //   child: Container(
-            //     height: size * 4.5,
-            //     width: double.infinity,
-            //     margin: EdgeInsets.symmetric(horizontal: ten),
-            //     decoration: BoxDecoration(
-            //       color: ColourConfig.dull,
-            //       borderRadius: defaultBorderRadius,
-            //       image: image == null
-            //           ? null
-            //           : DecorationImage(
-            //               image: FileImage(image!),
-            //               fit: BoxFit.cover,
-            //             ),
-            //     ),
-            //     child: Center(
-            //         child: Icon(
-            //       Icons.image,
-            //       size: size,
-            //     )),
-            //   ),
-            // ),
             Form(
               key: formKey,
               autovalidateMode: AutovalidateMode.always,
@@ -194,13 +147,22 @@ class _ConsumerCreateSpaceScreenState
                       height30,
                       AppButton(
                         label: 'Create',
-                        onTap: () {
-                          if (_nameController.text.trim().isEmpty) {
-                            showSnackBar(context,
-                                msg: 'The name field is required');
+                        onTap: () async {
+                          final isConnected = await isOnline();
+                          if (!isConnected) {
+                            if (context.mounted) {
+                              showSnackBar(context, msg: "You're offline");
+                            }
                             return;
                           }
-                          final Space wrkspc = Space(
+                          if (_nameController.text.trim().isEmpty) {
+                            if (context.mounted) {
+                              showSnackBar(context,
+                                  msg: 'The name field is required');
+                            }
+                            return;
+                          }
+                          final Space space = Space(
                             id: 'id',
                             name: _nameController.text.trim(),
                             desc: _descController.text.trim(),
@@ -209,12 +171,14 @@ class _ConsumerCreateSpaceScreenState
                             createdAt: DateTime.now(),
                             private: value,
                           );
-                          SpaceDB().create(
-                            context,
-                            wrkspc: wrkspc,
-                            userId: user.uid,
-                            imagePath: image?.path ?? '',
-                          );
+                          if (context.mounted) {
+                            SpaceDB().create(
+                              context,
+                              space: space,
+                              userId: user.uid,
+                              imagePath: image?.path ?? '',
+                            );
+                          }
                         },
                       ),
                     ],

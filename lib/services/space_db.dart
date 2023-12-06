@@ -1,4 +1,3 @@
-import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,32 +14,22 @@ class SpaceDB {
 
   Future<void> create(
     BuildContext context, {
-    required Space wrkspc,
+    required Space space,
     required String userId,
     required String? imagePath,
   }) async {
-    _spaceRef = _firestore.collection('workspaces');
-
-    bool isConnected = await isOnline();
-    if (!isConnected) {
-      if (context.mounted) {
-        context.pop();
-        showSnackBar(context, msg: "You're offline");
-      }
-      return;
-    }
-
+    _spaceRef = _firestore.collection('spaces');
     try {
       if (context.mounted) showLoadingIndicator(context, label: 'Creating...');
       await _spaceRef.add({
-        'name': wrkspc.name,
-        'desc': wrkspc.desc,
+        'name': space.name,
+        'desc': space.desc,
         'image': imagePath,
-        'creatorId': wrkspc.creatorId,
-        'createdAt': wrkspc.createdAt,
-        'private': wrkspc.private,
+        'creatorId': space.creatorId,
+        'createdAt': space.createdAt,
+        'private': space.private,
       }).then((doc) async {
-        final String path = 'workspaces/${doc.id}.png';
+        final String path = 'spaces/${doc.id}.png';
         _spaceRef.doc(doc.id).update({
           'id': doc.id,
           'participants': FieldValue.arrayUnion([userId]),
@@ -53,7 +42,7 @@ class SpaceDB {
         }).then((_) {
           context.pop();
           context.pop();
-          showSnackBar(context, msg: '${wrkspc.name} has been created');
+          showSnackBar(context, msg: '${space.name} has been created');
         });
         imagePath == null || imagePath.isEmpty
             ? null
@@ -81,21 +70,14 @@ class SpaceDB {
     }
   }
 
-  Future join(
+  Future<void> join(
     BuildContext context, {
     required Space space,
 
     /// The required [userId] refers to the currently signed in user
     required String userId,
   }) async {
-    final isConnected = await isOnline();
-    if (!isConnected) {
-      if (context.mounted) {
-        showSnackBar(context, msg: "You're offline'");
-      }
-      return;
-    }
-    _spaceRef = _firestore.collection('workspaces');
+    _spaceRef = _firestore.collection('spaces');
     try {
       if (context.mounted) showLoadingIndicator(context, label: 'Joining...');
       _spaceRef.doc(space.id).update({
@@ -117,21 +99,14 @@ class SpaceDB {
     }
   }
 
-  Future exit(
+  Future<void> exit(
     BuildContext context, {
     required Space space,
 
     /// The required [userId] refers to the currently signed in user
     required String userId,
   }) async {
-    final isConnected = await isOnline();
-    if (!isConnected) {
-      if (context.mounted) {
-        showSnackBar(context, msg: "You're offline");
-      }
-      return;
-    }
-    _spaceRef = _firestore.collection('workspaces');
+    _spaceRef = _firestore.collection('spaces');
     try {
       if (context.mounted) showLoadingIndicator(context, label: 'Exiting...');
       _spaceRef.doc(space.id).update({
@@ -149,27 +124,19 @@ class SpaceDB {
     }
   }
 
-  Future edit(
+  Future<void> edit(
     BuildContext context, {
-    required String wrkspcId,
+    required String spaceId,
     String? name,
     String? desc,
   }) async {
     _firestore.settings = const Settings(persistenceEnabled: false);
 
-    bool isConnected = await isOnline();
-    if (!isConnected) {
-      if (context.mounted) {
-        context.pop();
-        showSnackBar(context, msg: "You're offline");
-      }
-      return;
-    }
     try {
       if (context.mounted) showLoadingIndicator(context);
       _firestore
-          .collection('workspaces')
-          .doc(wrkspcId)
+          .collection('spaces')
+          .doc(spaceId)
           .update({'name': name, 'desc': desc}).then((value) {
         context.pop();
         context.pop();
@@ -187,35 +154,25 @@ class SpaceDB {
     }
   }
 
-  Future delete(
+  Future<void> delete(
     BuildContext context, {
-    required String wrkspcName,
-    required String wrkspcId,
+    required String spaceName,
+    required String spaceId,
   }) async {
-    _firestore.settings = const Settings(persistenceEnabled: false);
-
-    bool isConnected = await isOnline();
-    if (!isConnected) {
-      if (context.mounted) {
-        context.pop();
-        showSnackBar(context, msg: "You're offline");
-      }
-      return;
-    }
     try {
       if (context.mounted) showLoadingIndicator(context, label: 'Deleting...');
-      _firestore.collection('workspaces').doc(wrkspcId).delete().then((value) {
+      _firestore.collection('spaces').doc(spaceId).delete().then((value) {
         context.go(SpaceScreen.id);
         showSnackBar(
           context,
-          msg: "$wrkspcName deleted",
+          msg: "$spaceName deleted",
         );
       }).catchError((e) {
         context.pop();
         context.pop();
         showSnackBar(
           context,
-          msg: "Unable to delete $wrkspcName",
+          msg: "Unable to delete $spaceName",
         );
       }).timeout(
         const Duration(seconds: 20),

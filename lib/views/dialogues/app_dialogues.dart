@@ -4,7 +4,7 @@ import 'package:basic_board/views/widgets/app_button.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../services/workspace_db.dart';
+import '../../services/space_db.dart';
 import 'loading_indicator_build.dart';
 
 linkAlertDialogue(
@@ -18,13 +18,10 @@ linkAlertDialogue(
       width: double.infinity,
       child: AlertDialog(
         actionsAlignment: MainAxisAlignment.spaceBetween,
-        // title: const Text('Open link'),
-        shape: RoundedRectangleBorder(
-          borderRadius: defaultBorderRadius,
-        ),
+        actionsOverflowAlignment: OverflowBarAlignment.center,
         alignment: Alignment.bottomCenter,
         insetPadding: EdgeInsets.all(ten),
-        content: Text.rich(
+        title: Text.rich(
           TextSpan(
             text: 'Do you want to open ',
             children: [
@@ -37,25 +34,27 @@ linkAlertDialogue(
               ),
             ],
           ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
         actions: [
-          TextButton(
-            onPressed: () => Clipboard.setData(ClipboardData(text: linkString))
-                .then((value) {
-              context.pop();
-              showSnackBar(context, msg: 'Copied to clipboard');
-            }),
-            child: const Text('Copy'),
-          ),
-          TextButton(
-            onPressed: () async {
+          AppButton(
+            onTap: () async {
               context.pop();
               await launchUrl(link, mode: LaunchMode.inAppWebView).catchError(
                 (value) =>
                     showSnackBar(context, msg: 'Unable to open this link'),
               );
             },
-            child: const Text('Open'),
+            label: 'Open',
+          ),
+          AppOutlinedButton(
+            onTap: () => Clipboard.setData(ClipboardData(text: linkString))
+                .then((value) {
+              context.pop();
+              showSnackBar(context, msg: 'Copied to clipboard');
+            }),
+            label: 'Copy',
           ),
         ],
       ),
@@ -107,7 +106,7 @@ leaveRoomDialogue(
   required String roomName,
   required String userId,
   required String roomId,
-  required String wrkspcId,
+  required String spcId,
 }) {
   showDialog(
     context: context,
@@ -128,7 +127,7 @@ leaveRoomDialogue(
             onPressed: () {
               RoomDB().leave(
                 context,
-                spaceId: wrkspcId,
+                spaceId: spcId,
                 roomId: roomId,
                 userId: userId,
                 roomName: roomName,
@@ -145,7 +144,7 @@ deleteRoomDialogue(
   BuildContext context, {
   required String roomId,
   required String roomName,
-  required String wrkspcId,
+  required String spaceId,
 }) {
   showDialog(
     context: context,
@@ -168,7 +167,7 @@ deleteRoomDialogue(
                 context,
                 roomId: roomId,
                 roomName: roomName,
-                wrkspcId: wrkspcId,
+                spaceId: spaceId,
               );
             },
           ),
@@ -217,15 +216,15 @@ deleteAccountDialogue(BuildContext context) {
 // The "deleteSpaceDialogue" is not currently in use
 deleteSpaceDialogue(
   BuildContext context, {
-  required String wrkspcName,
-  required String wrkspcId,
+  required String spaceName,
+  required String spaceId,
 }) {
   showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
         content: Text(
-          'You are about to delete $wrkspcName. All Rooms will be deleted and participants removed. This cannot be reversed.',
+          'You are about to delete $spaceName. All Rooms will be deleted and participants removed. This cannot be reversed.',
         ),
         actionsAlignment: MainAxisAlignment.spaceBetween,
         shape: RoundedRectangleBorder(borderRadius: defaultBorderRadius),
@@ -236,8 +235,8 @@ deleteSpaceDialogue(
             onPressed: () {
               SpaceDB().delete(
                 context,
-                wrkspcName: wrkspcName,
-                wrkspcId: wrkspcId,
+                spaceName: spaceName,
+                spaceId: spaceId,
               );
             },
           ),

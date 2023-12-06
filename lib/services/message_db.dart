@@ -19,7 +19,7 @@ class MessageDB {
     Message message,
     BuildContext context, {
     required CollectionReference ref,
-    required String wrkspcId,
+    required String spaceId,
     required String roomId,
   }) async {
     try {
@@ -32,8 +32,8 @@ class MessageDB {
         'likes': [],
       }).then((doc) async {
         final docRef = _firestore
-            .collection('workspaces')
-            .doc(wrkspcId)
+            .collection('spaces')
+            .doc(spaceId)
             .collection('rooms')
             .doc(roomId)
             .collection('messages')
@@ -46,7 +46,7 @@ class MessageDB {
                     filePath: message.file!,
                     docRef: docRef,
                     storagePath:
-                        'workspaces/$wrkspcId/rooms/$roomId/messages/${doc.id + DateTime.now().toString() + message.file!}',
+                        'spaces/$spaceId/rooms/$roomId/messages/${doc.id + DateTime.now().toString() + message.file!}',
                   )
                 : null
             : await imageHelper.uploadImage(
@@ -54,7 +54,7 @@ class MessageDB {
                 imagePath: message.image!,
                 docRef: docRef,
                 storagePath:
-                    'workspaces/$wrkspcId/rooms/$roomId/messages/${doc.id + DateTime.now().toString()}.png',
+                    'spaces/$spaceId/rooms/$roomId/messages/${doc.id + DateTime.now().toString()}.png',
                 msg: 'File uploaded and sent',
               );
       }).catchError((e) {
@@ -103,7 +103,7 @@ class MessageDB {
     showLoadingIndicator(context, label: 'Updating...');
     try {
       _firestore
-          .collection('workspaces')
+          .collection('spaces')
           .doc(spaceId)
           .collection('rooms')
           .doc(roomId)

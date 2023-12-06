@@ -4,10 +4,10 @@ import 'package:basic_board/utils/imports.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 /// This File is currently not in use. Until further notice
-/// 
-/// 
-/// 
-/// 
+///
+///
+///
+///
 
 class DirectChatDb {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -18,7 +18,7 @@ class DirectChatDb {
   Future send(BuildContext context, DirectMsg msg,
       {required String recipientId, required String spaceId}) async {
     _chatRef = _firestore
-        .collection('workspaces')
+        .collection('spaces')
         .doc(spaceId)
         .collection('chats')
         .doc('chat${msg.toId}')
@@ -33,7 +33,7 @@ class DirectChatDb {
         'time': msg.time,
       }).then((doc) async {
         _firestore
-            .collection('workspaces')
+            .collection('spaces')
             .doc(spaceId)
             .collection('chats')
             .doc('chat${msg.toId}')

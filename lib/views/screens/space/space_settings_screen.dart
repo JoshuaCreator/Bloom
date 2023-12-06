@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'package:basic_board/providers/workspace_providers.dart';
+import 'package:basic_board/providers/space_providers.dart';
 import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/services/image_helper.dart';
-import 'package:basic_board/services/workspace_db.dart';
+import 'package:basic_board/services/space_db.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/dialogues/bottom_sheets.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
@@ -17,8 +17,8 @@ import 'package:image_picker/image_picker.dart';
 
 class SpaceSettingsScreen extends ConsumerStatefulWidget {
   static String id = 'space-settings';
-  const SpaceSettingsScreen({super.key, required this.wrkspc});
-  final Space wrkspc;
+  const SpaceSettingsScreen({super.key, required this.space});
+  final Space space;
 
   static GlobalKey<FormState> formKey = GlobalKey<FormState>();
   @override
@@ -36,11 +36,9 @@ class _ConsumerSpaceSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final space = ref.watch(spaceDataProvider(widget.wrkspc.id!));
-    final nameController =
-        TextEditingController(text: space.value?['name']);
-    final descController =
-        TextEditingController(text: space.value?['desc']);
+    final space = ref.watch(spaceDataProvider(widget.space.id!));
+    final nameController = TextEditingController(text: space.value?['name']);
+    final descController = TextEditingController(text: space.value?['desc']);
     return WillPopScope(
       onWillPop: () async {
         /// Prompts the user to save their changes only if they made any
@@ -150,10 +148,10 @@ class _ConsumerSpaceSettingsScreenState
                               //   context,
                               //   imagePath: croppedImg,
                               //   docRef: firestore
-                              //       .collection('workspaces')
-                              //       .doc(widget.wrkspc.id!),
+                              //       .collection('spaces')
+                              //       .doc(widget.space.id!),
                               //   storagePath:
-                              //       'workspaces/${widget.wrkspc.id!}.png',
+                              //       'spaces/${widget.space.id!}.png',
                               // );
                               if (context.mounted) context.pop();
                             }
@@ -247,7 +245,7 @@ class _ConsumerSpaceSettingsScreenState
     showLoadingIndicator(context, label: 'Saving...');
     await SpaceDB().edit(
       context,
-      wrkspcId: widget.wrkspc.id!,
+      spaceId: widget.space.id!,
       name: nameController.text.trim(),
       desc: descController.text.trim(),
     );
@@ -255,8 +253,8 @@ class _ConsumerSpaceSettingsScreenState
       await imageHelper.uploadImage(
         context,
         imagePath: image!,
-        docRef: firestore.collection('workspaces').doc(widget.wrkspc.id!),
-        storagePath: 'workspaces/${widget.wrkspc.id!}.png',
+        docRef: firestore.collection('spaces').doc(widget.space.id!),
+        storagePath: 'spaces/${widget.space.id!}.png',
       );
     }
   }

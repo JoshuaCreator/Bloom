@@ -12,13 +12,13 @@ class MessageTile extends ConsumerStatefulWidget {
     required this.messagesRef,
     required this.repliesRef,
     this.onTap,
-    required this.wrkspcId,
+    required this.spaceId,
   });
   final Message message;
   final CollectionReference<Map<String, dynamic>> messagesRef;
   final CollectionReference repliesRef;
   final void Function()? onTap;
-  final String wrkspcId;
+  final String spaceId;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _MessageTileState();
@@ -55,7 +55,7 @@ class _MessageTileState extends ConsumerState<MessageTile> {
                         onInfoIconPressed: widget.message.me!
                             ? null
                             : () => context.push(
-                                  '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspcId}/${RoomInfoScreen.id}/${widget.wrkspcId}/${UserScreen.id}/${widget.message.senderId}',
+                                  '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spaceId}/${RoomInfoScreen.id}/${widget.spaceId}/${UserScreen.id}/${widget.message.senderId}',
                                 ),
                       ),
                     ),

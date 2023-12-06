@@ -12,10 +12,10 @@ class RoomMsgScreen extends ConsumerStatefulWidget {
   const RoomMsgScreen({
     super.key,
     required this.room,
-    required this.wrkspc,
+    required this.spaceId,
   });
   final Room room;
-  final String wrkspc;
+  final String spaceId;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _RoomScreenState();
@@ -33,15 +33,15 @@ class _RoomScreenState extends ConsumerState<RoomMsgScreen> {
     final firestore = ref.watch(firestoreProvider);
 
     final collectionRef = firestore
-        .collection('workspaces')
-        .doc(widget.wrkspc)
+        .collection('spaces')
+        .doc(widget.spaceId)
         .collection('rooms')
         .doc(widget.room.id)
         .collection('messages');
 
     final messages = ref.watch(messagesProvider(firestore
-        .collection('workspaces')
-        .doc(widget.wrkspc)
+        .collection('spaces')
+        .doc(widget.spaceId)
         .collection('rooms')
         .doc(widget.room.id)
         .collection('messages')
@@ -95,7 +95,7 @@ class _RoomScreenState extends ConsumerState<RoomMsgScreen> {
                               message: message,
                               repliesRef: repliesRef,
                               messageRef: collectionRef,
-                              wrkspcId: widget.wrkspc,
+                              spaceId: widget.spaceId,
                             );
                           },
                         );
@@ -103,7 +103,7 @@ class _RoomScreenState extends ConsumerState<RoomMsgScreen> {
                       messagesRef: collectionRef,
                       repliesRef: repliesRef,
                       message: message,
-                      wrkspcId: widget.wrkspc,
+                      spaceId: widget.spaceId,
                     );
                   },
                 );
@@ -136,7 +136,7 @@ class _RoomScreenState extends ConsumerState<RoomMsgScreen> {
           padding: EdgeInsets.only(right: ten),
           child: GestureDetector(
             onTap: () => context.push(
-              '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspc}/${RoomInfoScreen.id}/${widget.wrkspc}',
+              '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spaceId}/${RoomInfoScreen.id}/${widget.spaceId}',
               extra: widget.room,
             ),
             child: Hero(
@@ -216,7 +216,7 @@ class _RoomScreenState extends ConsumerState<RoomMsgScreen> {
 
                   MessageDB().send(
                     ref: collectionRef,
-                    wrkspcId: widget.wrkspc,
+                    spaceId: widget.spaceId,
                     roomId: widget.room.id!,
                     Message(
                       senderId: senderId!,
