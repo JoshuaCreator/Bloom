@@ -49,7 +49,7 @@ class SettingsScreen extends ConsumerWidget {
                   leading: Icons.account_circle_outlined,
                   onTap: () {
                     context.push(
-                      '${WorkspaceScreen.id}/${SettingsScreen.id}/${AccountScreen.id}',
+                      '${SpaceScreen.id}/${SettingsScreen.id}/${AccountScreen.id}',
                     );
                   },
                 ),
@@ -59,7 +59,7 @@ class SettingsScreen extends ConsumerWidget {
                   leading: Icons.light_mode_outlined,
                   onTap: () {
                     context.push(
-                      '${WorkspaceScreen.id}/${SettingsScreen.id}/${ThemeSelectorScreen.id}',
+                      '${SpaceScreen.id}/${SettingsScreen.id}/${ThemeSelectorScreen.id}',
                     );
                   },
                 ),

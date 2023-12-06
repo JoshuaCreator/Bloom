@@ -6,8 +6,8 @@ import '../../../utils/imports.dart';
 
 class RoomChatsScreen extends ConsumerStatefulWidget {
   static String id = 'room-chats';
-  const RoomChatsScreen({super.key, this.workspace});
-  final Workspace? workspace;
+  const RoomChatsScreen({super.key, this.space});
+  final Space? space;
 
   @override
   ConsumerState<RoomChatsScreen> createState() => _RoomChatsScreenState();
@@ -22,19 +22,19 @@ class _RoomChatsScreenState extends ConsumerState<RoomChatsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final room = ref.watch(wrkspcRoomsProvider(widget.workspace!.id!));
+    final room = ref.watch(wrkspcRoomsProvider(widget.space!.id!));
     final auth = ref.watch(authStateProvider).value;
     final firestore = ref.watch(firestoreProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.workspace?.name ?? ''),
+        title: Text(widget.space?.name ?? ''),
         actions: [
           IconButton(
             onPressed: () {
               context.push(
-                '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${WorkspaceInfoScreen.id}',
-                extra: widget.workspace,
+                '${SpaceScreen.id}/${RoomChatsScreen.id}/${SpaceInfoScreen.id}',
+                extra: widget.space,
               );
             },
             icon: const Icon(Icons.info_outline),
@@ -47,7 +47,7 @@ class _RoomChatsScreenState extends ConsumerState<RoomChatsScreen> {
                 child: Padding(
                   padding: EdgeInsets.all(twenty),
                   child: const Text(
-                    'You have not joined any Rooms in this Workspace yet',
+                    'You have not joined any Rooms in this Space yet',
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -72,7 +72,7 @@ class _RoomChatsScreenState extends ConsumerState<RoomChatsScreen> {
                   final lastMessage = ref.watch(
                     lastMessageProvider(firestore
                         .collection('workspaces')
-                        .doc(widget.workspace?.id)
+                        .doc(widget.space?.id)
                         .collection('rooms')
                         .doc(roomData.id)
                         .collection('messages')
@@ -106,10 +106,10 @@ class _RoomChatsScreenState extends ConsumerState<RoomChatsScreen> {
                       showInfoIcon: true,
                       roomData: roomData,
                       subtitle: subtitle,
-                      wrkspcId: widget.workspace?.id,
+                      spaceId: widget.space?.id,
                       onTap: () {
                         context.push(
-                          '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.workspace!.id}',
+                          '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.space!.id}',
                           extra: roomData,
                         );
                       },

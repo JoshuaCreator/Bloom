@@ -60,7 +60,7 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
                             onInfoIconPressed: widget.reply.isMe!
                                 ? null
                                 : () => context.push(
-                                      '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspcId}/${RoomInfoScreen.id}/${widget.wrkspcId}/${UserScreen.id}/${widget.reply.replySenderId}/tag-from-reply-tile',
+                                      '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspcId}/${RoomInfoScreen.id}/${widget.wrkspcId}/${UserScreen.id}/${widget.reply.replySenderId}',
                                     ),
                           ),
                         ),

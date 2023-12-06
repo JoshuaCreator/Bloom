@@ -1,7 +1,7 @@
 import 'package:basic_board/utils/imports.dart';
 
-//?************** Get All Workspaces ***************//
-final allWorkspacesProvider = StreamProvider((ref) {
+//?************** Get All Spaces ***************//
+final allSpacesProvider = StreamProvider((ref) {
   final firestore = ref.watch(firestoreProvider);
   final collectionRef = firestore.collection('workspaces');
   return collectionRef
@@ -10,8 +10,8 @@ final allWorkspacesProvider = StreamProvider((ref) {
       .map((value) => value.docs);
 });
 
-//?************** Get Workspaces I joined ***************//
-final myWorkspacesProvider = StreamProvider.family((ref, String userId) {
+//?************** Get Spaces I joined ***************//
+final mySpacesProvider = StreamProvider.family((ref, String userId) {
   final firestore = ref.watch(firestoreProvider);
 
   final collectionRef = firestore.collection('workspaces');
@@ -21,15 +21,15 @@ final myWorkspacesProvider = StreamProvider.family((ref, String userId) {
       .map((docs) => docs.docs);
 });
 
-//?*************** Get a particular Workspaces ***************//
-final workspaceProvider = StreamProvider.family((ref, String id) {
+//?*************** Get a particular Spaces ***************//
+final spaceProvider = StreamProvider.family((ref, String id) {
   final firestore = ref.watch(firestoreProvider);
   final collectionRef = firestore.collection('workspaces');
   return collectionRef.doc(id).snapshots().map((doc) => doc.data());
 });
 
-//?*************** Get Individial Workspaces *****************//
-final wrkspcDataProvider = StreamProvider.family((ref, String wrkspcId) {
+//?*************** Get Individial Spaces *****************//
+final spaceDataProvider = StreamProvider.family((ref, String wrkspcId) {
   final firestore = ref.watch(firestoreProvider);
   final userRef = firestore.collection('workspaces');
 

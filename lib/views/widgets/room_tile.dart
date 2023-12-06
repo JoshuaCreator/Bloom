@@ -5,13 +5,13 @@ class RoomTile extends ConsumerWidget {
   const RoomTile({
     super.key,
     this.subtitle,
-    this.wrkspcId,
+    this.spaceId,
     this.trailing,
     required this.roomData,
     this.showInfoIcon = false,
     this.onTap,
   });
-  final String? subtitle, wrkspcId;
+  final String? subtitle, spaceId;
   final Widget? trailing;
   final Room roomData;
   final bool showInfoIcon;
@@ -29,7 +29,7 @@ class RoomTile extends ConsumerWidget {
                 : roomData.image!,
             onInfoIconPressed: showInfoIcon
                 ? () => context.push(
-                      '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${roomData.id}/${RoomInfoScreen.id}/$wrkspcId',
+                      '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${roomData.id}/${RoomInfoScreen.id}/$spaceId',
                       extra: roomData,
                     )
                 : null,

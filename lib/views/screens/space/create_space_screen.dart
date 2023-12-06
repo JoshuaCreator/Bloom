@@ -9,17 +9,17 @@ import 'package:image_picker/image_picker.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
 
-class CreateWorkspaceScreen extends ConsumerStatefulWidget {
-  static String id = 'create-workspace';
-  const CreateWorkspaceScreen({super.key});
+class CreateSpaceScreen extends ConsumerStatefulWidget {
+  static String id = 'create-space';
+  const CreateSpaceScreen({super.key});
 
   @override
-  ConsumerState<CreateWorkspaceScreen> createState() =>
-      _ConsumerCreateWorkspaceScreenState();
+  ConsumerState<CreateSpaceScreen> createState() =>
+      _ConsumerCreateSpaceScreenState();
 }
 
-class _ConsumerCreateWorkspaceScreenState
-    extends ConsumerState<CreateWorkspaceScreen> {
+class _ConsumerCreateSpaceScreenState
+    extends ConsumerState<CreateSpaceScreen> {
   bool value = false;
 
   String privacyText = 'Public (Anyone can join)';
@@ -41,7 +41,7 @@ class _ConsumerCreateWorkspaceScreenState
     final user = ref.watch(authStateProvider).value;
     final auth = ref.watch(authStateProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Workspace")),
+      appBar: AppBar(title: const Text("Create Space")),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -135,7 +135,7 @@ class _ConsumerCreateWorkspaceScreenState
                               width: size * 2,
                               height: size * 2,
                               decoration: BoxDecoration(
-                                color: ColourConfig.dull,
+                                color: ColourConfig.grey,
                                 borderRadius: defaultBorderRadius,
                                 image: image == null
                                     ? null
@@ -200,7 +200,7 @@ class _ConsumerCreateWorkspaceScreenState
                                 msg: 'The name field is required');
                             return;
                           }
-                          final Workspace wrkspc = Workspace(
+                          final Space wrkspc = Space(
                             id: 'id',
                             name: _nameController.text.trim(),
                             desc: _descController.text.trim(),
@@ -209,7 +209,7 @@ class _ConsumerCreateWorkspaceScreenState
                             createdAt: DateTime.now(),
                             private: value,
                           );
-                          WorkspaceDB().create(
+                          SpaceDB().create(
                             context,
                             wrkspc: wrkspc,
                             userId: user.uid,

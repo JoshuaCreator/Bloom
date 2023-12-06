@@ -10,24 +10,24 @@ import 'package:basic_board/views/widgets/app_text_field.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// This File is currently not in use. Until further notice
-/// 
-/// 
-/// 
-/// 
+///
+///
+///
+///
 
-class WorkspaceSettingsScreen extends ConsumerStatefulWidget {
-  static String id = 'workspace-settings';
-  const WorkspaceSettingsScreen({super.key, required this.wrkspc});
-  final Workspace wrkspc;
+class SpaceSettingsScreen extends ConsumerStatefulWidget {
+  static String id = 'space-settings';
+  const SpaceSettingsScreen({super.key, required this.wrkspc});
+  final Space wrkspc;
 
   static GlobalKey<FormState> formKey = GlobalKey<FormState>();
   @override
-  ConsumerState<WorkspaceSettingsScreen> createState() =>
-      _ConsumerWorkspaceSettingsScreenState();
+  ConsumerState<SpaceSettingsScreen> createState() =>
+      _ConsumerSpaceSettingsScreenState();
 }
 
-class _ConsumerWorkspaceSettingsScreenState
-    extends ConsumerState<WorkspaceSettingsScreen> {
+class _ConsumerSpaceSettingsScreenState
+    extends ConsumerState<SpaceSettingsScreen> {
   bool canPop = false;
 
   String? image;
@@ -36,16 +36,16 @@ class _ConsumerWorkspaceSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final workspace = ref.watch(workspaceProvider(widget.wrkspc.id!));
+    final space = ref.watch(spaceDataProvider(widget.wrkspc.id!));
     final nameController =
-        TextEditingController(text: workspace.value?['name']);
+        TextEditingController(text: space.value?['name']);
     final descController =
-        TextEditingController(text: workspace.value?['desc']);
+        TextEditingController(text: space.value?['desc']);
     return WillPopScope(
       onWillPop: () async {
         /// Prompts the user to save their changes only if they made any
-        if (nameController.text == workspace.value?['name'] ||
-            descController.text == workspace.value?['desc']) {
+        if (nameController.text == space.value?['name'] ||
+            descController.text == space.value?['desc']) {
           canPop = true;
           return canPop;
         }
@@ -81,7 +81,7 @@ class _ConsumerWorkspaceSettingsScreenState
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Workspace Settings'),
+          title: const Text('Space Settings'),
           actions: [
             AppTextButton(
               onPressed: () async {
@@ -92,8 +92,8 @@ class _ConsumerWorkspaceSettingsScreenState
                   }
                   return;
                 }
-                if (nameController.text == workspace.value?['name'] ||
-                    descController.text == workspace.value?['desc']) {
+                if (nameController.text == space.value?['name'] ||
+                    descController.text == space.value?['desc']) {
                   if (context.mounted) {
                     showSnackBar(context, msg: 'No changes were made');
                   }
@@ -188,12 +188,12 @@ class _ConsumerWorkspaceSettingsScreenState
                     width: size * 5,
                     height: size * 5,
                     decoration: BoxDecoration(
-                      color: ColourConfig.dull,
+                      color: ColourConfig.grey,
                       borderRadius: BorderRadius.circular(size),
                       image: image == null
                           ? DecorationImage(
                               image: CachedNetworkImageProvider(
-                                  workspace.value?['image']),
+                                  space.value?['image']),
                               fit: BoxFit.cover,
                             )
                           : DecorationImage(
@@ -207,7 +207,7 @@ class _ConsumerWorkspaceSettingsScreenState
             ),
             height10,
             Form(
-              key: WorkspaceSettingsScreen.formKey,
+              key: SpaceSettingsScreen.formKey,
               child: Column(
                 children: [
                   AppTextField(
@@ -245,7 +245,7 @@ class _ConsumerWorkspaceSettingsScreenState
     required TextEditingController descController,
   }) async {
     showLoadingIndicator(context, label: 'Saving...');
-    await WorkspaceDB().edit(
+    await SpaceDB().edit(
       context,
       wrkspcId: widget.wrkspc.id!,
       name: nameController.text.trim(),

@@ -55,54 +55,58 @@ class _RoomScreenState extends ConsumerState<RoomMsgScreen> {
       appBar: buildAppBar(context),
       body: messages.when(
         data: (data) {
-          return ListView.builder(
-            padding: EdgeInsets.only(bottom: ten),
-            reverse: true,
-            itemCount: data.length,
-            itemBuilder: (context, index) {
-              final user = ref.watch(
-                  anyUserProvider(messages.value?[index]['senderId'] ?? ''));
-              bool isMe = user.value?['id'] == auth?.uid;
+          return data.isEmpty
+              ? Center(
+                  child: Text('This is the begining of ${widget.room.name}'),
+                )
+              : ListView.builder(
+                  padding: EdgeInsets.only(bottom: ten),
+                  reverse: true,
+                  itemCount: data.length,
+                  itemBuilder: (context, index) {
+                    final user = ref.watch(anyUserProvider(
+                        messages.value?[index]['senderId'] ?? ''));
+                    bool isMe = user.value?['id'] == auth?.uid;
 
-              final pending = data[index].metadata.hasPendingWrites;
-              final Message message = Message(
-                id: data[index].id,
-                senderId: data[index]['senderId'] ?? 'random_string',
-                me: isMe,
-                message: data[index]['message'] ?? '',
-                image: data[index]['image'] ?? '',
-                time: (data[index]['time']).toDate(),
-                pending: pending,
-                likes: data[index]['likes'],
-              );
-              final repliesRef =
-                  collectionRef.doc(message.id).collection('replies');
-              return MessageTile(
-                onTap: () {
-                  showModalBottomSheet(
-                    enableDrag: false,
-                    context: context,
-                    isScrollControlled: true,
-                    useSafeArea: true,
-                    useRootNavigator: true,
-                    builder: (context) {
-                      return MessageDetailsScreen(
-                        room: widget.room,
-                        message: message,
-                        repliesRef: repliesRef,
-                        messageRef: collectionRef,
-                        wrkspcId: widget.wrkspc,
-                      );
-                    },
-                  );
-                },
-                messagesRef: collectionRef,
-                repliesRef: repliesRef,
-                message: message,
-                wrkspcId: widget.wrkspc,
-              );
-            },
-          );
+                    final pending = data[index].metadata.hasPendingWrites;
+                    final Message message = Message(
+                      id: data[index].id,
+                      senderId: data[index]['senderId'] ?? 'random_string',
+                      me: isMe,
+                      message: data[index]['message'] ?? '',
+                      image: data[index]['image'] ?? '',
+                      time: (data[index]['time']).toDate(),
+                      pending: pending,
+                      likes: data[index]['likes'],
+                    );
+                    final repliesRef =
+                        collectionRef.doc(message.id).collection('replies');
+                    return MessageTile(
+                      onTap: () {
+                        showModalBottomSheet(
+                          enableDrag: false,
+                          context: context,
+                          isScrollControlled: true,
+                          useSafeArea: true,
+                          useRootNavigator: true,
+                          builder: (context) {
+                            return MessageDetailsScreen(
+                              room: widget.room,
+                              message: message,
+                              repliesRef: repliesRef,
+                              messageRef: collectionRef,
+                              wrkspcId: widget.wrkspc,
+                            );
+                          },
+                        );
+                      },
+                      messagesRef: collectionRef,
+                      repliesRef: repliesRef,
+                      message: message,
+                      wrkspcId: widget.wrkspc,
+                    );
+                  },
+                );
         },
         error: (error, stackTrace) {
           return const Center(child: Text('Oops! An error occurred'));
@@ -132,7 +136,7 @@ class _RoomScreenState extends ConsumerState<RoomMsgScreen> {
           padding: EdgeInsets.only(right: ten),
           child: GestureDetector(
             onTap: () => context.push(
-              '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspc}/${RoomInfoScreen.id}/${widget.wrkspc}',
+              '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspc}/${RoomInfoScreen.id}/${widget.wrkspc}',
               extra: widget.room,
             ),
             child: Hero(

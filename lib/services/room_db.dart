@@ -77,10 +77,8 @@ class RoomDB {
         const Duration(seconds: 20),
         onTimeout: () {
           context.pop();
-          showSnackBar(
-            context,
-            msg: 'The connection timed out',
-          );
+          showSnackBar(context, msg: 'The connection timed out');
+          return;
         },
       );
       return true;
@@ -151,6 +149,7 @@ class RoomDB {
               msg:
                   'The connection timed out. Check your internet connection and try again',
             );
+            return;
           },
         );
       });
@@ -167,7 +166,7 @@ class RoomDB {
   Future leave(
     BuildContext context, {
     required String roomId,
-    required String wrkspcId,
+    required String spaceId,
     required String userId,
     required String roomName,
   }) async {
@@ -184,7 +183,7 @@ class RoomDB {
       if (context.mounted) showLoadingIndicator(context, label: 'Exiting...');
       _firestore
           .collection('workspaces')
-          .doc(wrkspcId)
+          .doc(spaceId)
           .collection('rooms')
           .doc(roomId)
           .collection('participants')
@@ -193,12 +192,13 @@ class RoomDB {
           .then((value) {
         _firestore
             .collection('workspaces')
-            .doc(wrkspcId)
+            .doc(spaceId)
             .collection('rooms')
             .doc(roomId)
             .update({
           'participants': FieldValue.arrayRemove([userId])
         }).then((value) {
+          context.pop();
           context.pop();
           context.pop();
           showSnackBar(context, msg: "You left $roomName");
@@ -214,6 +214,7 @@ class RoomDB {
               msg:
                   'The connection timed out. Check your internet connection and try again',
             );
+            return;
           },
         );
       });
@@ -224,7 +225,7 @@ class RoomDB {
 
   Future edit(
     BuildContext context, {
-    required String wrkspcId,
+    required String spaceId,
     required String roomId,
     String? name,
     String? desc,
@@ -242,7 +243,7 @@ class RoomDB {
       if (context.mounted) showLoadingIndicator(context);
       _firestore
           .collection('workspaces')
-          .doc(wrkspcId)
+          .doc(spaceId)
           .collection('rooms')
           .doc(roomId)
           .update({'name': name, 'desc': desc}).then((value) {
@@ -314,14 +315,12 @@ class RoomDB {
             msg:
                 'The connection timed out. Check your internet connection and try again',
           );
+          return;
         },
       );
     } catch (e) {
       if (context.mounted) {
-        showSnackBar(
-          context,
-          msg: "An error occurred: $e",
-        );
+        showSnackBar(context, msg: "An error occurred: $e");
       }
     }
   }

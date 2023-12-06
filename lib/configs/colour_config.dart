@@ -29,11 +29,13 @@ class ColourConfig {
 
   static Color go = Colors.green;
 
-  static Color dull = Colors.grey;
+  static Color grey = Colors.grey;
 
-  static Color holy = Colors.white;
+  static Color white = Colors.white;
 
-  static Color evil = Colors.black;
+  static Color black = Colors.black;
+
+  static Color fadedBlack = Colors.black87;
 
   static Color empty = Colors.transparent;
 }

@@ -11,7 +11,7 @@ class AuthChecker extends ConsumerWidget {
     return authState.when(
       data: (data) {
         if (data != null && data.emailVerified) {
-          return const WorkspaceScreen();
+          return const SpaceScreen();
         } else if (data != null && !data.emailVerified) {
           return const VerifyEmailScreen();
         }

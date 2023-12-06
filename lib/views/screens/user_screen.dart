@@ -6,8 +6,8 @@ import 'package:basic_board/views/widgets/show_more_text.dart';
 
 class UserScreen extends ConsumerWidget {
   static String id = 'user-screen';
-  const UserScreen({super.key, required this.userId, required this.tag});
-  final String userId, tag;
+  const UserScreen({super.key, required this.userId});
+  final String userId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,10 +23,10 @@ class UserScreen extends ConsumerWidget {
               builder: (context) => ImageViewer(image: userImg),
             ),
             child: Hero(
-              tag: tag,
+              tag: 'user-tag',
               child: AppCircleAvatar(
                 image: CachedNetworkImageProvider(userImg),
-                userId: user.value?['id'] ?? '',
+                userId: user.value?['id'] ?? 'user-tag',
               ),
             ),
           ),

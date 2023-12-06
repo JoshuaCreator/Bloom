@@ -1,14 +1,10 @@
 import 'package:basic_board/services/auth.dart';
-import 'package:basic_board/views/dialogues/snack_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:basic_board/utils/imports.dart';
+import 'package:basic_board/views/widgets/app_button.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../configs/consts.dart';
 import '../../services/workspace_db.dart';
-import '../../services/room_db.dart';
-import '../widgets/app_text_buttons.dart';
 import 'loading_indicator_build.dart';
 
 linkAlertDialogue(
@@ -117,30 +113,26 @@ leaveRoomDialogue(
     context: context,
     builder: (context) {
       return AlertDialog(
-        content: Text('Leave $roomName?'),
+        title: const Text('Leave this Room?'),
         actionsAlignment: MainAxisAlignment.spaceBetween,
-        shape: RoundedRectangleBorder(
-          borderRadius: defaultBorderRadius,
-        ),
-        insetPadding: EdgeInsets.all(ten),
+        actionsOverflowAlignment: OverflowBarAlignment.center,
         actions: [
+          AppButton(
+            label: 'Cancel',
+            onTap: () {
+              context.pop();
+            },
+          ),
           AppTextButton(
             label: 'Leave',
             onPressed: () {
-              //? Leave Room
               RoomDB().leave(
                 context,
-                wrkspcId: wrkspcId,
+                spaceId: wrkspcId,
                 roomId: roomId,
                 userId: userId,
                 roomName: roomName,
               );
-            },
-          ),
-          AppTextButton(
-            label: 'Cancel',
-            onPressed: () {
-              context.pop();
             },
           ),
         ],
@@ -222,7 +214,8 @@ deleteAccountDialogue(BuildContext context) {
   );
 }
 
-deleteWorkspaceDialogue(
+// The "deleteSpaceDialogue" is not currently in use
+deleteSpaceDialogue(
   BuildContext context, {
   required String wrkspcName,
   required String wrkspcId,
@@ -241,7 +234,7 @@ deleteWorkspaceDialogue(
           AppTextButton(
             label: 'Delete',
             onPressed: () {
-              WorkspaceDB().delete(
+              SpaceDB().delete(
                 context,
                 wrkspcName: wrkspcName,
                 wrkspcId: wrkspcId,
@@ -252,6 +245,45 @@ deleteWorkspaceDialogue(
             label: 'Cancel',
             onPressed: () {
               context.pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+leaveSpaceDialogue(
+  BuildContext context, {
+  required Space space,
+  required String spaceName,
+  required String userId,
+}) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(
+          'Leave $spaceName?',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actionsOverflowAlignment: OverflowBarAlignment.center,
+        insetPadding: EdgeInsets.all(ten),
+        actions: [
+          AppButton(
+            label: 'Cancel',
+            onTap: () {
+              context.pop();
+            },
+          ),
+          AppTextButton(
+            label: 'Leave',
+            onPressed: () {
+              SpaceDB()
+                  .exit(context, space: space, userId: userId)
+                  .then((value) => context.go(SpaceScreen.id));
             },
           ),
         ],

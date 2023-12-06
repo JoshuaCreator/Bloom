@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:basic_board/views/screens/room/room_chats_screen.dart';
-import 'package:basic_board/views/screens/workspace/workspace_screen.dart';
+import 'package:basic_board/views/screens/space/space_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -54,7 +54,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   child: const Text('Verified'),
                   onPressed: () {
                     if (auth.currentUser!.emailVerified) {
-                      context.go('${WorkspaceScreen.id}/${RoomChatsScreen.id}');
+                      context.go('${SpaceScreen.id}/${RoomChatsScreen.id}');
                     } else {
                       return;
                     }

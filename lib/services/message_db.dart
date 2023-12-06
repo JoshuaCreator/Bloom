@@ -85,10 +85,7 @@ class MessageDB {
         },
       ).catchError((e) {
         context.pop();
-        showSnackBar(
-          context,
-          msg: e,
-        );
+        showSnackBar(context, msg: e);
       });
       return true;
     } catch (e) {
@@ -99,7 +96,7 @@ class MessageDB {
   Future edit(
     BuildContext context, {
     required String roomId,
-    required String wrkspcId,
+    required String spaceId,
     required String messageId,
     required String newMessage,
   }) async {
@@ -107,7 +104,7 @@ class MessageDB {
     try {
       _firestore
           .collection('workspaces')
-          .doc(wrkspcId)
+          .doc(spaceId)
           .collection('rooms')
           .doc(roomId)
           .collection('messages')
@@ -123,17 +120,12 @@ class MessageDB {
         );
       }).catchError((e) {
         context.pop();
-        showSnackBar(
-          context,
-          msg: 'Oops! Unable to message.',
-        );
+        showSnackBar(context, msg: 'Oops! Unable to message.');
       }).timeout(
         const Duration(seconds: 20),
         onTimeout: () {
-          showSnackBar(
-            context,
-            msg: 'Your connection timed out',
-          );
+          showSnackBar(context, msg: 'Your connection timed out');
+          return;
         },
       );
     } catch (e) {
@@ -171,6 +163,7 @@ class MessageDB {
             msg:
                 'The connection timed out. Check your internet connection and try again',
           );
+          return;
         },
       );
       return true;

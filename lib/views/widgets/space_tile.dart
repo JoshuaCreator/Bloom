@@ -1,7 +1,7 @@
 import '../../utils/imports.dart';
 
-class WorkspaceTile extends ConsumerWidget {
-  const WorkspaceTile({
+class SpaceTile extends ConsumerWidget {
+  const SpaceTile({
     super.key,
     required this.id,
     required this.title,
@@ -20,12 +20,10 @@ class WorkspaceTile extends ConsumerWidget {
         onTap: onTap,
         borderRadius: defaultBorderRadius,
         child: Container(
-          padding: EdgeInsets.all(ten),
-          decoration: BoxDecoration(
-            borderRadius: defaultBorderRadius,
-            border: Border.all(color: Colors.grey),
-          ),
+          padding: EdgeInsets.all(five),
+          decoration: BoxDecoration(borderRadius: defaultBorderRadius),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 padding: EdgeInsets.all(thirty),
@@ -38,20 +36,29 @@ class WorkspaceTile extends ConsumerWidget {
                 ),
               ),
               SizedBox(width: ten),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: twenty - 2, color: Colors.grey),
-                  ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(color: Colors.grey.withOpacity(0.4)),
-                  ),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: twenty - 2,
+                        color: ColourConfig.grey,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: ColourConfig.grey.withOpacity(0.4),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

@@ -6,12 +6,12 @@ import 'package:basic_board/utils/imports.dart';
 /// 
 /// 
 
-final workspaceParticipantsProvider =
-    StreamProvider.family((ref, String workspaceId) {
+final spaceParticipantsProvider =
+    StreamProvider.family((ref, String spaceId) {
   final firestore = ref.watch(firestoreProvider);
-  final workspaceRef = firestore
+  final spaceRef = firestore
       .collection('workspaces')
-      .doc(workspaceId)
+      .doc(spaceId)
       .collection('participants');
-  return workspaceRef.snapshots().map((snapshot) => snapshot.docs);
+  return spaceRef.snapshots().map((snapshot) => snapshot.docs);
 });

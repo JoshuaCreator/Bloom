@@ -55,7 +55,7 @@ class _MessageTileState extends ConsumerState<MessageTile> {
                         onInfoIconPressed: widget.message.me!
                             ? null
                             : () => context.push(
-                                  '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspcId}/${RoomInfoScreen.id}/${widget.wrkspcId}/${UserScreen.id}/${widget.message.senderId}/tag-from-msg-tile',
+                                  '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspcId}/${RoomInfoScreen.id}/${widget.wrkspcId}/${UserScreen.id}/${widget.message.senderId}',
                                 ),
                       ),
                     ),

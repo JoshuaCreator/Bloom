@@ -14,10 +14,9 @@ import '../../widgets/user_tile.dart';
 
 class RoomInfoScreen extends ConsumerStatefulWidget {
   static String id = 'room-info';
-  const RoomInfoScreen(
-      {super.key, required this.room, required this.wrkspaceId});
+  const RoomInfoScreen({super.key, required this.room, required this.spaceId});
   final Room room;
-  final String wrkspaceId;
+  final String spaceId;
 
   @override
   ConsumerState<RoomInfoScreen> createState() => _ConsumerRoomInfoScreenState();
@@ -33,12 +32,12 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
     final creator = ref.watch(anyUserProvider(widget.room.creatorId));
     final room = ref.watch(roomProvider(firestore
         .collection('workspaces')
-        .doc(widget.wrkspaceId)
+        .doc(widget.spaceId)
         .collection('rooms')
         .doc(widget.room.id)));
     final participants = ref.watch(participantsProvider(firestore
         .collection('workspaces')
-        .doc(widget.wrkspaceId)
+        .doc(widget.spaceId)
         .collection('rooms')
         .doc(widget.room.id)
         .collection('participants')));
@@ -46,17 +45,16 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
     final aboutController = TextEditingController(text: room.value?['desc']);
     return Scaffold(
       appBar: AppBar(
-        actions: auth.uid == widget.room.creatorId
-            ? [
-                buildMenu(
-                  context,
-                  nameController: nameController,
-                  aboutController: aboutController,
-                  firestore: firestore,
-                  userId: auth.uid,
-                ),
-              ]
-            : null,
+        actions: [
+          buildMenu(
+            context,
+            nameController: nameController,
+            aboutController: aboutController,
+            firestore: firestore,
+            userId: auth.uid,
+            isCreator: auth.uid == room.value?['creatorId'],
+          ),
+        ],
       ),
       body: participants.when(
         data: (data) {
@@ -135,11 +133,11 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                             ? '${anyUser?['name']} (You)'
                             : '${anyUser?['name']}',
                         image: anyUser?['image'] ?? '',
-                        tag: anyUser?['id'],
+                        tag: me ? '' : 'user-tag',
                         onTap: me
                             ? null
                             : () => context.push(
-                                  '${WorkspaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.wrkspaceId}/${RoomInfoScreen.id}/${widget.wrkspaceId}/${UserScreen.id}/${data[index]['id']}/tag-from-room-info-screen',
+                                  '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spaceId}/${RoomInfoScreen.id}/${widget.spaceId}/${UserScreen.id}/${data[index]['id']}',
                                 ),
                       );
                     },
@@ -165,148 +163,163 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
     required TextEditingController aboutController,
     required FirebaseFirestore firestore,
     required String userId,
+    required bool isCreator,
   }) {
-    return AppPopupMenu(items: [
-      AppPopupMenu.buildPopupMenuItem(
-        context,
-        label: 'Change display picture',
-        onTap: () async {
-          bool isConnected = await isOnline();
-          if (!isConnected) {
-            if (context.mounted) {
-              showSnackBar(context, msg: "You're offline");
-            }
-            return;
-          }
-          if (context.mounted) {
-            imagePickerDialogue(
-              context,
-              onStorageTapped: () async {
-                String imagePath = await imageHelper.pickImage(
-                  context,
-                  source: ImageSource.gallery,
-                );
-                if (context.mounted) {
-                  String croppedImg =
-                      await imageHelper.cropImage(context, path: imagePath);
-                  if (context.mounted) {
-                    context.pop();
-                    context.pop();
-                    showLoadingIndicator(context, label: 'Saving');
+    return AppPopupMenu(
+      items: isCreator
+          ? [
+              AppPopupMenu.buildPopupMenuItem(
+                context,
+                label: 'Change display picture',
+                onTap: () async {
+                  bool isConnected = await isOnline();
+                  if (!isConnected) {
+                    if (context.mounted) {
+                      showSnackBar(context, msg: "You're offline");
+                    }
+                    return;
                   }
                   if (context.mounted) {
-                    setState(() {
-                      fileImage = croppedImg;
-                    });
-                    await imageHelper.uploadImage(
+                    imagePickerDialogue(
                       context,
-                      imagePath: croppedImg,
-                      docRef: firestore
-                          .collection('workspaces')
-                          .doc(widget.wrkspaceId)
-                          .collection('rooms')
-                          .doc(widget.room.id),
-                      storagePath: 'rooms/${widget.room.name}.png',
+                      onStorageTapped: () async {
+                        String imagePath = await imageHelper.pickImage(
+                          context,
+                          source: ImageSource.gallery,
+                        );
+                        if (context.mounted) {
+                          String croppedImg = await imageHelper
+                              .cropImage(context, path: imagePath);
+                          if (context.mounted) {
+                            context.pop();
+                            context.pop();
+                            showLoadingIndicator(context, label: 'Saving');
+                          }
+                          if (context.mounted) {
+                            setState(() {
+                              fileImage = croppedImg;
+                            });
+                            await imageHelper.uploadImage(
+                              context,
+                              imagePath: croppedImg,
+                              docRef: firestore
+                                  .collection('workspaces')
+                                  .doc(widget.spaceId)
+                                  .collection('rooms')
+                                  .doc(widget.room.id),
+                              storagePath: 'rooms/${widget.room.name}.png',
+                            );
+                            if (context.mounted) context.pop();
+                          }
+                        }
+                      },
+                      onCameraTapped: () async {
+                        String imagePath = await imageHelper.pickImage(
+                          context,
+                          source: ImageSource.camera,
+                        );
+                        if (context.mounted) {
+                          String croppedImg = await imageHelper
+                              .cropImage(context, path: imagePath);
+                          if (context.mounted) {
+                            setState(() {
+                              fileImage = croppedImg;
+                            });
+                            await imageHelper.uploadImage(
+                              context,
+                              imagePath: croppedImg,
+                              docRef: firestore
+                                  .collection('workspaces')
+                                  .doc(widget.spaceId)
+                                  .collection('rooms')
+                                  .doc(widget.room.id),
+                              storagePath: 'rooms/${widget.room.name}.png',
+                            );
+                          }
+                        }
+                      },
                     );
-                    if (context.mounted) context.pop();
                   }
-                }
-              },
-              onCameraTapped: () async {
-                String imagePath = await imageHelper.pickImage(
+                },
+              ),
+              AppPopupMenu.buildPopupMenuItem(
+                context,
+                label: 'Change Room info',
+                onTap: () => infoEditDialogue(
                   context,
-                  source: ImageSource.camera,
-                );
-                if (context.mounted) {
-                  String croppedImg =
-                      await imageHelper.cropImage(context, path: imagePath);
-                  if (context.mounted) {
-                    setState(() {
-                      fileImage = croppedImg;
-                    });
-                    await imageHelper.uploadImage(
+                  nameController: nameController,
+                  aboutController: aboutController,
+                  onSaved: () {
+                    if (nameController.text.trim().isEmpty) return;
+                    RoomDB().edit(
                       context,
-                      imagePath: croppedImg,
-                      docRef: firestore
-                          .collection('workspaces')
-                          .doc(widget.wrkspaceId)
-                          .collection('rooms')
-                          .doc(widget.room.id),
-                      storagePath: 'rooms/${widget.room.name}.png',
+                      spaceId: widget.spaceId,
+                      roomId: widget.room.id!,
+                      name: nameController.text.trim(),
+                      desc: aboutController.text.trim(),
                     );
-                  }
-                }
-              },
-            );
-          }
-        },
-      ),
-      AppPopupMenu.buildPopupMenuItem(
-        context,
-        label: 'Change Room info',
-        onTap: () => infoEditDialogue(
-          context,
-          nameController: nameController,
-          aboutController: aboutController,
-          onSaved: () {
-            if (nameController.text.trim().isEmpty) return;
-            RoomDB().edit(
-              context,
-              wrkspcId: widget.wrkspaceId,
-              roomId: widget.room.id!,
-              name: nameController.text.trim(),
-              desc: aboutController.text.trim(),
-            );
-          },
-        ),
-      ),
-      widget.room.participants.contains(userId)
-          ? AppPopupMenu.buildPopupMenuItem(
-              context,
-              label: 'Leave Room',
-              onTap: () {
-                //? Leave Room
-                leaveRoomDialogue(
-                  context,
-                  wrkspcId: widget.wrkspaceId,
-                  roomName: widget.room.name,
-                  userId: userId,
-                  roomId: widget.room.id!,
-                );
-              },
-            )
-          : AppPopupMenu.buildPopupMenuItem(
-              context,
-              label: 'Join Room',
-              onTap: () {
-                //? Join Room
-                RoomDB().join(
-                  context,
-                  wrkspcId: widget.wrkspaceId,
-                  roomId: widget.room.id!,
-                  userId: userId,
-                  roomName: widget.room.name,
-                );
-              },
-            ),
-      widget.room.creatorId == userId
-          ? AppPopupMenu.buildPopupMenuItem(
-              context,
-              label: 'Delete Room',
-              onTap: () {
-                deleteRoomDialogue(
-                  context,
-                  roomId: widget.room.id!,
-                  roomName: widget.room.name,
-                  wrkspcId: widget.wrkspaceId,
-                );
-              },
-            )
-          : AppPopupMenu.buildPopupMenuItem(
-              context,
-              label: '',
-              onTap: () {},
-            ),
-    ]);
+                  },
+                ),
+              ),
+              widget.room.participants.contains(userId)
+                  ? AppPopupMenu.buildPopupMenuItem(
+                      context,
+                      label: 'Leave Room',
+                      onTap: () {
+                        //? Leave Room
+                        leaveRoomDialogue(
+                          context,
+                          wrkspcId: widget.spaceId,
+                          roomName: widget.room.name,
+                          userId: userId,
+                          roomId: widget.room.id!,
+                        );
+                      },
+                    )
+                  : AppPopupMenu.buildPopupMenuItem(
+                      context,
+                      label: 'Join Room',
+                      onTap: () {
+                        //? Join Room
+                        RoomDB().join(
+                          context,
+                          wrkspcId: widget.spaceId,
+                          roomId: widget.room.id!,
+                          userId: userId,
+                          roomName: widget.room.name,
+                        );
+                      },
+                    ),
+            ]
+          : [
+              widget.room.participants.contains(userId)
+                  ? AppPopupMenu.buildPopupMenuItem(
+                      context,
+                      label: 'Leave Room',
+                      onTap: () {
+                        leaveRoomDialogue(
+                          context,
+                          wrkspcId: widget.spaceId,
+                          roomName: widget.room.name,
+                          userId: userId,
+                          roomId: widget.room.id!,
+                        );
+                      },
+                    )
+                  : AppPopupMenu.buildPopupMenuItem(
+                      context,
+                      label: 'Join Room',
+                      onTap: () {
+                        RoomDB().join(
+                          context,
+                          wrkspcId: widget.spaceId,
+                          roomId: widget.room.id!,
+                          userId: userId,
+                          roomName: widget.room.name,
+                        );
+                      },
+                    ),
+            ],
+    );
   }
 }

@@ -6,20 +6,20 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 import '../utils/imports.dart';
 
-class WorkspaceDB {
+class SpaceDB {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  late CollectionReference _workspaceRef;
+  late CollectionReference _spaceRef;
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseStorage storageRef = FirebaseStorage.instance;
   final ImageHelper imageHelper = ImageHelper();
 
   Future<void> create(
     BuildContext context, {
-    required Workspace wrkspc,
+    required Space wrkspc,
     required String userId,
     required String? imagePath,
   }) async {
-    _workspaceRef = _firestore.collection('workspaces');
+    _spaceRef = _firestore.collection('workspaces');
 
     bool isConnected = await isOnline();
     if (!isConnected) {
@@ -32,21 +32,20 @@ class WorkspaceDB {
 
     try {
       if (context.mounted) showLoadingIndicator(context, label: 'Creating...');
-      await _workspaceRef.add({
+      await _spaceRef.add({
         'name': wrkspc.name,
         'desc': wrkspc.desc,
         'image': imagePath,
-        // 'participants': FieldValue.arrayUnion([wrkspc.participants]),
         'creatorId': wrkspc.creatorId,
         'createdAt': wrkspc.createdAt,
         'private': wrkspc.private,
       }).then((doc) async {
         final String path = 'workspaces/${doc.id}.png';
-        _workspaceRef.doc(doc.id).update({
+        _spaceRef.doc(doc.id).update({
           'id': doc.id,
           'participants': FieldValue.arrayUnion([userId]),
         }).then((_) {
-          _workspaceRef
+          _spaceRef
               .doc(doc.id)
               .collection('participants')
               .doc(userId)
@@ -62,11 +61,11 @@ class WorkspaceDB {
                 .uploadImage(
                   context,
                   imagePath: imagePath,
-                  docRef: _workspaceRef.doc(doc.id),
+                  docRef: _spaceRef.doc(doc.id),
                   storagePath: path,
                 )
                 .then((downloadUrl) =>
-                    _workspaceRef.doc(doc.id).update({'image': downloadUrl}));
+                    _spaceRef.doc(doc.id).update({'image': downloadUrl}));
       }).catchError((e) {
         context.pop();
         showSnackBar(context, msg: 'An error occurred: $e');
@@ -84,30 +83,64 @@ class WorkspaceDB {
 
   Future join(
     BuildContext context, {
-    required Workspace workspace,
+    required Space space,
+
+    /// The required [userId] refers to the currently signed in user
     required String userId,
   }) async {
     final isConnected = await isOnline();
     if (!isConnected) {
       if (context.mounted) {
-        showSnackBar(context, msg: "You joined ${workspace.name}");
+        showSnackBar(context, msg: "You're offline'");
       }
       return;
     }
-    _workspaceRef = _firestore.collection('workspaces');
+    _spaceRef = _firestore.collection('workspaces');
     try {
       if (context.mounted) showLoadingIndicator(context, label: 'Joining...');
-      _workspaceRef.doc(workspace.id).update({
+      _spaceRef.doc(space.id).update({
         'participants': FieldValue.arrayUnion([userId])
       });
-      _workspaceRef
-          .doc(workspace.id)
+      _spaceRef
+          .doc(space.id)
           .collection('participants')
           .doc(userId)
           .update({'id': userId, 'joined': DateTime.now()});
       if (context.mounted) {
         context.pop();
-        showSnackBar(context, msg: 'You joined ${workspace.name}');
+        showSnackBar(context, msg: 'You joined ${space.name}');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showSnackBar(context, msg: 'An error occurred: $e');
+      }
+    }
+  }
+
+  Future exit(
+    BuildContext context, {
+    required Space space,
+
+    /// The required [userId] refers to the currently signed in user
+    required String userId,
+  }) async {
+    final isConnected = await isOnline();
+    if (!isConnected) {
+      if (context.mounted) {
+        showSnackBar(context, msg: "You're offline");
+      }
+      return;
+    }
+    _spaceRef = _firestore.collection('workspaces');
+    try {
+      if (context.mounted) showLoadingIndicator(context, label: 'Exiting...');
+      _spaceRef.doc(space.id).update({
+        'participants': FieldValue.arrayRemove([userId])
+      });
+      _spaceRef.doc(space.id).collection('participants').doc(userId).delete();
+      if (context.mounted) {
+        context.pop();
+        showSnackBar(context, msg: 'You left ${space.name}');
       }
     } catch (e) {
       if (context.mounted) {
@@ -140,13 +173,13 @@ class WorkspaceDB {
           .update({'name': name, 'desc': desc}).then((value) {
         context.pop();
         context.pop();
-        showSnackBar(context, msg: 'Workspace info updated successfully');
+        showSnackBar(context, msg: 'Space info updated successfully');
       }).catchError((e) {
         context.pop();
         context.pop();
         showSnackBar(
           context,
-          msg: 'Oops! Unable to update Workspace info. \n Try again',
+          msg: 'Unable to update Space info. \n Try again',
         );
       });
     } catch (e) {
@@ -172,7 +205,7 @@ class WorkspaceDB {
     try {
       if (context.mounted) showLoadingIndicator(context, label: 'Deleting...');
       _firestore.collection('workspaces').doc(wrkspcId).delete().then((value) {
-        context.go(WorkspaceScreen.id);
+        context.go(SpaceScreen.id);
         showSnackBar(
           context,
           msg: "$wrkspcName deleted",
@@ -193,14 +226,12 @@ class WorkspaceDB {
             msg:
                 'The connection timed out. Check your internet connection and try again',
           );
+          return;
         },
       );
     } catch (e) {
       if (context.mounted) {
-        showSnackBar(
-          context,
-          msg: "An error occurred: $e",
-        );
+        showSnackBar(context, msg: "An error occurred: $e");
       }
     }
   }

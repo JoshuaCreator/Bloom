@@ -1,6 +1,9 @@
+import 'package:basic_board/providers/workspace_providers.dart';
 import 'package:basic_board/utils/imports.dart';
-import 'package:basic_board/views/widgets/workspace_tile.dart';
-import 'package:intl/intl.dart';
+import 'package:basic_board/views/widgets/space_card.dart';
+
+// This file is currently not in use
+// Until the Search functionality is fixed
 
 class CustomSearchDelegate extends SearchDelegate<String> {
   @override
@@ -18,89 +21,89 @@ class CustomSearchDelegate extends SearchDelegate<String> {
   @override
   Widget? buildLeading(BuildContext context) {
     return IconButton(
-      onPressed: () => context.pop(),
+      onPressed: () => close(context, ''),
       icon: const Icon(Icons.arrow_back),
     );
   }
 
-  // Future<List<DocumentSnapshot>> fetchWorkspaces(String query) async {
-  //   final CollectionReference ref =
-  //       FirebaseFirestore.instance.collection('workspaces');
-  //   final snapshot = await ref.where('name', isEqualTo: query).get();
-  //   return snapshot.docs;
-  // }
-
   @override
   Widget buildResults(BuildContext context) {
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    return FutureBuilder(
-      future: firestore
-          .collection('workspaces')
-          .where('name'.toLowerCase(), arrayContains: query)
-          .get(),
-      // .asBroadcastStream(),
-      builder: (context, snapshot) {
-        // if (snapshot.connectionState == ConnectionState.waiting) {
-        //   return const Center(child: LoadingIndicator());
-        // }
-        final data = snapshot.data?.docs;
-        return ListView.builder(
-          padding: EdgeInsets.only(top: ten),
-          itemCount: data?.length,
-          itemBuilder: (context, index) {
-            final timeStamp = data?[index]['createdAt'] == null
-                ? DateTime.now()
-                : (data?[index]['createdAt']).toDate();
-            String dateTime = DateFormat('dd MMM hh:mm a').format(timeStamp);
-            return WorkspaceTile(
-              id: data?[index].id ?? '',
-              title: data?[index]['name'] ?? '',
-              subtitle: dateTime,
-              image: data?[index]['image'] == null ||
-                      data?[index]['image']!.isEmpty
-                  ? defaultWorkspaceImg
-                  : data?[index]['image'],
-            );
-          },
-        );
-      },
-    );
+    return Searcher(query);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    // final FirebaseAuth auth = FirebaseAuth.instance;
-    return FutureBuilder(
-      future: firestore
-          .collection('workspaces')
-          // .where('name'.toLowerCase(), isEqualTo: query)
-          .get(),
-      builder: (context, snapshot) {
-        // if (snapshot.connectionState == ConnectionState.waiting) {
-        //   return const Center(child: LoadingIndicator());
-        // }
-        final data = snapshot.data?.docs;
-        return ListView.builder(
-          padding: EdgeInsets.only(top: ten),
-          itemCount: data?.length,
-          itemBuilder: (context, index) {
-            final timeStamp = data?[index]['createdAt'] == null
-                ? DateTime.now()
-                : (data?[index]['createdAt']).toDate();
-            String dateTime = DateFormat('dd MMM hh:mm a').format(timeStamp);
-            return WorkspaceTile(
-              id: data?[index].id ?? '',
-              title: data?[index]['name'] ?? '',
-              subtitle: dateTime,
-              image: data?[index]['image'] == null ||
-                      data?[index]['image']!.isEmpty
-                  ? defaultWorkspaceImg
-                  : data?[index]['image'],
-            );
-          },
-        );
+    return Searcher(query);
+  }
+}
+
+final searchResultProvider =
+    StreamProvider.family.autoDispose((ref, String query) {
+  final q = query.toLowerCase().trim();
+  final firestore = ref.watch(firestoreProvider);
+  return firestore
+      .collection('workspaces')
+      .where('name', isGreaterThanOrEqualTo: q, isLessThanOrEqualTo: q)
+      .snapshots()
+      .map((snapshot) => snapshot.docs);
+});
+
+class Searcher extends ConsumerWidget {
+  const Searcher(this.query, {super.key});
+  final String query;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authStateProvider).value!;
+    final result = ref.watch(allSpacesProvider);
+    return result.when(
+      data: (data) {
+        return data.isEmpty
+            ? Center(child: Text('${query.trim()} not found'))
+            : ListView.builder(
+                padding: EdgeInsets.all(ten),
+                itemCount: result.value?.length,
+                itemBuilder: (context, index) {
+                  final data = result.value?[index];
+                  final Space space = Space(
+                    id: data?.id,
+                    name: data?['name'],
+                    desc: data?['desc'],
+                    image: data?['image'] == null || data?['image']!.isEmpty
+                        ? defaultSpaceImg
+                        : data?['image'],
+                    participants: data?['participants'],
+                    creatorId: data?['creatorId'],
+                    rooms: data?['rooms'],
+                    createdAt: (data?['createdAt']).toDate(),
+                    private: data?['private'],
+                  );
+                  return result.value![index]['name']
+                          .toString()
+                          .toLowerCase()
+                          .trim()
+                          .contains(query.toLowerCase().trim())
+                      ? SpaceCard(
+                          name: space.name,
+                          desc: space.desc!,
+                          img: space.image,
+                          isParticipant: space.participants!.contains(auth.uid),
+                          onTap: () {
+                            context.push(
+                              '${SpaceScreen.id}/${RoomChatsScreen.id}/${SpaceInfoScreen.id}',
+                              extra: space,
+                            );
+                          },
+                          onJoin: () {},
+                        )
+                      : const SizedBox();
+                },
+              );
       },
+      error: (error, stackTrace) => Center(
+        child: Text('Oops! An error occurred: $error'),
+      ),
+      loading: () => const Center(child: LoadingIndicator()),
     );
   }
 }

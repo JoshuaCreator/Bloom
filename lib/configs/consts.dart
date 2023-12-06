@@ -18,7 +18,7 @@ SizedBox height20 = SizedBox(height: twenty);
 SizedBox height10 = SizedBox(height: ten);
 SizedBox height5 = SizedBox(height: five);
 
-BorderRadius defaultBorderRadius = BorderRadius.circular(five);
+BorderRadius defaultBorderRadius = BorderRadius.circular(ten);
 
 BorderRadius myBorderRadius = BorderRadius.only(
   topLeft: Radius.circular(twenty),
@@ -35,7 +35,7 @@ BorderRadius yourBorderRadius = BorderRadius.only(
 const String defaultRoomImg =
     'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg';
 
-const String defaultWorkspaceImg =
+const String defaultSpaceImg =
     'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg';
 
 const String defaultUserImg =

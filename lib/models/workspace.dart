@@ -1,4 +1,4 @@
-class Workspace {
+class Space {
   final String name;
   final String? id, desc, image, creatorId;
   final List? participants;
@@ -6,7 +6,7 @@ class Workspace {
   final DateTime createdAt;
   final bool private;
 
-  Workspace({
+  Space({
     this.id,
     required this.name,
     this.desc,

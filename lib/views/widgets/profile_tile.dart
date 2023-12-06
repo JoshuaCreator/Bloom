@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../configs/consts.dart';
-import '../screens/workspace/workspace_screen.dart';
+import '../screens/space/space_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/settings_screen.dart';
 
@@ -24,7 +24,7 @@ class ProfileTile extends StatelessWidget {
         InkWell(
           onTap: () {
             context.push(
-              '${WorkspaceScreen.id}/${SettingsScreen.id}/${ProfileScreen.id}',
+              '${SpaceScreen.id}/${SettingsScreen.id}/${ProfileScreen.id}',
             );
           },
           child: Ink(

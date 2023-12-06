@@ -16,10 +16,10 @@ class DirectChatDb {
   final ImageHelper imageHelper = ImageHelper();
 
   Future send(BuildContext context, DirectMsg msg,
-      {required String recipientId, required String workspaceId}) async {
+      {required String recipientId, required String spaceId}) async {
     _chatRef = _firestore
         .collection('workspaces')
-        .doc(workspaceId)
+        .doc(spaceId)
         .collection('chats')
         .doc('chat${msg.toId}')
         .collection('messages');
@@ -34,7 +34,7 @@ class DirectChatDb {
       }).then((doc) async {
         _firestore
             .collection('workspaces')
-            .doc(workspaceId)
+            .doc(spaceId)
             .collection('chats')
             .doc('chat${msg.toId}')
             .set({

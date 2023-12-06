@@ -261,7 +261,7 @@ class ReactionTile extends StatelessWidget {
                             MessageDB().edit(
                               context,
                               roomId: widget.room.id!,
-                              wrkspcId: widget.wrkspcId,
+                              spaceId: widget.wrkspcId,
                               messageId: widget.message.id!,
                               newMessage: messageController.text.trim(),
                             );
