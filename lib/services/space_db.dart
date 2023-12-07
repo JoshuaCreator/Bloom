@@ -28,6 +28,7 @@ class SpaceDB {
         'creatorId': space.creatorId,
         'createdAt': space.createdAt,
         'private': space.private,
+        'rooms': space.rooms
       }).then((doc) async {
         final String path = 'spaces/${doc.id}.png';
         _spaceRef.doc(doc.id).update({

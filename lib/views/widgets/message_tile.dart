@@ -115,8 +115,12 @@ class _MessageTileState extends ConsumerState<MessageTile> {
                             ),
                             progressIndicatorBuilder: (context, url, progress) {
                               return Center(
-                                child: CircularProgressIndicator(
-                                  value: progress.progress,
+                                child: Padding(
+                                  padding: EdgeInsets.all(five),
+                                  child: CircularProgressIndicator(
+                                    value: progress.progress,
+                                    strokeCap: StrokeCap.round,
+                                  ),
                                 ),
                               );
                             },
@@ -166,7 +170,7 @@ List<TextSpan> extractText(BuildContext context, String rawString) {
   List<TextSpan> textSpan = [];
 
   final urlRegExp = RegExp(
-    r"((https?:www\.)|(https?:\/\/)|(www\.))[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}(\/[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)?",
+    r"((https?:www\.)|(https?:\/\/)|(www\.)|(.?))[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}(\/[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)?",
   );
 
   getLink(String linkString) {
@@ -174,18 +178,13 @@ List<TextSpan> extractText(BuildContext context, String rawString) {
     textSpan.add(
       TextSpan(
         text: linkString,
-        style: const TextStyle(
-          color: Colors.blueAccent,
-          // fontWeight: FontWeight.w500,
-        ),
+        style: const TextStyle(color: Colors.blueAccent),
         recognizer: TapGestureRecognizer()
           ..onTap = () => linkAlertDialogue(
                 context,
                 link: link,
                 linkString: linkString,
               ),
-        // onEnter: (event) => bgroundColour = Colors.red,
-        // onExit: (event) => bgroundColour = Colors.transparent,
       ),
     );
     return linkString;

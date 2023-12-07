@@ -1,3 +1,4 @@
+import 'package:basic_board/utils/imports.dart';
 import 'package:flutter/material.dart';
 import '../../configs/consts.dart';
 
@@ -9,9 +10,8 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      overlayColor: MaterialStatePropertyAll(
-        Colors.purple.shade50.withOpacity(0.5),
-      ),
+      overlayColor:
+          MaterialStatePropertyAll(ColourConfig.white.withOpacity(0.5)),
       borderRadius: BorderRadius.circular(50.0),
       onTap: onTap,
       child: Ink(
@@ -19,14 +19,14 @@ class AppButton extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: thirty, vertical: ten),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50.0),
-          color: Colors.purple,
+          color: ColourConfig.button,
         ),
         child: Center(
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: ColourConfig.white,
               fontSize: 16.0,
               fontWeight: FontWeight.w500,
             ),
@@ -46,7 +46,7 @@ class AppOutlinedButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       overlayColor: MaterialStatePropertyAll(
-        Colors.purple.shade50.withOpacity(0.5),
+        ColourConfig.white.withOpacity(0.5),
       ),
       borderRadius: BorderRadius.circular(50.0),
       onTap: onTap,
@@ -56,15 +56,15 @@ class AppOutlinedButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50.0),
           border: Border.all(
-            color: Colors.purple,
+            color: ColourConfig.button,
             width: 2.0,
           ),
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.purple,
+          style: TextStyle(
+            color: ColourConfig.button,
             fontSize: 16.0,
             fontWeight: FontWeight.w500,
           ),

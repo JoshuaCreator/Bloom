@@ -5,7 +5,7 @@ showSnackBar(BuildContext context, {required String msg}) {
   final SnackBar snackBar = SnackBar(
     content: Text(msg, textAlign: TextAlign.center),
     shape: RoundedRectangleBorder(borderRadius: defaultBorderRadius),
-    behavior: SnackBarBehavior.fixed,
+    behavior: SnackBarBehavior.floating,
     showCloseIcon: true,
     duration: const Duration(seconds: 4),
   );

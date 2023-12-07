@@ -33,9 +33,11 @@ class ColourConfig {
 
   static Color white = Colors.white;
 
+  static Color button = Colors.blue;
+
   static Color black = Colors.black;
 
   static Color fadedBlack = Colors.black87;
 
-  static Color empty = Colors.transparent;
+  static Color transparent = Colors.transparent;
 }

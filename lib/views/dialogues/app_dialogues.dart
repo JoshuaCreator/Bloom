@@ -17,11 +17,11 @@ linkAlertDialogue(
     builder: (context) => SizedBox(
       width: double.infinity,
       child: AlertDialog(
-        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actionsAlignment: MainAxisAlignment.end,
         actionsOverflowAlignment: OverflowBarAlignment.center,
         alignment: Alignment.bottomCenter,
         insetPadding: EdgeInsets.all(ten),
-        title: Text.rich(
+        content: Text.rich(
           TextSpan(
             text: 'Do you want to open ',
             children: [
@@ -48,8 +48,8 @@ linkAlertDialogue(
             },
             label: 'Open',
           ),
-          AppOutlinedButton(
-            onTap: () => Clipboard.setData(ClipboardData(text: linkString))
+          AppTextButton(
+            onPressed: () => Clipboard.setData(ClipboardData(text: linkString))
                 .then((value) {
               context.pop();
               showSnackBar(context, msg: 'Copied to clipboard');
