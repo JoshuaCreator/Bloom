@@ -1,5 +1,6 @@
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/screens/verify_email_screen.dart';
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 
 class AuthChecker extends ConsumerWidget {
   static String id = '/';
@@ -11,7 +12,7 @@ class AuthChecker extends ConsumerWidget {
     return authState.when(
       data: (data) {
         if (data != null && data.emailVerified) {
-          return const SpaceScreen();
+          return const BNavBar();
         } else if (data != null && !data.emailVerified) {
           return const VerifyEmailScreen();
         }

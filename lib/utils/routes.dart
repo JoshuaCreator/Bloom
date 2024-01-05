@@ -1,6 +1,7 @@
 import 'package:basic_board/views/screens/user_screen.dart';
 import 'package:basic_board/views/screens/space/discover_space_screen.dart';
 import 'package:basic_board/views/screens/space/space_settings_screen.dart';
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 
 import '../views/screens/verify_email_screen.dart';
 import '../utils/imports.dart';
@@ -13,8 +14,8 @@ GoRouter goRouter = GoRouter(
       builder: (context, state) => const AuthChecker(),
     ),
     GoRoute(
-      path: SpaceScreen.id,
-      builder: (context, state) => const SpaceScreen(),
+      path: BNavBar.id,
+      builder: (context, state) => BNavBar(space: state.extra as Space),
       routes: [
         GoRoute(
           path: SettingsScreen.id,

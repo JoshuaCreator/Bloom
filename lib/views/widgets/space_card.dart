@@ -19,14 +19,6 @@ class SpaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = MediaQuery.platformBrightnessOf(context);
-    final cardColour = brightness == Brightness.light
-        ? ColourConfig.white
-        : ColourConfig.fadedBlack;
-
-    final shadowColour =
-        brightness == Brightness.light ? ColourConfig.black : ColourConfig.grey;
-
     return Padding(
       padding: EdgeInsets.only(bottom: ten),
       child: InkWell(
@@ -34,14 +26,8 @@ class SpaceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(twenty),
         child: Ink(
           decoration: BoxDecoration(
-            color: cardColour,
             borderRadius: BorderRadius.circular(twenty),
-            boxShadow: [
-              BoxShadow(
-                color: shadowColour.withOpacity(0.1),
-                blurRadius: 5.0,
-              ),
-            ],
+            border: Border.all(color: ColourConfig.grey),
           ),
           child: Column(
             children: [
@@ -71,7 +57,9 @@ class SpaceCard extends StatelessWidget {
                   ),
                 ),
               ),
-              AppShowMoreText(text: desc, trimLines: 3),
+              desc.isNotEmpty
+                  ? AppShowMoreText(text: desc, trimLines: 3)
+                  : const SizedBox(),
               SizedBox(height: ten),
               !isParticipant
                   ? Padding(

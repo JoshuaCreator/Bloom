@@ -1,5 +1,6 @@
 import 'package:basic_board/providers/room/message_data_providers.dart';
 import 'package:basic_board/providers/users_providers.dart';
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 
 import '../../utils/imports.dart';
 import '../screens/user_screen.dart';
@@ -55,7 +56,7 @@ class _MessageTileState extends ConsumerState<MessageTile> {
                         onInfoIconPressed: widget.message.me!
                             ? null
                             : () => context.push(
-                                  '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spaceId}/${RoomInfoScreen.id}/${widget.spaceId}/${UserScreen.id}/${widget.message.senderId}',
+                                  '${BNavBar.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spaceId}/${RoomInfoScreen.id}/${widget.spaceId}/${UserScreen.id}/${widget.message.senderId}',
                                 ),
                       ),
                     ),

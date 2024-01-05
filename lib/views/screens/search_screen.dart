@@ -1,5 +1,6 @@
 import 'package:basic_board/providers/space_providers.dart';
 import 'package:basic_board/utils/imports.dart';
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 import 'package:basic_board/views/widgets/space_card.dart';
 
 // This file is currently not in use
@@ -88,7 +89,7 @@ class Searcher extends ConsumerWidget {
                           isParticipant: space.participants!.contains(auth.uid),
                           onTap: () {
                             context.push(
-                              '${SpaceScreen.id}/${RoomChatsScreen.id}/${SpaceInfoScreen.id}',
+                              '${BNavBar.id}/${RoomChatsScreen.id}/${SpaceInfoScreen.id}',
                               extra: space,
                             );
                           },

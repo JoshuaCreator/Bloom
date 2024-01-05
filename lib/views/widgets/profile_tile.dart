@@ -1,3 +1,4 @@
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,7 +25,7 @@ class ProfileTile extends StatelessWidget {
         InkWell(
           onTap: () {
             context.push(
-              '${SpaceScreen.id}/${SettingsScreen.id}/${ProfileScreen.id}',
+              '${BNavBar.id}/${SettingsScreen.id}/${ProfileScreen.id}',
             );
           },
           child: Ink(

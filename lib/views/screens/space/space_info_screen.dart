@@ -9,6 +9,7 @@ import 'package:basic_board/services/space_db.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/dialogues/bottom_sheets.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 import 'package:basic_board/views/widgets/show_more_text.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -132,7 +133,7 @@ class _ConsumerSpaceInfoScreenState extends ConsumerState<SpaceInfoScreen> {
                             child: IconButton(
                               onPressed: () {
                                 context.push(
-                                  '${SpaceScreen.id}/${RoomChatsScreen.id}/${SpaceInfoScreen.id}/${CreateRoomScreen.id}/${widget.space.id!}',
+                                  '${BNavBar.id}/${RoomChatsScreen.id}/${SpaceInfoScreen.id}/${CreateRoomScreen.id}/${widget.space.id!}',
                                 );
                               },
                               icon: const Icon(Icons.add),
@@ -230,7 +231,7 @@ class _ConsumerSpaceInfoScreenState extends ConsumerState<SpaceInfoScreen> {
                                         "You must be a participant of ${data?['name']} to view this Room's details",
                                   )
                                 : context.push(
-                                    '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.space.id!}/${RoomInfoScreen.id}/${widget.space.id!}',
+                                    '${BNavBar.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.space.id!}/${RoomInfoScreen.id}/${widget.space.id!}',
                                     extra: roomData,
                                   ),
                           );

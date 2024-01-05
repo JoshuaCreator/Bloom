@@ -1,5 +1,6 @@
 import 'package:basic_board/providers/users_providers.dart';
 import 'package:basic_board/services/connection_state.dart';
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 import 'package:basic_board/views/widgets/settings_tile.dart';
 import 'package:basic_board/views/widgets/profile_tile.dart';
 import '../../services/auth.dart';
@@ -49,7 +50,7 @@ class SettingsScreen extends ConsumerWidget {
                   leading: Icons.account_circle_outlined,
                   onTap: () {
                     context.push(
-                      '${SpaceScreen.id}/${SettingsScreen.id}/${AccountScreen.id}',
+                      '${BNavBar.id}/${SettingsScreen.id}/${AccountScreen.id}',
                     );
                   },
                 ),
@@ -59,7 +60,7 @@ class SettingsScreen extends ConsumerWidget {
                   leading: Icons.light_mode_outlined,
                   onTap: () {
                     context.push(
-                      '${SpaceScreen.id}/${SettingsScreen.id}/${ThemeSelectorScreen.id}',
+                      '${BNavBar.id}/${SettingsScreen.id}/${ThemeSelectorScreen.id}',
                     );
                   },
                 ),

@@ -3,6 +3,7 @@ import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/utils/imports.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:basic_board/views/screens/user_screen.dart';
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 import 'package:basic_board/views/widgets/image_viewer.dart';
 import 'show_more_text.dart';
 
@@ -60,7 +61,7 @@ class _ConsumerReplyTileState extends ConsumerState<ReplyTile> {
                             onInfoIconPressed: widget.reply.isMe!
                                 ? null
                                 : () => context.push(
-                                      '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spaceId}/${RoomInfoScreen.id}/${widget.spaceId}/${UserScreen.id}/${widget.reply.replySenderId}',
+                                      '${BNavBar.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spaceId}/${RoomInfoScreen.id}/${widget.spaceId}/${UserScreen.id}/${widget.reply.replySenderId}',
                                     ),
                           ),
                         ),

@@ -2,6 +2,7 @@ import 'package:basic_board/providers/space_providers.dart';
 import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/services/space_db.dart';
 import 'package:basic_board/utils/imports.dart';
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 import 'package:basic_board/views/widgets/space_card.dart';
 
 class DiscoverSpacesScreen extends ConsumerWidget {
@@ -53,7 +54,7 @@ class DiscoverSpacesScreen extends ConsumerWidget {
                     isParticipant: space.participants!.contains(auth.uid),
                     onTap: () {
                       context.push(
-                        '${SpaceScreen.id}/${RoomChatsScreen.id}/${SpaceInfoScreen.id}',
+                        '${BNavBar.id}/${RoomChatsScreen.id}/${SpaceInfoScreen.id}',
                         extra: space,
                       );
                     },

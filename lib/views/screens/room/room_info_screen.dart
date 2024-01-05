@@ -5,6 +5,7 @@ import 'package:basic_board/services/connection_state.dart';
 import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
 import 'package:basic_board/views/screens/user_screen.dart';
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 import 'package:basic_board/views/widgets/image_viewer.dart';
 import 'package:basic_board/views/widgets/show_more_text.dart';
 import '../../../utils/imports.dart';
@@ -105,8 +106,34 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                   ),
                   height10,
                   const Separator(),
-                  AppShowMoreText(text: room.value?['desc']),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ActionsTile(
+                        icon: Icons.call_rounded,
+                        onTap: () {
+                          // TODO: Implement function
+                        },
+                      ),
+                      const SizedBox(width: 20.0),
+                      ActionsTile(
+                        icon: Icons.videocam_rounded,
+                        onTap: () {
+                          // TODO: Implement function
+                        },
+                      ),
+                    ],
+                  ),
                   const Separator(),
+                  Visibility(
+                    visible: room.value!['desc'].toString().isNotEmpty,
+                    child: Column(
+                      children: [
+                        AppShowMoreText(text: room.value?['desc']),
+                        const Separator(),
+                      ],
+                    ),
+                  ),
                   Row(
                     children: [
                       Padding(
@@ -137,7 +164,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                         onTap: me
                             ? null
                             : () => context.push(
-                                  '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spcId}/${RoomInfoScreen.id}/${widget.spcId}/${UserScreen.id}/${data[index]['id']}',
+                                  '${BNavBar.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spcId}/${RoomInfoScreen.id}/${widget.spcId}/${UserScreen.id}/${data[index]['id']}',
                                 ),
                       );
                     },
@@ -320,6 +347,32 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                       },
                     ),
             ],
+    );
+  }
+}
+
+class ActionsTile extends StatelessWidget {
+  const ActionsTile({
+    super.key,
+    required this.icon,
+    this.onTap,
+  });
+  final IconData icon;
+  final void Function()? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: defaultBorderRadius,
+      child: Ink(
+        padding: const EdgeInsets.all(10.0),
+        decoration: BoxDecoration(
+          border: Border.all(),
+          borderRadius: defaultBorderRadius,
+        ),
+        child: Icon(icon),
+      ),
     );
   }
 }

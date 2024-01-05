@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/space_db.dart';
+import '../widgets/b_nav_bar.dart';
 import 'loading_indicator_build.dart';
 
 linkAlertDialogue(
@@ -282,7 +283,7 @@ leaveSpaceDialogue(
             onPressed: () {
               SpaceDB()
                   .exit(context, space: space, userId: userId)
-                  .then((value) => context.go(SpaceScreen.id));
+                  .then((value) => context.go(BNavBar.id));
             },
           ),
         ],

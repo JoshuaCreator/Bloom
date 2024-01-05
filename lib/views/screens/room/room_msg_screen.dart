@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:basic_board/providers/room/message_data_providers.dart';
 import 'package:basic_board/providers/users_providers.dart';
 import 'package:basic_board/services/image_helper.dart';
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../utils/imports.dart';
@@ -51,92 +52,94 @@ class _RoomScreenState extends ConsumerState<RoomMsgScreen> {
 
     double bottom = MediaQuery.viewInsetsOf(context).bottom;
 
-    return Scaffold(
-      appBar: buildAppBar(context),
-      body: messages.when(
-        data: (data) {
-          return data.isEmpty
-              ? Center(
-                  child: Text('This is the begining of ${widget.room.name}'),
-                )
-              : ListView.builder(
-                  padding: EdgeInsets.only(bottom: ten),
-                  reverse: true,
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-                    final user = ref.watch(anyUserProvider(
-                        messages.value?[index]['senderId'] ?? ''));
-                    bool isMe = user.value?['id'] == auth?.uid;
-
-                    final pending = data[index].metadata.hasPendingWrites;
-                    final Message message = Message(
-                      id: data[index].id,
-                      senderId: data[index]['senderId'] ?? 'random_string',
-                      me: isMe,
-                      message: data[index]['message'] ?? '',
-                      image: data[index]['image'] ?? '',
-                      time: (data[index]['time']).toDate(),
-                      pending: pending,
-                      likes: data[index]['likes'],
-                    );
-                    final repliesRef =
-                        collectionRef.doc(message.id).collection('replies');
-                    return MessageTile(
-                      onTap: () {
-                        showModalBottomSheet(
-                          enableDrag: false,
-                          context: context,
-                          isScrollControlled: true,
-                          useSafeArea: true,
-                          useRootNavigator: true,
-                          builder: (context) {
-                            return MessageDetailsScreen(
-                              room: widget.room,
-                              message: message,
-                              repliesRef: repliesRef,
-                              messageRef: collectionRef,
-                              spaceId: widget.spaceId,
-                            );
-                          },
-                        );
-                      },
-                      messagesRef: collectionRef,
-                      repliesRef: repliesRef,
-                      message: message,
-                      spaceId: widget.spaceId,
-                    );
-                  },
-                );
-        },
-        error: (error, stackTrace) {
-          return const Center(child: Text('Oops! An error occurred'));
-        },
-        loading: () {
-          return const Center(child: LoadingIndicator());
-        },
+    return Theme(
+      data: Theme.of(context).copyWith(
+        dividerTheme: DividerThemeData(color: ColourConfig.transparent),
       ),
-      persistentFooterButtons: buildTexter(
-        context,
-        collectionRef: collectionRef,
-        bottom: bottom,
-        senderId: auth?.uid,
-        firestore: firestore,
+      child: Scaffold(
+        appBar: buildAppBar(context),
+        body: messages.when(
+          data: (data) {
+            return data.isEmpty
+                ? Center(
+                    child: Text('This is the begining of ${widget.room.name}'),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.only(bottom: ten),
+                    reverse: true,
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      final user = ref.watch(anyUserProvider(
+                          messages.value?[index]['senderId'] ?? ''));
+                      bool isMe = user.value?['id'] == auth?.uid;
+
+                      final pending = data[index].metadata.hasPendingWrites;
+                      final Message message = Message(
+                        id: data[index].id,
+                        senderId: data[index]['senderId'] ?? 'random_string',
+                        me: isMe,
+                        message: data[index]['message'] ?? '',
+                        image: data[index]['image'] ?? '',
+                        time: (data[index]['time']).toDate(),
+                        pending: pending,
+                        likes: data[index]['likes'],
+                      );
+                      final repliesRef =
+                          collectionRef.doc(message.id).collection('replies');
+                      return MessageTile(
+                        onTap: () {
+                          showModalBottomSheet(
+                            enableDrag: false,
+                            context: context,
+                            isScrollControlled: true,
+                            useSafeArea: true,
+                            useRootNavigator: true,
+                            builder: (context) {
+                              return MessageDetailsScreen(
+                                room: widget.room,
+                                message: message,
+                                repliesRef: repliesRef,
+                                messageRef: collectionRef,
+                                spaceId: widget.spaceId,
+                              );
+                            },
+                          );
+                        },
+                        messagesRef: collectionRef,
+                        repliesRef: repliesRef,
+                        message: message,
+                        spaceId: widget.spaceId,
+                      );
+                    },
+                  );
+          },
+          error: (error, stackTrace) {
+            return const Center(child: Text('Oops! An error occurred'));
+          },
+          loading: () {
+            return const Center(child: LoadingIndicator());
+          },
+        ),
+        persistentFooterButtons: buildTexter(
+          context,
+          collectionRef: collectionRef,
+          bottom: bottom,
+          senderId: auth?.uid,
+          firestore: firestore,
+        ),
       ),
     );
   }
 
   AppBar buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text(
-        widget.room.name,
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: Text(widget.room.name, overflow: TextOverflow.ellipsis),
       actions: [
         Padding(
           padding: EdgeInsets.only(right: ten),
           child: GestureDetector(
             onTap: () => context.push(
-              '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spaceId}/${RoomInfoScreen.id}/${widget.spaceId}',
+              '${BNavBar.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.spaceId}/${RoomInfoScreen.id}/${widget.spaceId}',
               extra: widget.room,
             ),
             child: Hero(

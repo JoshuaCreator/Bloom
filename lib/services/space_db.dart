@@ -1,5 +1,6 @@
 import 'package:basic_board/services/image_helper.dart';
 import 'package:basic_board/views/dialogues/loading_indicator_build.dart';
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -163,7 +164,7 @@ class SpaceDB {
     try {
       if (context.mounted) showLoadingIndicator(context, label: 'Deleting...');
       _firestore.collection('spaces').doc(spaceId).delete().then((value) {
-        context.go(SpaceScreen.id);
+        context.go(BNavBar.id);
         showSnackBar(
           context,
           msg: "$spaceName deleted",

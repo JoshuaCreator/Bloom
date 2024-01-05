@@ -1,3 +1,4 @@
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 import 'package:basic_board/views/widgets/image_viewer.dart';
 import '../../utils/imports.dart';
 
@@ -29,7 +30,7 @@ class RoomTile extends ConsumerWidget {
                 : roomData.image!,
             onInfoIconPressed: showInfoIcon
                 ? () => context.push(
-                      '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${roomData.id}/${RoomInfoScreen.id}/$spaceId',
+                      '${BNavBar.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${roomData.id}/${RoomInfoScreen.id}/$spaceId',
                       extra: roomData,
                     )
                 : null,

@@ -1,6 +1,8 @@
 import 'package:basic_board/providers/room/message_data_providers.dart';
 import 'package:basic_board/providers/room/room_data_providers.dart';
+import 'package:basic_board/views/widgets/b_nav_bar.dart';
 
+import '../../../providers/space_providers.dart';
 import '../../../providers/users_providers.dart';
 import '../../../utils/imports.dart';
 
@@ -22,18 +24,23 @@ class _RoomChatsScreenState extends ConsumerState<RoomChatsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final room = ref.watch(spaceRoomsProvider(widget.space!.id!));
     final auth = ref.watch(authStateProvider).value;
+    final myspaces = ref.watch(mySpacesProvider(auth!.uid));
     final firestore = ref.watch(firestoreProvider);
+    final firstSpace = myspaces.value!.first;
+    final room = ref.watch(
+      spaceRoomsProvider(widget.space!.id ?? firstSpace.id),
+    );
 
     return Scaffold(
+      drawer: const SpaceScreen(),
       appBar: AppBar(
-        title: Text(widget.space?.name ?? ''),
+        title: Text(widget.space?.name ?? (firstSpace['name'] ?? '')),
         actions: [
           IconButton(
             onPressed: () {
               context.push(
-                '${SpaceScreen.id}/${RoomChatsScreen.id}/${SpaceInfoScreen.id}',
+                '${BNavBar.id}/${RoomChatsScreen.id}/${SpaceInfoScreen.id}',
                 extra: widget.space,
               );
             },
@@ -57,17 +64,18 @@ class _RoomChatsScreenState extends ConsumerState<RoomChatsScreen> {
                 itemCount: room.value?.length,
                 itemBuilder: (context, index) {
                   final Room roomData = Room(
-                    id: room.value![index]['id'],
-                    creatorId: room.value?[index]['creatorId'],
-                    name: room.value?[index]['name'],
-                    desc: room.value?[index]['desc'],
-                    private: room.value?[index]['private'],
+                    id: room.value![index]['id'] ?? '',
+                    creatorId: room.value?[index]['creatorId'] ?? '',
+                    name: room.value?[index]['name'] ?? '',
+                    desc: room.value?[index]['desc'] ?? '',
+                    private: room.value?[index]['private'] ?? true,
                     image: room.value?[index]['image'] == null ||
                             room.value?[index]['image']!.isEmpty
                         ? defaultRoomImg
                         : room.value?[index]['image'],
-                    createdAt: (room.value?[index]['createdAt']).toDate(),
-                    participants: room.value?[index]['participants'],
+                    createdAt: (room.value?[index]['createdAt']).toDate() ??
+                        DateTime.now(),
+                    participants: room.value?[index]['participants'] ?? [],
                   );
                   final lastMessage = ref.watch(
                     lastMessageProvider(firestore
@@ -86,7 +94,7 @@ class _RoomChatsScreenState extends ConsumerState<RoomChatsScreen> {
 
                   final user = ref.watch(anyUserProvider(senderId));
 
-                  final bool me = auth?.uid == senderId;
+                  final bool me = auth.uid == senderId;
 
                   final String last =
                       lastMessage.value == null || lastMessage.value!.isEmpty
@@ -101,7 +109,7 @@ class _RoomChatsScreenState extends ConsumerState<RoomChatsScreen> {
                               : '~${user.value?['name'] ?? ''}: $last';
 
                   return Visibility(
-                    visible: roomData.participants.contains(auth?.uid),
+                    visible: roomData.participants.contains(auth.uid),
                     child: RoomTile(
                       showInfoIcon: true,
                       roomData: roomData,
@@ -109,7 +117,7 @@ class _RoomChatsScreenState extends ConsumerState<RoomChatsScreen> {
                       spaceId: widget.space?.id,
                       onTap: () {
                         context.push(
-                          '${SpaceScreen.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.space!.id}',
+                          '${BNavBar.id}/${RoomChatsScreen.id}/${RoomMsgScreen.id}/${widget.space!.id}',
                           extra: roomData,
                         );
                       },
