@@ -131,7 +131,7 @@ userInfoEditDialogue(
               ),
               height10,
               AppTextField(
-                hintText: 'Phone',
+                hintText: 'about',
                 borderless: true,
                 maxLines: 5,
                 autofocus: autofocusAbout,

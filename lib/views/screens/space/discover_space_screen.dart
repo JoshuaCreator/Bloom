@@ -39,7 +39,7 @@ class DiscoverSpacesScreen extends ConsumerWidget {
                     desc: data[index]['desc'],
                     image: data[index]['image'] == null ||
                             data[index]['image']!.isEmpty
-                        ? defaultSpaceImg
+                        ? defaultSpaceImgPath
                         : data[index]['image'],
                     creatorId: data[index]['creatorId'],
                     createdAt: (data[index]['createdAt']).toDate(),

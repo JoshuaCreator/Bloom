@@ -1,5 +1,4 @@
 import 'package:basic_board/models/user.dart';
-import 'package:basic_board/views/screens/space/space_screen.dart';
 import 'package:basic_board/views/widgets/b_nav_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';

@@ -71,7 +71,7 @@ class _RoomChatsScreenState extends ConsumerState<RoomChatsScreen> {
                     private: room.value?[index]['private'] ?? true,
                     image: room.value?[index]['image'] == null ||
                             room.value?[index]['image']!.isEmpty
-                        ? defaultRoomImg
+                        ? defaultRoomImgPath
                         : room.value?[index]['image'],
                     createdAt: (room.value?[index]['createdAt']).toDate() ??
                         DateTime.now(),

@@ -26,7 +26,7 @@ class RoomTile extends ConsumerWidget {
           context: context,
           builder: (context) => ImageViewer(
             image: roomData.image!.isEmpty || roomData.image == null
-                ? defaultRoomImg
+                ? defaultRoomImgPath
                 : roomData.image!,
             onInfoIconPressed: showInfoIcon
                 ? () => context.push(
@@ -40,7 +40,7 @@ class RoomTile extends ConsumerWidget {
           radius: circularAvatarRadius,
           backgroundImage: CachedNetworkImageProvider(
             roomData.image!.isEmpty || roomData.image == null
-                ? defaultRoomImg
+                ? defaultRoomImgPath
                 : roomData.image!,
           ),
         ),

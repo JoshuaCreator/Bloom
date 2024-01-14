@@ -1,3 +1,9 @@
+import 'package:basic_board/views/screens/academics/academics_home_screen.dart';
+import 'package:basic_board/views/screens/academics/courses_screen.dart';
+import 'package:basic_board/views/screens/academics/courseworks_screen.dart';
+import 'package:basic_board/views/screens/academics/events_screen.dart';
+import 'package:basic_board/views/screens/academics/lectures_screen.dart';
+import 'package:basic_board/views/screens/academics/performance_report_screen.dart';
 import 'package:basic_board/views/screens/user_screen.dart';
 import 'package:basic_board/views/screens/space/discover_space_screen.dart';
 import 'package:basic_board/views/screens/space/space_settings_screen.dart';
@@ -84,6 +90,32 @@ GoRouter goRouter = GoRouter(
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+        GoRoute(
+          path: AcademicsHomeScreen.id,
+          builder: (context, state) => const AcademicsHomeScreen(),
+          routes: [
+            GoRoute(
+              path: CoursesScreen.id,
+              builder: (context, state) => CoursesScreen(),
+            ),
+            GoRoute(
+              path: LecturesScreen.id,
+              builder: (context, state) => const LecturesScreen(),
+            ),
+            GoRoute(
+              path: CourseworksScreen.id,
+              builder: (context, state) => const CourseworksScreen(),
+            ),
+            GoRoute(
+              path: PerformanceReportScreen.id,
+              builder: (context, state) => const PerformanceReportScreen(),
+            ),
+            GoRoute(
+              path: EventsScreen.id,
+              builder: (context, state) => const EventsScreen(),
             ),
           ],
         ),

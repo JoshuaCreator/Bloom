@@ -31,6 +31,8 @@ class ColourConfig {
 
   static Color grey = Colors.grey;
 
+  static Color lightGrey = Colors.grey.shade300;
+
   static Color white = Colors.white;
 
   static Color button = Colors.blue;

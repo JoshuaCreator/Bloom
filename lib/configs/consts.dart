@@ -32,11 +32,11 @@ BorderRadius yourBorderRadius = BorderRadius.only(
   bottomRight: Radius.circular(twenty),
 );
 
-const String defaultRoomImg =
-    'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg';
+const String defaultRoomImgPath =
+    'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg';
 
-const String defaultSpaceImg =
-    'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg';
+const String defaultSpaceImgPath =
+    'https://images.pexels.com/photos/2387877/pexels-photo-2387877.jpeg';
 
-const String defaultUserImg =
-    'https://images.pexels.com/photos/919278/pexels-photo-919278.jpeg';
+const String defaultUserImgPath =
+    'https://images.pexels.com/photos/60579/pexels-photo-60579.jpeg';

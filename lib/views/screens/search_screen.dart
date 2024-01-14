@@ -60,44 +60,44 @@ class Searcher extends ConsumerWidget {
     return result.when(
       data: (data) {
         return ListView.builder(
-                padding: EdgeInsets.all(ten),
-                itemCount: result.value?.length,
-                itemBuilder: (context, index) {
-                  final data = result.value?[index];
-                  final Space space = Space(
-                    id: data?.id,
-                    name: data?['name'],
-                    desc: data?['desc'],
-                    image: data?['image'] == null || data?['image']!.isEmpty
-                        ? defaultSpaceImg
-                        : data?['image'],
-                    participants: data?['participants'],
-                    creatorId: data?['creatorId'],
-                    rooms: data?['rooms'],
-                    createdAt: (data?['createdAt']).toDate(),
-                    private: data?['private'],
-                  );
-                  return result.value![index]['name']
-                          .toString()
-                          .toLowerCase()
-                          .trim()
-                          .contains(query.toLowerCase().trim())
-                      ? SpaceCard(
-                          name: space.name,
-                          desc: space.desc!,
-                          img: space.image,
-                          isParticipant: space.participants!.contains(auth.uid),
-                          onTap: () {
-                            context.push(
-                              '${BNavBar.id}/${RoomChatsScreen.id}/${SpaceInfoScreen.id}',
-                              extra: space,
-                            );
-                          },
-                          onJoin: () {},
-                        )
-                      : const SizedBox();
-                },
-              );
+          padding: EdgeInsets.all(ten),
+          itemCount: result.value?.length,
+          itemBuilder: (context, index) {
+            final data = result.value?[index];
+            final Space space = Space(
+              id: data?.id,
+              name: data?['name'],
+              desc: data?['desc'],
+              image: data?['image'] == null || data?['image']!.isEmpty
+                  ? defaultSpaceImgPath
+                  : data?['image'],
+              participants: data?['participants'],
+              creatorId: data?['creatorId'],
+              rooms: data?['rooms'],
+              createdAt: (data?['createdAt']).toDate(),
+              private: data?['private'],
+            );
+            return result.value![index]['name']
+                    .toString()
+                    .toLowerCase()
+                    .trim()
+                    .contains(query.toLowerCase().trim())
+                ? SpaceCard(
+                    name: space.name,
+                    desc: space.desc!,
+                    img: space.image,
+                    isParticipant: space.participants!.contains(auth.uid),
+                    onTap: () {
+                      context.push(
+                        '${BNavBar.id}/${RoomChatsScreen.id}/${SpaceInfoScreen.id}',
+                        extra: space,
+                      );
+                    },
+                    onJoin: () {},
+                  )
+                : const SizedBox();
+          },
+        );
       },
       error: (error, stackTrace) => Center(
         child: Text('Oops! An error occurred: $error'),

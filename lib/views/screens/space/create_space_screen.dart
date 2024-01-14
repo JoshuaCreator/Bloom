@@ -39,7 +39,6 @@ class _ConsumerCreateSpaceScreenState extends ConsumerState<CreateSpaceScreen> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authStateProvider).value;
-    final auth = ref.watch(authStateProvider);
     return Scaffold(
       appBar: AppBar(title: const Text("Create Space")),
       body: SingleChildScrollView(

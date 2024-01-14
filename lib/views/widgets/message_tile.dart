@@ -108,7 +108,7 @@ class _MessageTileState extends ConsumerState<MessageTile> {
                           child: CachedNetworkImage(
                             imageUrl: widget.message.image!.isEmpty ||
                                     widget.message.image == null
-                                ? defaultRoomImg
+                                ? defaultRoomImgPath
                                 : widget.message.image!,
                             errorWidget: (context, url, error) => Icon(
                               Icons.image,

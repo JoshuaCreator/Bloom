@@ -80,22 +80,14 @@ class AppTextField extends StatelessWidget {
               )
             : OutlineInputBorder(
                 borderRadius: defaultBorderRadius,
-                borderSide: BorderSide(
-                  color: Colors.purple.shade300,
-                  width: 2,
-                ),
+                borderSide: const BorderSide(width: 2),
               ),
         enabledBorder: borderless
             ? OutlineInputBorder(
                 borderRadius: defaultBorderRadius,
                 borderSide: BorderSide.none,
               )
-            : OutlineInputBorder(
-                borderRadius: defaultBorderRadius,
-                borderSide: BorderSide(
-                  color: Colors.purple.shade300,
-                ),
-              ),
+            : OutlineInputBorder(borderRadius: defaultBorderRadius),
       ),
       autofocus: autofocus,
       maxLines: maxLines,

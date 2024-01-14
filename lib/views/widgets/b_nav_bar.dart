@@ -1,4 +1,5 @@
 import 'package:basic_board/utils/imports.dart';
+import 'package:basic_board/views/screens/academics/academics_home_screen.dart';
 import '../../providers/space_providers.dart';
 
 class BNavBar extends ConsumerStatefulWidget {
@@ -11,26 +12,26 @@ class BNavBar extends ConsumerStatefulWidget {
 }
 
 class _BNavBarState extends ConsumerState<BNavBar> {
-  int currentPage = 0;
+  int currentPage = 1;
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authStateProvider).value;
     final myspaces = ref.watch(mySpacesProvider(auth!.uid));
-    final firstSpace = myspaces.value!.first;
+    final firstSpace = myspaces.value?.first;
     final Space space = Space(
-      name: firstSpace['name'] ?? '',
-      id: firstSpace.id,
-      desc: firstSpace['desc'] ?? '',
-      image: firstSpace['image'] ?? '',
-      private: firstSpace['private'] ?? true,
-      participants: firstSpace['participants'] ?? [],
-      createdAt: (firstSpace['createdAt']).toDate() ?? DateTime.now(),
-      creatorId: firstSpace['creatorId'] ?? '',
+      name: firstSpace?['name'] ?? '',
+      id: firstSpace?.id ?? '',
+      desc: firstSpace?['desc'] ?? '',
+      image: firstSpace?['image'] ?? '',
+      private: firstSpace?['private'] ?? true,
+      participants: firstSpace?['participants'] ?? [],
+      createdAt: (firstSpace?['createdAt'].toDate()) ?? DateTime.now(),
+      creatorId: firstSpace?['creatorId'] ?? '',
     );
     return Scaffold(
       body: [
         RoomChatsScreen(space: widget.space ?? space),
-        const Center(child: Text('Academics')),
+        const AcademicsHomeScreen(),
         const SettingsScreen(),
       ][currentPage],
       bottomNavigationBar: NavigationBar(
@@ -48,7 +49,7 @@ class _BNavBarState extends ConsumerState<BNavBar> {
             tooltip: 'Space',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_rounded),
+            icon: Icon(Icons.school_rounded),
             label: 'Me',
             tooltip: 'My academics',
           ),

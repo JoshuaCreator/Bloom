@@ -39,7 +39,8 @@ class SpaceCard extends StatelessWidget {
                     topRight: Radius.circular(twenty),
                   ),
                   image: DecorationImage(
-                    image: CachedNetworkImageProvider(img ?? defaultSpaceImg),
+                    image:
+                        CachedNetworkImageProvider(img ?? defaultSpaceImgPath),
                     fit: BoxFit.cover,
                   ),
                 ),

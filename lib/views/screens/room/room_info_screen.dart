@@ -71,7 +71,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                       builder: (context) => ImageViewer(
                         image: room.value?['image']!.isEmpty ||
                                 room.value?['image'] == null
-                            ? defaultRoomImg
+                            ? defaultRoomImgPath
                             : room.value?['image'],
                       ),
                     ),
@@ -83,7 +83,7 @@ class _ConsumerRoomInfoScreenState extends ConsumerState<RoomInfoScreen> {
                               backgroundImage: CachedNetworkImageProvider(
                                 widget.room.image!.isEmpty ||
                                         widget.room.image == null
-                                    ? defaultRoomImg
+                                    ? defaultRoomImgPath
                                     : widget.room.image!,
                               ),
                             )
@@ -368,7 +368,7 @@ class ActionsTile extends StatelessWidget {
       child: Ink(
         padding: const EdgeInsets.all(10.0),
         decoration: BoxDecoration(
-          border: Border.all(),
+          border: Border.all(color: ColourConfig.lightGrey),
           borderRadius: defaultBorderRadius,
         ),
         child: Icon(icon),

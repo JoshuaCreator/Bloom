@@ -57,7 +57,7 @@ class SpaceScreen extends ConsumerWidget {
                       desc: data[index]['desc'] ?? '',
                       image: data[index]['image'] == null ||
                               data[index]['image']!.isEmpty
-                          ? defaultSpaceImg
+                          ? defaultSpaceImgPath
                           : data[index]['image'],
                       creatorId: data[index]['creatorId'] ?? '',
                       participants: data[index]['participants'] ?? [],

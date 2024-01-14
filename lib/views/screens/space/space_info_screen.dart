@@ -176,8 +176,8 @@ class _ConsumerSpaceInfoScreenState extends ConsumerState<SpaceInfoScreen> {
                             name: room.value?[index]['name'] ?? '',
                             desc: room.value?[index]['desc'] ?? '',
                             private: room.value?[index]['private'] ?? true,
-                            image:
-                                room.value?[index]['image'] ?? defaultRoomImg,
+                            image: room.value?[index]['image'] ??
+                                defaultRoomImgPath,
                             createdAt: timeStamp,
                             participants:
                                 room.value?[index]['participants'] ?? [],
